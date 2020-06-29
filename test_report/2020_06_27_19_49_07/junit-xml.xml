@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="1" failures="0" hostname="WIN-CDD40IFICEH" name="pytest" skipped="0" tests="1" time="15.263" timestamp="2020-06-27T19:49:08.125754"><testcase classname="pytest" name="internal" time="0.000"><error message="internal error">Traceback (most recent call last):
+  File &quot;D:\python3\lib\site-packages\_pytest\main.py&quot;, line 191, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File &quot;D:\python3\lib\site-packages\_pytest\main.py&quot;, line 235, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File &quot;D:\python3\lib\site-packages\pluggy\hooks.py&quot;, line 286, in __call__
+    return self._hookexec(self, self.get_hookimpls(), kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 93, in _hookexec
+    return self._inner_hookexec(hook, methods, kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 84, in &lt;lambda&gt;
+    self._inner_hookexec = lambda hook, methods, kwargs: hook.multicall(
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 208, in _multicall
+    return outcome.get_result()
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 80, in get_result
+    raise ex[1].with_traceback(ex[2])
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 187, in _multicall
+    res = hook_impl.function(*args)
+  File &quot;D:\python3\lib\site-packages\_pytest\main.py&quot;, line 256, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File &quot;D:\python3\lib\site-packages\pluggy\hooks.py&quot;, line 286, in __call__
+    return self._hookexec(self, self.get_hookimpls(), kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 93, in _hookexec
+    return self._inner_hookexec(hook, methods, kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 84, in &lt;lambda&gt;
+    self._inner_hookexec = lambda hook, methods, kwargs: hook.multicall(
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 208, in _multicall
+    return outcome.get_result()
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 80, in get_result
+    raise ex[1].with_traceback(ex[2])
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 187, in _multicall
+    res = hook_impl.function(*args)
+  File &quot;D:\python3\lib\site-packages\pytest_rerunfailures.py&quot;, line 176, in pytest_runtest_protocol
+    reports = runtestprotocol(item, nextitem=nextitem, log=False)
+  File &quot;D:\python3\lib\site-packages\_pytest\runner.py&quot;, line 89, in runtestprotocol
+    rep = call_and_report(item, &quot;setup&quot;, log)
+  File &quot;D:\python3\lib\site-packages\_pytest\runner.py&quot;, line 178, in call_and_report
+    report = hook.pytest_runtest_makereport(item=item, call=call)
+  File &quot;D:\python3\lib\site-packages\pluggy\hooks.py&quot;, line 286, in __call__
+    return self._hookexec(self, self.get_hookimpls(), kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 93, in _hookexec
+    return self._inner_hookexec(hook, methods, kwargs)
+  File &quot;D:\python3\lib\site-packages\pluggy\manager.py&quot;, line 84, in &lt;lambda&gt;
+    self._inner_hookexec = lambda hook, methods, kwargs: hook.multicall(
+  File &quot;D:\python3\lib\site-packages\pluggy\callers.py&quot;, line 203, in _multicall
+    gen.send(outcome)
+  File &quot;D:\PycharmProjects\guest\pyautoTest-master\conftest.py&quot;, line 53, in pytest_runtest_makereport
+    capture_screenshots(case_name)
+  File &quot;D:\PycharmProjects\guest\pyautoTest-master\conftest.py&quot;, line 100, in capture_screenshots
+    driver.save_screenshot(image_dir)
+AttributeError: &apos;NoneType&apos; object has no attribute &apos;save_screenshot&apos;</error></testcase></testsuite></testsuites>

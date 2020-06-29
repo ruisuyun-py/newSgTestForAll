@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="0" failures="0" hostname="WIN-CDD40IFICEH" name="pytest" skipped="0" tests="1" time="30.072" timestamp="2020-06-17T00:09:39.803503"><testcase classname="test_dir.test_login.TestLogin" file="test_dir\test_login.py" line="35" name="test_login" time="29.950"></testcase></testsuite></testsuites>
