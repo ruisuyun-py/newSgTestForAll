@@ -15,6 +15,7 @@ def setup_module(module):
     login.login()
 
 
+
 def setup_function(function):
     base.driver.switch_to.default_content()
     base.wait_element(base.find_xpath("订单")).click()
@@ -35,10 +36,18 @@ def teardown_module(module):
     base.browser_close()
 
 
-def test1():
+def test_multi_search():
+    """
+    base.wait_element(base.locations["批量搜索下拉按钮"]).click()
+    base.wait_element(base.find_xpath("搜索类型", "买家账号")).click()
+    base.wait_element(base.find_xpath_by_tag_name("搜索类型", "textarea")).send_keys("200623201454")
+    base.wait_element(base.find_xpath("确定")).click()
+    time.sleep(2)
 
     base.wait_element(base.find_xpath_by_placeholder("模糊搜索")).click()
     time.sleep(2)
+    """
+    print(base.driver.get_cookies())
 
 
 if __name__ == '__main__':

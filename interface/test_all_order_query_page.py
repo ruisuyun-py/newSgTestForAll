@@ -5,11 +5,15 @@ from sys import path
 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 path.insert(0, parentdir)
-from db_fixture import test_data
+
+
+def test_login():
+    base_url = ""
+    pass
 
 
 class TestQuery:
-    ''' 获得发布会列表 '''
+    """ 获得发布会列表 """
 
     def test_query(self):
         self.base_url = "http://s40.erp12345.com/api/Orders/AllOrder/" \
