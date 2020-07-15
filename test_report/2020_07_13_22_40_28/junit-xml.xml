@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="0" failures="0" hostname="PC-20170621WOWM" name="pytest" skipped="0" tests="1" time="16.573" timestamp="2020-07-13T22:40:29.082431"><testcase classname="test_dir.order.all_order.test_main" file="test_dir\order\all_order\test_main.py" line="37" name="test1" time="16.501"></testcase></testsuite></testsuites>
