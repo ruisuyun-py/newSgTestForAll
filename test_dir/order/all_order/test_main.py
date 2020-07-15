@@ -15,7 +15,6 @@ def setup_module(module):
     login.login()
 
 
-
 def setup_function(function):
     base.driver.switch_to.default_content()
     base.wait_element(base.find_xpath("订单")).click()
@@ -45,9 +44,8 @@ def test_multi_search():
     time.sleep(2)
 
     base.wait_element(base.find_xpath_by_placeholder("模糊搜索")).click()
-    time.sleep(2)
     """
-    print(base.driver.get_cookies())
+    time.sleep(2)
 
 
 if __name__ == '__main__':

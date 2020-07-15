@@ -36,7 +36,7 @@ def test_login():
     print()
     print("查询结果2：", end=' ')
     print(response.text)
-    base.driver.quit()
+    # base.driver.quit()
 
 
 if __name__ == '__main__':
