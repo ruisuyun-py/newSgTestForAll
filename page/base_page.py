@@ -4,6 +4,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 
 driver = webdriver.Chrome()
+cookies = []
 locations = {"全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
              "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
              "平台编码上传框架": "//iframe[contains(@src,"
@@ -42,11 +43,13 @@ def find_xpath(keywords):
     xpath = "//*[text()='{}']".format(keywords)
     return xpath
 
+
 """
 def find_xpath(keywords1, keywords2):
     xpath = "//*[contains(text(),'{}')]/following::*[contains(text(),'{}')]".format(keywords1, keywords2)
     return xpath
 """
+
 
 def find_xpath_by_tag_name(keywords1, keywords2):
     xpath = "//*[text()='{0}']/following::{1}".format(keywords1, keywords2)
@@ -96,3 +99,5 @@ def close_page(page_name):
 
 def browser_close():
     driver.quit()
+
+

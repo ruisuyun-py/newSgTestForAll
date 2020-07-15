@@ -12,7 +12,8 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
 def setup_module(module):
-    login.login()
+    # login.login()
+    print("全部订单测试开始")
 
 
 def setup_function(function):
@@ -32,19 +33,10 @@ def teardown_function(function):
 
 
 def teardown_module(module):
-    base.browser_close()
+    print("测试结束")
 
 
 def test_multi_search():
-    """
-    base.wait_element(base.locations["批量搜索下拉按钮"]).click()
-    base.wait_element(base.find_xpath("搜索类型", "买家账号")).click()
-    base.wait_element(base.find_xpath_by_tag_name("搜索类型", "textarea")).send_keys("200623201454")
-    base.wait_element(base.find_xpath("确定")).click()
-    time.sleep(2)
-
-    base.wait_element(base.find_xpath_by_placeholder("模糊搜索")).click()
-    """
     time.sleep(2)
 
 
