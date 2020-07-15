@@ -1,43 +1,42 @@
-import http
-import urllib
 import page.base_page as base
 import pytest
 import requests
+import page.login_page as login
+import os
+from sys import path
 
-from page.base_page import driver
-import page.login_page as lo
 
-class TestLogin:
-    def test_query(self):
-        self.base_url = "http://erp12345.com/api/users/login/CheckLogin"
-        login = {
-            "companyName": "%E6%B5%8B%E8%AF%95%E4%B8%93%E7%94%A8",
-            "username": "%E6%B5%8B%E8%AF%95",
-            "password": "8888",
-        }
-        se = requests.session()
-        response = se.get(self.base_url, data=login)
-        # coo =
-        # coo = requests.utils.dict_from_cookiejar(response.cookies)
-        lo.login()
-        coo = base.driver.get_cookies()
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+path.insert(0, parentdir)
 
-        # print(coo)
-        co = requests.cookies.RequestsCookieJar()
-        for c in coo:
-            if c["name"] == "TOKEN":
-                co.set('TOKEN', c["value"])
 
-        self.base_url = "http://s40.erp12345.com/api/Orders/AllOrder/" \
-                        "QueryPage?ModelTypeName=ErpWeb.Domain.ViewModels.Orders.AllOrderVmv&page=1&pagesize=20"
-        se.cookies.update(co)
-        print("查询之后的cookie内容：")
-        print(se.cookies)
-
-        response = se.get(self.base_url)
-        print("查询结果：")
-        print(response.text.encode('utf8'))
-        base.driver.quit()
+def test_login():
+    login.login()
+    coo = base.driver.get_cookies()
+    cookie_str = 'TOKEN='
+    for c in coo:
+        if c['name'] == 'TOKEN':
+            cookie_str += c['value']
+            cookie_str += ';'
+        elif c['name'] == 'TENANTID':
+            cookie_str += 'TENANTID='
+            cookie_str += c['value']
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/QueryPage?ModelTypeName=ErpWeb.Domain.ViewModels.Orders" \
+        ".AllOrderVmv&page=1&pagesize=20 "
+    headers = {
+        'Cookie': cookie_str
+    }
+    response = requests.get(url, headers=headers)
+    print()
+    print("查询结果1：", end=' ')
+    print(response.text.encode('utf8'))
+    url = 'http://gw.erp12345.com/api/Orders/AllOrder/QueryPage?OrderStatus=1&ModelTypeName=ErpWeb.Domain.ViewModels' \
+          '.Orders.AllOrderVmv&page=1&pagesize=20 '
+    response = requests.get(url, headers=headers)
+    print()
+    print("查询结果2：", end=' ')
+    print(response.text)
+    base.driver.quit()
 
 
 if __name__ == '__main__':
