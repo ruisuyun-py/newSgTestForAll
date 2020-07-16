@@ -1,4 +1,7 @@
 import datetime
+import time
+
+import requests
 from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
@@ -34,21 +37,35 @@ def get_location(key_name):
     return locations[key_name]
 
 
+def get_now_string():
+    now_string = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
+    return now_string
+
+
 def find_xpath_by_placeholder(keywords):
-    xpath = "//*[@placeholder='{}']".format(keywords)
-    return xpath
-
-
-def find_xpath(keywords):
-    xpath = "//*[text()='{}']".format(keywords)
+    xpath = f"//*[@placeholder='{keywords}']"
     return xpath
 
 
 """
+def find_xpath(keywords):
+    xpath = f"//*[text()='{keywords}']"
+    return xpath
+
+
+
 def find_xpath(keywords1, keywords2):
     xpath = "//*[contains(text(),'{}')]/following::*[contains(text(),'{}')]".format(keywords1, keywords2)
     return xpath
 """
+
+
+def find_xpath(keywords1, keywords2=''):
+    if keywords2 == '':
+        xpath = f"//*[text()='{keywords1}']"
+    else:
+        xpath = f"//*[contains(text(),'{keywords1}')]/following::*[contains(text(),'{keywords2}')]"
+    return xpath
 
 
 def find_xpath_by_tag_name(keywords1, keywords2):
@@ -101,3 +118,12 @@ def browser_close():
     driver.quit()
 
 
+def new_vip(name):
+    headers = {
+        'Cookie': cookies
+    }
+    url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={\"Id\":0,\"VipId\":0,\"Platform\":0,\"ShopId\":0,\"IsPosVip\":true,\"VipName\":\"" + name + "\",\"VipCode\":\"" + name + "\",\"ShipName\":\"\",\"ShipMobile\":\"\",\"ReceiverName\":\"芮苏云\",\"ReceiverMobile\":\"15221071395\",\"ReceiverPhone\":\"\",\"ReceiverZip\":\"\",\"ProvinceName\":\"上海\",\"CityName\":\"上海市\",\"DistrictName\":\"闵行区\",\"ReceiverAddress\":\"衡东路189\",\"IsIllegal\":false}"
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    vip_info = [result["data"]["VipName"], result['data']['VipId']]
+    return vip_info

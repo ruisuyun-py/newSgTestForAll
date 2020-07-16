@@ -2,9 +2,8 @@ import sys
 import time
 import pytest
 from os.path import dirname, abspath
+from selenium import webdriver
 from selenium.webdriver import ActionChains
-from selenium.webdriver.common.by import By
-
 import page.login_page as login
 import page.base_page as base
 
@@ -12,7 +11,8 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
 def setup_module(module):
-    # login.login()
+    base.driver = webdriver.Chrome()
+    base.cookies = login.login()
     print("全部订单测试开始")
 
 
@@ -33,7 +33,8 @@ def teardown_function(function):
 
 
 def teardown_module(module):
-    print("测试结束")
+    base.browser_close()
+    print("全部订单测试结束")
 
 
 def test_multi_search():
