@@ -1,3 +1,6 @@
+import urllib
+from urllib.parse import urlencode
+
 from selenium import webdriver
 import page.base_page as base
 import pytest
@@ -28,6 +31,46 @@ def teardown_module(module):
     print("测试结束")
 
 
+def test_001():
+    name = base.get_now_string()
+    headers = {
+        'Cookie': base.cookies
+    }
+    # url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={'Id':0,'VipId':0,'Platform':0,'ShopId':0,'IsPosVip':true,'VipName':'" + name + "','VipCode':'" + name + "','ShipName':'','ShipMobile':'','ReceiverName':'芮苏云','ReceiverMobile':'15221071395','ReceiverPhone':'','ReceiverZip':'','ProvinceName':'上海','CityName':'上海市','DistrictName':'闵行区','ReceiverAddress':'衡东路189','IsIllegal':false}"
+    vip = {
+        'Id': 0,
+        'VipId': 0,
+        'Platform': 0,
+        'ShopId': 0,
+        'IsPosVip': 'true',
+        'VipName': name,
+        'VipCode': name,
+        'ShipName': '',
+        'ShipMobile': '',
+        'ReceiverName': '芮苏云',
+        'ReceiverMobile': '15221071395',
+        'ReceiverPhone': '',
+        'ReceiverZip': '',
+        'ProvinceName': '上海',
+        'CityName': '上海市',
+        'DistrictName': '闵行区',
+        'ReceiverAddress': '衡东路189',
+        'IsIllegal': 'false'
+    }
+    url_param = ''
+    for k, v in vip.items():
+        url_param += f"'{k}':'{v}',"
+    print("rul_param:")
+    print(url_param)
+    url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={"+url_param+"}"
+    print(url)
+    response = requests.get(url, headers=headers, )
+    print(response.url)
+    result = dict(response.json())
+    vip_info = [result["data"]["VipName"], result['data']['VipId']]
+    print(vip_info)
+
+
 def test_login_for_module():
     url = "http://gw.erp12345.com/api/Orders/AllOrder/QueryPage?ModelTypeName=ErpWeb.Domain.ViewModels.Orders" \
           ".AllOrderVmv&page=1&pagesize=20 "
@@ -55,7 +98,9 @@ def test_add_vip():
 def test_new_order():
     vip_name = base.get_now_string()
     vip_info = base.new_vip(vip_name)
-    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrder?order={\"Id\":\"0\",\"Tid\":\"\",\"OrderType\":1,\"DealDate\":\"2020-07-16 17:08:59\",\"ShopId\":\"7494440439622140309\",\"VipId\":\"" + vip_info[1] + "\",\"VipName\":\"" + vip_info[0] + "\",\"ExpressId\":\"7494440373939341490\",\"PostFee\":0,\"WarehouseId\":\"162573418911628622\",\"ProvinceName\":\"上海\",\"CityName\":\"上海市\",\"DistrictName\":\"闵行区\",\"ReceiverName\":\"芮苏云\",\"ReceiverPhone\":\"\",\"ReceiverMobile\":\"15221071395\",\"ReceiverRegionId\":\"0\",\"ReceiverZip\":\"\",\"ReceiverAddress\":\"衡东路189\",\"SellerMemo\":\"2\",\"BuyerMemo\":\"1\",\"Note\":\"\",\"SettlementMode\":0,\"SalesManId\":\"0\",\"SalesManName\":\"\",\"SellerFlag\":0,\"InvoiceTitle\":\"\",\"InvoiceNo\":\"\"}"
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrder?order={'Id':'0','Tid':'','OrderType':1,'DealDate':'2020-07-16 17:08:59','ShopId':'7494440439622140309','VipId':'" + \
+          vip_info[1] + "','VipName':'" + vip_info[
+              0] + "','ExpressId':'7494440373939341490','PostFee':0,'WarehouseId':'162573418911628622','ProvinceName':'上海','CityName':'上海市','DistrictName':'闵行区','ReceiverName':'芮苏云','ReceiverPhone':'','ReceiverMobile':'15221071395','ReceiverRegionId':'0','ReceiverZip':'','ReceiverAddress':'衡东路189','SellerMemo':'2','BuyerMemo':'1','Note':'','SettlementMode':0,'SalesManId':'0','SalesManName':'','SellerFlag':0,'InvoiceTitle':'','InvoiceNo':''}"
     payload = {}
     headers = {
         'Cookie': base.cookies
