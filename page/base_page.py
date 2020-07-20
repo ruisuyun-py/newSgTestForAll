@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 
-driver = webdriver.Chrome()
+global driver
 cookies = []
 locations = {"全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
              "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
@@ -127,3 +127,6 @@ def new_vip(name):
     result = dict(response.json())
     vip_info = [result["data"]["VipName"], result['data']['VipId']]
     return vip_info
+
+
+
