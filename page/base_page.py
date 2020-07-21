@@ -118,15 +118,107 @@ def browser_close():
     driver.quit()
 
 
+# 新增会员
 def new_vip(name):
+    """
+    name:会员名称，一般用get_now_string()生成
+    return:返回【会员ID，会员名称】
+    """
     headers = {
         'Cookie': cookies
     }
-    url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={\"Id\":0,\"VipId\":0,\"Platform\":0,\"ShopId\":0,\"IsPosVip\":true,\"VipName\":\"" + name + "\",\"VipCode\":\"" + name + "\",\"ShipName\":\"\",\"ShipMobile\":\"\",\"ReceiverName\":\"芮苏云\",\"ReceiverMobile\":\"15221071395\",\"ReceiverPhone\":\"\",\"ReceiverZip\":\"\",\"ProvinceName\":\"上海\",\"CityName\":\"上海市\",\"DistrictName\":\"闵行区\",\"ReceiverAddress\":\"衡东路189\",\"IsIllegal\":false}"
-    response = requests.get(url, headers=headers)
+    vip = {
+        'Id': 0,
+        'VipId': 0,
+        'Platform': 0,
+        'ShopId': 0,
+        'IsPosVip': 'true',
+        'VipName': name,
+        'VipCode': name,
+        'ShipName': '',
+        'ShipMobile': '',
+        'ReceiverName': '芮苏云',
+        'ReceiverMobile': '15221071395',
+        'ReceiverPhone': '',
+        'ReceiverZip': '',
+        'ProvinceName': '上海',
+        'CityName': '上海市',
+        'DistrictName': '闵行区',
+        'ReceiverAddress': '衡东路189',
+        'IsIllegal': 'false'
+    }
+    url_param = ''
+    for k, v in vip.items():
+        url_param += f"'{k}':'{v}',"
+    url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={" + url_param + "}"
+    response = requests.get(url, headers=headers, )
     result = dict(response.json())
-    vip_info = [result["data"]["VipName"], result['data']['VipId']]
+    vip_info = [result["data"]["VipId"], result['data']['VipName']]
     return vip_info
 
 
-
+def new_order(vip_info, sku_info):
+    """
+    vip_info:Vip信息，包含，vip_id 和vip_name,一般通过 new_vip 获取
+    sku_info:商品信息列表，商品信息字典，如下
+    sku_info = [
+        {'SkuId': '7494440356323262567', 'Qty': '2'},
+    ]
+    return:order_info ，订单信息，包含订单id和订单编码
+    格式： [order_id,order_code]
+    """
+    order = {
+        "Id": "0",
+        "Tid": "",
+        "OrderType": 1,
+        "DealDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+        "ShopId": "7494440439622140309",
+        "VipId": vip_info[0],
+        "VipName": vip_info[1],
+        "ExpressId": "7494440373939341490",
+        "PostFee": 0,
+        "WarehouseId": "162573418911628622",
+        "ProvinceName": "上海",
+        "CityName": "上海市",
+        "DistrictName": "闵行区",
+        "ReceiverName": "芮苏云",
+        "ReceiverPhone": "",
+        "ReceiverMobile": "15221071395",
+        "ReceiverRegionId": "0",
+        "ReceiverZip": "",
+        "ReceiverAddress": "衡东路189",
+        "SellerMemo": "",
+        "BuyerMemo": "",
+        "Note": "",
+        "SettlementMode": 0,
+        "SalesManId": "0",
+        "SalesManName": "",
+        "SellerFlag": 0,
+        "InvoiceTitle": "",
+        "InvoiceNo": ""
+    }
+    headers = {
+        'Cookie': cookies
+    }
+    url_param = ''
+    for k, v in order.items():
+        url_param += f"'{k}':'{v}',"
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrder?order={" + url_param + "}"
+    response = requests.get(url, headers=headers, )
+    result = dict(response.json())
+    start = result['data']['OrderCodeTid'].find("T")
+    end = len(result['data']['OrderCodeTid'])
+    order_info = [result['data']['WaitApproveMaxId'], result['data']['OrderCodeTid'][start: end]]
+    # 添加订单主体完成，下面需要添加商品信息
+    url_param = ''
+    for sku in sku_info:
+        url_param += '{'
+        for k, v in sku.items():
+            url_param += f"'{k}':'{v}',"
+        url_param += '},'
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrderLine?orderId=" + order_info[0] + "&skus=[" + url_param + "]"
+    requests.get(url, headers=headers, )
+    # 添加支付信息
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info[0] + ""
+    requests.get(url, headers=headers)
+    return order_info
