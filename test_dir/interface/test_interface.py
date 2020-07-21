@@ -68,5 +68,10 @@ def test_new_order():
     print(order_info)
 
 
+def test_get_vip_id():
+    vip_id = base.get_vip_id("测试会员1")
+    print(vip_id)
+
+
 if __name__ == '__main__':
     pytest.main()

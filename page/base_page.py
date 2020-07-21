@@ -157,6 +157,22 @@ def new_vip(name):
     return vip_info
 
 
+def get_vip_id(name):
+    user_info = {
+        'ModelTypeName': 'ErpWeb.Domain.ViewModels.Vips.FullVipVmv',
+        'VipName': name,
+        'IsHide': 'false',
+    }
+    url = "http://gw.erp12345.com/api/Vips/FullVip/QueryPage?"
+    for k, v in user_info.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': cookies
+    }
+    response = requests.get(url, headers=headers)
+    vip_id = dict(response.json())['data']['Items'][0]['VipId']
+    return vip_id
+
 def new_order(vip_info, sku_info):
     """
     vip_info:Vip信息，包含，vip_id 和vip_name,一般通过 new_vip 获取
