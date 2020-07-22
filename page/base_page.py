@@ -126,7 +126,7 @@ def wait_elements(xpath):
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
 
-def wait_table_refresh(button_xpath, column_name, keywords):
+def wait_table_refresh(button_xpath, keywords, column_name):
     element = driver.find_element_by_xpath(get_cell_xpath(keywords, column_name))
     wait_element(button_xpath).click()
     start = datetime.datetime.now()
@@ -139,7 +139,7 @@ def wait_table_refresh(button_xpath, column_name, keywords):
 
 def get_column_field(column_name):
     xpath = "//div[contains(@class,'ag-header-cell') and contains(string(),'{}')]".format(column_name)
-    column_field = wait_element(xpath).GetAttribute("col-id")
+    column_field = wait_element(xpath).get_attribute("col-id")
     return column_field
 
 

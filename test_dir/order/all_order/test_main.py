@@ -1,10 +1,12 @@
 import sys
 import time
+
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
 import page.login_page as login
 import page.base_page as base
+import page.order.all_order_page as order
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
@@ -29,7 +31,12 @@ def teardown_module():
 
 
 def test_multi_search():
-    time.sleep(2)
+    time.sleep(1)
+    base.wait_element(order.locations["批量搜索下拉按钮"]).click()
+    base.wait_element(base.find_xpath("搜索类型", "买家账号")).click()
+    base.wait_element(order.locations["批量搜索文本框"]).send_keys("20200722150615")
+    base.wait_table_refresh(base.find_xpath("每行一个", "确认"), 1, "会员名")
+
 
 
 if __name__ == '__main__':
