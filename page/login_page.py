@@ -1,8 +1,4 @@
-import time
-
 from selenium.webdriver.common.keys import Keys
-
-# from page.base_page import *
 import page.base_page as base
 
 

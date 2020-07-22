@@ -1,9 +1,6 @@
-import time
-import urllib
-from urllib.parse import urlencode
-
 from selenium import webdriver
 import page.base_page as base
+import page.interface as interface
 import pytest
 import requests
 import page.login_page as login
@@ -33,9 +30,7 @@ def teardown_module(module):
 
 
 def test_001():
-    product_code = base.get_now_string()
-    sku_info = base.new_product(product_code)
-    print(sku_info)
+    pass
 
 
 def test_login_for_module():
@@ -58,21 +53,33 @@ def test_login_for_module():
 
 def test_add_vip():
     vip_name = base.get_now_string()
-    name = base.new_vip(vip_name)
+    name = interface.new_vip(vip_name)
     print(name)
+
+
+def test_get_vip_id():
+    vip_id = interface.get_vip_id("测试会员1")
+    print(vip_id)
 
 
 def test_new_order():
     name = base.get_now_string()
-    vip_info = base.new_vip(name)
+    vip_info = interface.new_vip(name)
     sku_info = [{'SkuId': '7494440356323262567', 'Qty': '2'}, ]
-    order_info = base.new_order(vip_info, sku_info)
+    order_info = interface.new_order(vip_info, sku_info)
     print(order_info)
 
 
-def test_get_vip_id():
-    vip_id = base.get_vip_id("测试会员1")
-    print(vip_id)
+def test_new_product():
+    product_code = base.get_now_string()
+    result = interface.new_product(product_code)
+    print(result)
+
+
+def test_get_sku_id():
+    sku_code = "测试商品1-红色 XS"
+    sku_id = interface.get_sku_id(sku_code)
+    print(sku_id)
 
 
 if __name__ == '__main__':
