@@ -1,39 +1,37 @@
 import datetime
 import time
-
 import js2py
-import requests
-from selenium import webdriver
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 global driver
 cookies = []
-locations = {"全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
-             "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
-             "平台编码上传框架": "//iframe[contains(@src,"
-                         "'Products/PlatformProductTool/PlatformProductToolBrowserView')]",
-             "店铺商品匹配框架": "//iframe[contains(@src,'Products/ShopProductMatch/ShopProductMatchBrowserView')]",
-             "套餐商品框架": "//iframe[contains(@src,'Products/comboProduct/ComboProductBrowserView')]",
-             "门店收银框架": "//iframe[contains(@src,'Pos/Pos/PosBrowserView')]",
-             "采购建议框架": "//iframe[contains(@src,'Purchase/PurchaseAdvise/PurchaseAdviseBrowserView')]",
-             "采购单框架": "//iframe[contains(@src,'Purchase/Purchase/PurchaseOrderBrowserView')]",
-             "全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
-             "打印发货框架": "//iframe[contains(@src,'Deliverys/Delivery/DeliveryBrowserView')]",
-             "打包登记框架": "//iframe[contains(@src,'Orders/PackageRegister/PackageRegisterBrowserView')]",
-             "会员管理框架": "//iframe[contains(@src,'Vips/FullVip/FullVipBrowserView')]",
-             "库存查询框架": "//iframe[contains(@src,'Inventorys/Inventory/InventoryBrowserView')]",
-             "入库单框架": "//iframe[contains(@src,'Stocks/StockInOrder/StockInOrderBrowserView')]",
-             "盘点单框架": "//iframe[contains(@src,'Inventorys/InventoryVer/InventoryVerBrowserView')]",
-             "售后单框架": "//iframe[contains(@src,'AfterServices/ServiceOrder/ServiceOrderBrowserView')]",
-             "供应商往来账框架": "//iframe[contains(@src,'Finances/SupplierBillOrder/SupplierBillOrderBrowserView')]",
-             "供应商结算单框架": "//iframe[contains(@src,'Finances/SupplierSettleOrder/SupplierSettleOrderBrowserView')]",
-             "基础业务框架": "//iframe[contains(@src,'Settings/BillSetting/BillSettingBrowserView')]",
-             "订单设置框架": "//iframe[contains(@src,'Settings/OrderSetting/OrderSettingBrowserView')]",
-             "外观设置框架": "//iframe[contains(@src,'Settings/AppearanceSetting/AppearanceSettingBrowserView')]",
-             "供应商管理框架": "//iframe[contains(@src,'Settings/Supplier/SupplierBrowserView')]"
-             }
+locations = {
+    "全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
+    "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
+    "平台编码上传框架": "//iframe[contains(@src,"
+                "'Products/PlatformProductTool/PlatformProductToolBrowserView')]",
+    "店铺商品匹配框架": "//iframe[contains(@src,'Products/ShopProductMatch/ShopProductMatchBrowserView')]",
+    "套餐商品框架": "//iframe[contains(@src,'Products/comboProduct/ComboProductBrowserView')]",
+    "门店收银框架": "//iframe[contains(@src,'Pos/Pos/PosBrowserView')]",
+    "采购建议框架": "//iframe[contains(@src,'Purchase/PurchaseAdvise/PurchaseAdviseBrowserView')]",
+    "采购单框架": "//iframe[contains(@src,'Purchase/Purchase/PurchaseOrderBrowserView')]",
+    "全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
+    "打印发货框架": "//iframe[contains(@src,'Deliverys/Delivery/DeliveryBrowserView')]",
+    "打包登记框架": "//iframe[contains(@src,'Orders/PackageRegister/PackageRegisterBrowserView')]",
+    "会员管理框架": "//iframe[contains(@src,'Vips/FullVip/FullVipBrowserView')]",
+    "库存查询框架": "//iframe[contains(@src,'Inventorys/Inventory/InventoryBrowserView')]",
+    "入库单框架": "//iframe[contains(@src,'Stocks/StockInOrder/StockInOrderBrowserView')]",
+    "盘点单框架": "//iframe[contains(@src,'Inventorys/InventoryVer/InventoryVerBrowserView')]",
+    "售后单框架": "//iframe[contains(@src,'AfterServices/ServiceOrder/ServiceOrderBrowserView')]",
+    "供应商往来账框架": "//iframe[contains(@src,'Finances/SupplierBillOrder/SupplierBillOrderBrowserView')]",
+    "供应商结算单框架": "//iframe[contains(@src,'Finances/SupplierSettleOrder/SupplierSettleOrderBrowserView')]",
+    "基础业务框架": "//iframe[contains(@src,'Settings/BillSetting/BillSettingBrowserView')]",
+    "订单设置框架": "//iframe[contains(@src,'Settings/OrderSetting/OrderSettingBrowserView')]",
+    "外观设置框架": "//iframe[contains(@src,'Settings/AppearanceSetting/AppearanceSettingBrowserView')]",
+    "供应商管理框架": "//iframe[contains(@src,'Settings/Supplier/SupplierBrowserView')]"
+}
 
 
 def get_location(key_name):

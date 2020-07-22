@@ -1,30 +1,29 @@
+import sys
+from os.path import dirname, abspath
 from selenium import webdriver
 import page.base_page as base
 import page.interface as interface
 import pytest
 import requests
 import page.login_page as login
-import os
-from sys import path
 
-parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-path.insert(0, parentdir)
+sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
-def setup_module(module):
+def setup_module():
     base.driver = webdriver.Chrome()
     base.cookies = login.login()
 
 
-def setup_function(function):
+def setup_function():
     pass
 
 
-def teardown_function(function):
+def teardown_function():
     pass
 
 
-def teardown_module(module):
+def teardown_module():
     base.browser_close()
     print("测试结束")
 
