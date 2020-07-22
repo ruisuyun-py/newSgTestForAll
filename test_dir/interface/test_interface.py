@@ -33,7 +33,9 @@ def teardown_module(module):
 
 
 def test_001():
-    pass
+    product_code = base.get_now_string()
+    sku_info = base.new_product(product_code)
+    print(sku_info)
 
 
 def test_login_for_module():

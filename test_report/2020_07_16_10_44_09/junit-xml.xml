@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite errors="1" failures="0" hostname="PC-20170621WOWM" name="pytest" skipped="0" tests="2" time="15.452" timestamp="2020-07-16T10:44:09.614305"><testcase classname="test_dir.interface.test_login" file="test_dir\interface\test_login.py" line="42" name="test_login_for_module" time="0.000"><error message="test setup failure">module = &lt;module &apos;test_dir.interface.test_login&apos; from &apos;D:\\pycham\\newSgTestForAll\\test_dir\\interface\\test_login.py&apos;&gt;
-
-    def setup_module(module):
-&gt;       base.driver = webdriver.Chorme()
-E       AttributeError: module &apos;selenium.webdriver&apos; has no attribute &apos;Chorme&apos;
-
-test_dir\interface\test_login.py:18: AttributeError</error></testcase><testcase classname="test_dir.order.all_order.test_main" file="test_dir\order\all_order\test_main.py" line="41" name="test_multi_search" time="14.673"></testcase></testsuite></testsuites>

@@ -173,6 +173,65 @@ def get_vip_id(name):
     vip_id = dict(response.json())['data']['Items'][0]['VipId']
     return vip_id
 
+
+def new_product(product_code):
+    url = "http://gw.erp12345.com/api/Products/FullProduct/New"
+    url += "?product={"
+    product_info = {
+        "Name": product_code,
+        "Code": product_code,
+        "ProductCategoryId": "0",
+        "ShortName": '',
+        "V": "0",
+        "BrandId": "0",
+        "Unit": "",
+        "PicUrl": "",
+        "StandardPrice": '0',
+    }
+    for k, v in product_info.items():
+        url += f"'{k}':'{v}',"
+    product_skus = [
+        {"Id": "0", "Name": "红色 XS", "Code": "" + product_code + "-红色 XS", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 S", "Code": "" + product_code + "-红色 S", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 M", "Code": "" + product_code + "-红色 M", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 L", "Code": "" + product_code + "-红色 L", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 XL", "Code": "" + product_code + "-红色 XL", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 2XL", "Code": "" + product_code + "-红色 2XL", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+        {"Id": "0", "Name": "红色 3XL", "Code": "" + product_code + "-红色 3XL", "LastPurPrice": 0, "StandardPrice": 0,
+         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "SkuImg": "null", "IsHide": "false", "V": 0},
+    ]
+    url += "'ProductSkus':["
+    for sku in product_skus:
+        url += "{"
+        for k, v in sku.items():
+            url += f"'{k}':'{v}',"
+        url += "},"
+    url += "]}"
+    headers = {
+        'cookie': cookies
+    }
+    response = requests.post(url, headers=headers)
+    sku_list = dict(response.json())['data']['ProductSkus']
+    sku_info = []
+    for i in sku_list:
+        sku = {'Id': i['Id'], 'Code': i['Code']}
+        sku_info.append(sku)
+    return sku_info
+
+
 def new_order(vip_info, sku_info):
     """
     vip_info:Vip信息，包含，vip_id 和vip_name,一般通过 new_vip 获取
