@@ -6,3 +6,4 @@ pytest-html==2.1.0
 pytest-rerunfailures==7.0
 click==6.7
 poium==0.5.3
+js2py==0.70

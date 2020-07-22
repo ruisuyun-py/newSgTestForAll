@@ -17,19 +17,11 @@ def setup_module(module):
 
 
 def setup_function(function):
-    base.driver.switch_to.default_content()
-    base.wait_element(base.find_xpath("订单")).click()
-    time.sleep(1)
-    base.wait_element(base.find_xpath("全部订单")).click()
-    time.sleep(1)
-    base.driver.switch_to.default_content()
-    frame = base.get_location("全部订单框架")
-    base.driver.switch_to.frame(base.driver.find_element_by_xpath(base.get_location("全部订单框架")))
+    base.open_page("订单","全部订单", "全部订单框架")
 
 
 def teardown_function(function):
-    base.driver.switch_to.default_content()
-    ActionChains(base.driver).double_click(base.wait_element("//span[text()='全部订单']")).perform()
+    base.close_page("全部订单")
 
 
 def teardown_module(module):
