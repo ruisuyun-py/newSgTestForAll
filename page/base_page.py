@@ -71,7 +71,7 @@ def find_xpath_by_tag_name(keywords1, keywords2):
     return xpath
 
 
-def find_xpath_with_bland(keywords):
+def find_xpath_with_spaces(keywords):
     xpath = f"//*[contains(text(),'{keywords}')]"
     return xpath
 
@@ -91,10 +91,10 @@ def switch_to_frame(xpath):
 
 
 def open_page(menu_name, page_name, frame_name):
-    driver.switch_to.default_content
+    driver.switch_to.default_content()
     wait_element(find_xpath(menu_name)).click()
     wait_element(find_xpath(page_name)).click()
-    driver.switch_to.default_content
+    driver.switch_to.default_content()
     switch_to_frame(get_location(frame_name))
 
 
@@ -126,7 +126,14 @@ def wait_elements(xpath):
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
 
+# 等待主表刷新
 def wait_table_refresh(button_xpath, keywords, column_name):
+    """
+    button_xpath:按钮定位
+    keywords:可以是行号，也可以是关键字
+    column_name:列名
+    没有返回值
+    """
     element = driver.find_element_by_xpath(get_cell_xpath(keywords, column_name))
     wait_element(button_xpath).click()
     start = datetime.datetime.now()
@@ -135,6 +142,22 @@ def wait_table_refresh(button_xpath, keywords, column_name):
             element.get_attribute("value")
         except StaleElementReferenceException:
             break
+
+
+def wait_element_refresh(element, old_text):
+    start = datetime.datetime.now()
+    while (datetime.datetime.now() - start).seconds < 30:
+        try:
+            text = element.text
+            if text != old_text:
+                print(f"刷新前的文本：{old_text}")
+                print(f"刷新后的文本：{text}")
+                break
+        except StaleElementReferenceException:
+            print("元素过期")
+            break
+    assert 1 == 0, "元素刷新失败"
+
 
 
 def get_column_field(column_name):
