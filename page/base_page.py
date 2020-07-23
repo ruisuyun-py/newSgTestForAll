@@ -224,17 +224,14 @@ def scroll_to(num):
     """
     将滚动条分成10份，选择移动到哪个位置
     """
-    context_js_obj = js2py.EvalJs()
-    js = f"document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollLeft=document" \
-         f".getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollWidth/10*{num}; "
-    context_js_obj.execute(js)
+    js = f"document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollLeft=document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollWidth/10*{num}; "
+    driver.execute_script(js)
 
 
 def scroll_to_view(xpath):
     element = wait_element(xpath)
-    context_js_obj = js2py.EvalJs()
     js = "arguments[0].scrollIntoView();"
-    context_js_obj.execute(js, element)
+    driver.execute(js, element)
 
 
 def select_all():

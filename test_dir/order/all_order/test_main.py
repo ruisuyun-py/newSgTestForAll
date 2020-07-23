@@ -1,6 +1,5 @@
 import sys
 import time
-
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
@@ -183,7 +182,12 @@ def test_multi_search():
     base.scroll_to(5)
     address_result = base.get_column_text("收货地址")
     for v in address_result:
-        assert v + '\n' in address_list
+        assert v.replace('\n改', '') + '\n' in address_list
+
+
+def test_scroll():
+    time.sleep(2)
+    base.scroll_to(2)
 
 
 if __name__ == '__main__':
