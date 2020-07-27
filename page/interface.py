@@ -42,6 +42,46 @@ def new_vip(name):
     return vip_info
 
 
+def modify_vip(vip_info, vip_level_info):
+    """
+    name:会员名称，一般用get_now_string()生成
+    return:返回【会员ID，会员名称】
+    """
+    headers = {
+        'Cookie': base.cookies
+    }
+    vip = {
+        'Id': 0,
+        'VipId': vip_info[0],
+        'Platform': 0,
+        'ShopId': 0,
+        'IsPosVip': 'true',
+        'VipLevelId': vip_level_info[0],
+        'VipLevelName': vip_level_info[1],
+        'VipName': vip_info[1],
+        'VipCode': vip_info[1],
+        'ShipName': '',
+        'ShipMobile': '',
+        'ReceiverName': '芮苏云',
+        'ReceiverMobile': '15221071395',
+        'ReceiverPhone': '',
+        'ReceiverZip': '',
+        'ProvinceName': '上海',
+        'CityName': '上海市',
+        'DistrictName': '闵行区',
+        'ReceiverAddress': '衡东路189',
+        'IsIllegal': 'false'
+    }
+    url_param = ''
+    for k, v in vip.items():
+        url_param += f"'{k}':'{v}',"
+    url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={" + url_param + "}"
+    response = requests.get(url, headers=headers, )
+    result = dict(response.json())
+    vip_info = [result["data"]["VipId"], result['data']['VipName']]
+    return vip_info
+
+
 # 获取会员ID
 def get_vip_id(name):
     """
@@ -62,6 +102,23 @@ def get_vip_id(name):
     response = requests.get(url, headers=headers)
     vip_id = dict(response.json())['data']['Items'][0]['VipId']
     return vip_id
+
+
+def get_vip_level_info(level_name):
+    user_info = {
+        'ModelTypeName': 'ErpWeb.Domain.ViewModels.Vips.VipLevelVmv',
+        'VipLevelName': level_name,
+    }
+    url = "http://gw.erp12345.com/api/Vips/FullVip/QueryPage?"
+    for k, v in user_info.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    vip_level = [result["data"]["items"][0]["Id"], result["data"]["items"][0]["VipLevelName"]]
+    return vip_level
 
 
 # 新建商品
