@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 global driver
 cookies = []
 locations = {
-    "全部订单框架": "//iframe[contains(@src,'orders/allOrder/orderbrowserview')]",
     "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
     "平台编码上传框架": "//iframe[contains(@src,"
                 "'Products/PlatformProductTool/PlatformProductToolBrowserView')]",
@@ -21,6 +20,7 @@ locations = {
     "打印发货框架": "//iframe[contains(@src,'Deliverys/Delivery/DeliveryBrowserView')]",
     "打包登记框架": "//iframe[contains(@src,'Orders/PackageRegister/PackageRegisterBrowserView')]",
     "会员管理框架": "//iframe[contains(@src,'Vips/FullVip/FullVipBrowserView')]",
+    "预设会员价明细框架": "//iframe[contains(@src,'Vips/VipPresupposePriceDetail/VipPresupposePriceBrowserView')]",
     "库存查询框架": "//iframe[contains(@src,'Inventorys/Inventory/InventoryBrowserView')]",
     "入库单框架": "//iframe[contains(@src,'Stocks/StockInOrder/StockInOrderBrowserView')]",
     "盘点单框架": "//iframe[contains(@src,'Inventorys/InventoryVer/InventoryVerBrowserView')]",
@@ -68,6 +68,11 @@ def find_xpath(keywords1, keywords2=''):
 
 def find_xpath_by_tag_name(keywords1, keywords2):
     xpath = "//*[text()='{0}']/following::{1}".format(keywords1, keywords2)
+    return xpath
+
+
+def find_xpath_by_inner_tag_name(keywords1, keywords2):
+    xpath = "//*[text()='{0}']/descendant::{1}".format(keywords1, keywords2)
     return xpath
 
 
@@ -152,17 +157,27 @@ def wait_element_refresh(element, old_text):
             if text != old_text:
                 print(f"刷新前的文本：{old_text}")
                 print(f"刷新后的文本：{text}")
-                break
+                return text
         except StaleElementReferenceException:
             print("元素过期")
-            break
+            return text
     assert 1 == 0, "元素刷新失败"
 
 
-
+# 获取新表格组件的列域值
 def get_column_field(column_name):
     xpath = "//div[contains(@class,'ag-header-cell') and contains(string(),'{}')]".format(column_name)
     column_field = wait_element(xpath).get_attribute("col-id")
+    return column_field
+
+
+# 获取老表格组件的列域值
+def get_old_column_field(column_name):
+    """
+    column_name:列名
+    """
+    xpath = f"//span[text()='{column_name}']/ancestor::td"
+    column_field = wait_element(xpath).get_attribute("field")
     return column_field
 
 
@@ -177,6 +192,14 @@ def get_cell_xpath(row_key, column_name):
         xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']"
     else:
         xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']"
+    return xpath
+
+
+def get_old_cell_xpath(row_key, column_name):
+    if isinstance(row_key, int):
+        xpath = f"//tr[@datagrid-row-index='{row_key -1}']/td[@field='{get_old_column_field(column_name)}']/div/input"
+    else:
+        xpath = f"//tr[contains(string(),'{row_key}')]/td[@field='{get_old_column_field(column_name)}']/div/input"
     return xpath
 
 
