@@ -1,10 +1,8 @@
 import datetime
 import time
-import js2py
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
-
 global driver
 cookies = []
 locations = {
@@ -149,8 +147,13 @@ def wait_table_refresh(button_xpath, keywords, column_name):
             break
 
 
+# 等待元素刷新
 def wait_element_refresh(element, old_text):
+    """
+    通过元素的文本和StaleElementReferenceException 异常来判定，元素已经被刷新
+    """
     start = datetime.datetime.now()
+    text = ''
     while (datetime.datetime.now() - start).seconds < 30:
         try:
             text = element.text
@@ -162,6 +165,23 @@ def wait_element_refresh(element, old_text):
             print("元素过期")
             return text
     assert 1 == 0, "元素刷新失败"
+
+
+# 等待元素获取焦点
+def wait_element_focus(xpath):
+    """
+    通过判断当前获取焦点的元素是不是目标元素来判断当前元素是否获取焦点
+    """
+    element = wait_element(xpath)
+    start = datetime.datetime.now()
+    while (datetime.datetime.now() - start).seconds < 30:
+        try:
+            focus_element = driver.switch_to.active_element
+            if element == focus_element:
+                return element
+        except Exception:
+            continue
+    assert 1 == 0, "元素未获取焦点"
 
 
 # 获取新表格组件的列域值
@@ -197,7 +217,7 @@ def get_cell_xpath(row_key, column_name):
 
 def get_old_cell_xpath(row_key, column_name):
     if isinstance(row_key, int):
-        xpath = f"//tr[@datagrid-row-index='{row_key -1}']/td[@field='{get_old_column_field(column_name)}']/div/input"
+        xpath = f"//tr[@datagrid-row-index='{row_key - 1}']/td[@field='{get_old_column_field(column_name)}']/div/input"
     else:
         xpath = f"//tr[contains(string(),'{row_key}')]/td[@field='{get_old_column_field(column_name)}']/div/input"
     return xpath
@@ -212,9 +232,11 @@ def get_cell_icon_xpath(row_key, column_name, icon_text):
     return：图标定位
     """
     if isinstance(row_key, int):
-        xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']/span[1]/span[text()='{icon_text}'] "
+        xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']/span[1]/" \
+                f"span[text()='{icon_text}'] "
     else:
-        xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']/span[1]/span[text()='{icon_text}'] "
+        xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id=" \
+                f"'{get_column_field(column_name)}']/span[1]/span[text()='{icon_text}'] "
     return xpath
 
 
@@ -247,7 +269,8 @@ def scroll_to(num):
     """
     将滚动条分成10份，选择移动到哪个位置
     """
-    js = f"document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollLeft=document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollWidth/10*{num}; "
+    js = f"document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollLeft=document" \
+         f".getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollWidth/10*{num}; "
     driver.execute_script(js)
 
 
@@ -276,3 +299,28 @@ def click_control():
 
 def click_space():
     ActionChains(driver).key_down(Keys.SPACE).perform()
+
+
+def chose_vip(vip_name):
+    element = wait_element(get_cell_xpath(1, "会员名称"))
+    text = element.text
+    wait_element(find_xpath_by_placeholder("会员名称")).send_keys(vip_name)
+    wait_element(find_xpath_by_placeholder("会员名称")).send_keys(Keys.ENTER)
+    wait_element_refresh(element, text)
+    wait_element(get_cell_xpath(vip_name, "会员名称"))
+    double_click(get_cell_xpath(vip_name, "会员名称"))
+
+
+# 简化切换框架方法
+def change_frame(frame_name, frame_name2=''):
+    """
+    frame_name:一级框架，比如全部订单框架
+    frame_name2：二级框架，比如选择会员
+    """
+    if frame_name2 == '':
+        driver.switch_to.default_content()
+        switch_to_frame(locations[frame_name])
+    else:
+        driver.switch_to.default_content()
+        switch_to_frame(locations[frame_name])
+        switch_to_frame(find_frame(frame_name2))

@@ -66,50 +66,33 @@ def test_vip_price_detail():
     vip_info = interface.new_vip(vip_name)
     # 查询确认新会员没有任何记录
     base.wait_element(base.find_xpath_by_placeholder("会员")).click()
-    base.driver.switch_to.default_content()
-    base.switch_to_frame(base.locations["预设会员价明细框架"])
+    base.change_frame("预设会员价明细框架")
     base.switch_to_frame(base.find_frame("选择会员"))
-    element = base.wait_element(base.get_cell_xpath(1, "会员名称"))
-    text = element.text
-    base.wait_element(base.find_xpath_by_placeholder("会员名称")).send_keys(vip_name)
-    base.wait_element(base.find_xpath_by_placeholder("会员名称")).send_keys(Keys.ENTER)
-    base.wait_element_refresh(element, text)
-    base.wait_element(base.get_cell_xpath(vip_name, "会员名称")).click()
-    base.driver.switch_to.default_content()
-    base.switch_to_frame(base.locations["预设会员价明细框架"])
-    base.wait_table_refresh(base.find_xpath("确认选择的会员"), 1, "会员名")
+    base.chose_vip(vip_name)
+    base.change_frame("预设会员价明细框架")
     base.wait_element(base.find_xpath("本页共0条数据"))
     # 新建商品
     product_code = base.get_now_string()
+    print(product_code)
     sku_info = interface.new_product(product_code)
     try:
         base.open_page("订单", "门店收银", "门店收银框架")
-        base.switch_to_frame(base.find_frame("选择会员"))
-        element = base.wait_element(base.get_cell_xpath(1, "会员名称"))
-        text = element.text
-        base.wait_element(base.find_xpath_by_placeholder("会员名称")).send_keys(vip_name)
-        base.wait_element(base.find_xpath_by_placeholder("会员名称")).send_keys(Keys.ENTER)
-        base.wait_element_refresh(element, text)
-        time.sleep(1)
-        base.wait_element(base.get_cell_xpath(vip_name, "会员名称")).click()
-        base.click_space()
-        base.driver.switch_to.default_content()
-        base.switch_to_frame(base.locations["门店收银框架"])
-        base.wait_element(base.find_xpath("确认选择的买家")).click()
-        time.sleep(1)
+        base.change_frame("门店收银框架", "选择会员")
+        base.chose_vip(vip_name)
+        base.change_frame("门店收银框架")
+        base.wait_element_focus(base.find_xpath_by_placeholder("请扫描商品条码"))
         base.wait_element(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
-        base.wait_element("//a[text()='搜索']").click()
+        base.wait_element(base.find_xpath("搜索")).click()
         time.sleep(1)
         base.wait_element(base.find_xpath(product_code)).click()
-        base.driver.switch_to.default_content()
-        base.switch_to_frame(base.locations["门店收银框架"])
+        base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
-        print(price)
+        assert price == '0'
     finally:
         base.close_page("门店收银")
-
-
+    # 设置商品的标准售价，第二价格，第三价格，第四价格
+    interface.modify_sku_price(sku_info[0], "100", "200", "300", "400")
 
 
 def test_001():

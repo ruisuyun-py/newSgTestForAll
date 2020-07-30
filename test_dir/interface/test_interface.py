@@ -81,5 +81,9 @@ def test_get_sku_id():
     print(sku_id)
 
 
+def test_modify_sku_price():
+    interface.modify_sku_price("07080932-黑 XS XS", "6",)
+
+
 if __name__ == '__main__':
     pytest.main()

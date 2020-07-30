@@ -127,8 +127,8 @@ def new_product(product_code):
     product_code:商品货号，一般通过get_now_string 获取
     return:返货商品id和商家编码列表
     比如：[
-    {'Id': '7495021643807326816', 'Code': '20200722141224-红色 XS'},
-    {'Id': '7495021643807326817', 'Code': '20200722141224-红色 S'},
+    '20200722141224-红色 XS',
+    '20200722141224-红色 S',
     ]
     """
     url = "http://gw.erp12345.com/api/Products/FullProduct/New"
@@ -183,7 +183,7 @@ def new_product(product_code):
     sku_list = dict(response.json())['data']['ProductSkus']
     sku_info = []
     for i in sku_list:
-        sku = {'Id': i['Id'], 'Code': i['Code']}
+        sku = i['Code']
         sku_info.append(sku)
     return sku_info
 
@@ -192,7 +192,7 @@ def new_product(product_code):
 def get_sku_id(sku_code):
     """
     sku_code:需要查询的商家编码
-    return:sku_id
+    return:product_id,sku_id
     """
     url_params = {
         'ModelTypeName': 'ErpWeb.Domain.ViewModels.Products.FullProductVmv',
@@ -206,8 +206,47 @@ def get_sku_id(sku_code):
         'cookie': base.cookies
     }
     response = requests.get(url, headers=headers)
+    # print(response.json())
     result = dict(response.json())['data']['Items']
-    return result[0]['Id']
+    return [result[0]['ProductId'], result[0]['Id']]
+
+
+# 修改商品价格方法
+def modify_sku_price(sku_code, stand_price, second_price="", third_price="", fourth_price=""):
+    sku_info = get_sku_id(sku_code)
+    url = "http://gw.erp12345.com/api/Products/FullProduct/BatchAllEditField?"
+    url_param = {
+        "proIds": sku_info[0],
+        "skuId": sku_info[1],
+        "selectSkuIds": sku_info[1],
+        "allType": 1,
+        "editType": "2",
+    }
+    vm = {"StandardPrice": stand_price, "SecPrice": second_price, "ThirPrice": third_price, "FourPrice": fourth_price}
+    editFields = {"StandardPrice": stand_price, "SecPrice": second_price, "ThirPrice": third_price, "FourPrice": fourth_price}
+    if second_price == "":
+        vm.pop("SecPrice")
+        editFields.pop("SecPrice")
+    if third_price == "":
+        vm.pop("ThirPrice")
+        editFields.pop("ThirPrice")
+    if fourth_price == "":
+        vm.pop("FourPrice")
+        editFields.pop("FourPrice")
+    for k, v in url_param.items():
+        url += f"{k}={v}&"
+    url += "vm={"
+    for k, v in vm.items():
+        url += f"'{k}':'{v}',"
+    url += "}&editFields={"
+    for k, v in editFields.items():
+        url += f"'{k}':'{v}',"
+    url += "}"
+    headers = {
+        'cookie': base.cookies
+    }
+    response = requests.post(url, headers=headers)
+    assert response.status_code == 200
 
 
 # 新建订单
