@@ -535,8 +535,6 @@ sku_info = [
             line["VipPrice"] = get_sku_price_by_vip_id(vip_name, sku["SkuCode"])
             actual_amount = int(line["Price"])*int(line["Qty"])
             line["ActualAmount"] = actual_amount
-            print("line['Price']"+f'{line["Price"]}')
-            print("line['VipPrice']" + f'{line["VipPrice"]}')
             discount = int(line["Price"])/int(line["VipPrice"])
             line["Discount"] = discount
             lines.append(line)
