@@ -1,8 +1,11 @@
 import datetime
 import time
+from contextlib import contextmanager
+
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 global driver
 cookies = []
 locations = {
@@ -307,7 +310,7 @@ def chose_vip(vip_name):
     wait_element(find_xpath_by_placeholder("会员名称")).send_keys(vip_name)
     wait_element(find_xpath_by_placeholder("会员名称")).send_keys(Keys.ENTER)
     wait_element_refresh(element, text)
-    wait_element(get_cell_xpath(vip_name, "会员名称"))
+    time.sleep(1)
     double_click(get_cell_xpath(vip_name, "会员名称"))
 
 
@@ -324,3 +327,12 @@ def change_frame(frame_name, frame_name2=''):
         driver.switch_to.default_content()
         switch_to_frame(locations[frame_name])
         switch_to_frame(find_frame(frame_name2))
+
+
+@contextmanager
+def operate_page(menu_name, page_name, frame_name):
+    try:
+        open_page(menu_name, page_name, frame_name)
+        yield 1
+    finally:
+        close_page(page_name)

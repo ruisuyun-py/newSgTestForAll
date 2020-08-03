@@ -63,7 +63,7 @@ def test_vip_price_detail():
     interface.save_order_setting(setting_info)
     # 新建会员
     vip_name = base.get_now_string()
-    vip_info = interface.new_vip(vip_name)
+    interface.new_vip(vip_name)
     # 查询确认新会员没有任何记录
     base.wait_element(base.find_xpath_by_placeholder("会员")).click()
     base.change_frame("预设会员价明细框架")
@@ -74,9 +74,9 @@ def test_vip_price_detail():
     # 新建商品
     product_code = base.get_now_string()
     print(product_code)
-    sku_info = interface.new_product(product_code)
-    try:
-        base.open_page("订单", "门店收银", "门店收银框架")
+    # 解析出第一个skuCode
+    sku_code = interface.new_product(product_code)["data"]["ProductSkus"][0]["Code"]
+    with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
         base.change_frame("门店收银框架")
@@ -89,10 +89,56 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '0'
-    finally:
-        base.close_page("门店收银")
     # 设置商品的标准售价，第二价格，第三价格，第四价格
-    interface.modify_sku_price(sku_info[0], "100", "200", "300", "400")
+    interface.modify_sku_price(sku_code, "100", "200", "300", "400")
+    # 再次到门店开单页面查看售价是否是标准售价=100
+    with base.operate_page("订单", "门店收银", "门店收银框架") as e:
+        base.change_frame("门店收银框架", "选择会员")
+        base.chose_vip(vip_name)
+        base.change_frame("门店收银框架")
+        base.wait_element_focus(base.find_xpath_by_placeholder("请扫描商品条码"))
+        base.wait_element(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+        base.wait_element(base.find_xpath("搜索")).click()
+        time.sleep(1)
+        base.wait_element(base.find_xpath(product_code)).click()
+        base.change_frame("门店收银框架")
+        base.switch_to_frame(base.find_frame("商品选择"))
+        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        assert price == '100'
+    interface.modify_vip(vip_name, "8折")
+    with base.operate_page("订单", "门店收银", "门店收银框架") as e:
+        base.change_frame("门店收银框架", "选择会员")
+        base.chose_vip(vip_name)
+        base.change_frame("门店收银框架")
+        base.wait_element_focus(base.find_xpath_by_placeholder("请扫描商品条码"))
+        base.wait_element(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+        base.wait_element(base.find_xpath("搜索")).click()
+        time.sleep(1)
+        base.wait_element(base.find_xpath(product_code)).click()
+        base.change_frame("门店收银框架")
+        base.switch_to_frame(base.find_frame("商品选择"))
+        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        assert price == '80'
+    # 门店开单，不修改商品价格，还是没有记录
+    sku_info_list = []
+    sku_info = {}
+    product_info = interface.get_sku_info('', product_code)
+    i = 1
+    for sku in product_info["data"]["Items"]:
+        sku_info["SkuCode"] = sku["SkuCode"]
+        sku_info["Qty"] = i+1
+        sku_info["Price"] = sku["StandardPrice"]
+        sku_info_list.append(sku_info)
+    # 商品数据确定之后直接开单
+    interface.new_pos_oder(vip_name, sku_info_list)
+    # 再次核对预设会员价明细页面还是0
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    base.wait_element(base.find_xpath_by_placeholder("会员")).click()
+    base.change_frame("预设会员价明细框架")
+    base.switch_to_frame(base.find_frame("选择会员"))
+    base.chose_vip(vip_name)
+    base.change_frame("预设会员价明细框架")
+    base.wait_element(base.find_xpath("本页共0条数据"))
 
 
 def test_001():
