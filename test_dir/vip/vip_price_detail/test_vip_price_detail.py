@@ -56,13 +56,15 @@ def test_vip_price_detail():
     """
     # 先确定下设置
     setting_info = {
-        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "false",
+        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
         "记录会员上次交易价 同款同价：手工单或者门店单保存时，记录会员的商品交易价格 同款同价": "false",
         "只有手工修改售价才会记录预设价格": "true",
     }
     interface.save_order_setting(setting_info)
     # 新建会员
     vip_name = base.get_now_string()
+    print("会员名称：")
+    print(vip_name)
     interface.new_vip(vip_name)
     # 查询确认新会员没有任何记录
     base.wait_element(base.find_xpath_by_placeholder("会员")).click()
@@ -73,6 +75,7 @@ def test_vip_price_detail():
     base.wait_element(base.find_xpath("本页共0条数据"))
     # 新建商品
     product_code = base.get_now_string()
+    print("商品货号：")
     print(product_code)
     # 解析出第一个skuCode
     sku_code = interface.new_product(product_code)["data"]["ProductSkus"][0]["Code"]
@@ -105,7 +108,9 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '100'
-    interface.modify_vip(vip_name, "8折")
+    # 设置会员等级为8折，再次查看售价是否是80
+    vip_level = "8折"
+    interface.modify_vip(vip_name, vip_level)
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
@@ -120,15 +125,25 @@ def test_vip_price_detail():
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '80'
     # 门店开单，不修改商品价格，还是没有记录
+    # sku_info_list 商品信息列表
     sku_info_list = []
     sku_info = {}
     product_info = interface.get_sku_info('', product_code)
+    print("product_info:")
+    print(product_info)
     i = 1
     for sku in product_info["data"]["Items"]:
         sku_info["SkuCode"] = sku["SkuCode"]
-        sku_info["Qty"] = i+1
-        sku_info["Price"] = sku["StandardPrice"]
-        sku_info_list.append(sku_info)
+        print('sku_info["SkuCode"]:')
+        print(sku_info["SkuCode"])
+        i += 1
+        sku_info["Qty"] = i
+        sku_info["Price"] = int(sku["StandardPrice"])*int(interface.get_vip_level_info(vip_level)["data"]["Items"][0]["Discount"])/10
+        print("sku_info:")
+        print(sku_info)
+        sku_info_list.append(dict(sku_info))
+        print("sku_info_list:")
+        print(sku_info_list)
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面还是0
@@ -139,6 +154,35 @@ def test_vip_price_detail():
     base.chose_vip(vip_name)
     base.change_frame("预设会员价明细框架")
     base.wait_element(base.find_xpath("本页共0条数据"))
+    # 再次开单，修改其中一个规则的价格，必须有一条记录
+    # 修改商品信息
+    print("sku_info_list:")
+    print(sku_info_list)
+    print("sku_info_list[0]:")
+    print(sku_info_list[0])
+    modify_sku_code = sku_info_list[0]["SkuCode"]
+    modify_price = sku_info_list[0]["Price"] + 10
+    sku_info_list[0]["Price"] = modify_price
+    print("sku_info_list:")
+    print(sku_info_list)
+    # 商品数据确定之后直接开单
+    interface.new_pos_oder(vip_name, sku_info_list)
+    # 再次核对预设会员价明细页面有一条记录
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    base.wait_element(base.find_xpath_by_placeholder("会员")).click()
+    base.change_frame("预设会员价明细框架")
+    base.switch_to_frame(base.find_frame("选择会员"))
+    base.chose_vip(vip_name)
+    base.change_frame("预设会员价明细框架")
+    base.wait_element(base.find_xpath("本页共1条数据"))
+    result = base.get_column_text("预设价格")
+    assert len(result) == 1
+    for r in result:
+        r == modify_price
+    result = base.get_column_text("会员名")
+    assert len(result) == 1
+    for r in result:
+        r == modify_sku_code
 
 
 def test_001():

@@ -537,7 +537,7 @@ sku_info = [
             line["ActualAmount"] = actual_amount
             discount = int(line["Price"])/int(line["VipPrice"])
             line["Discount"] = discount
-            lines.append(line)
+            lines.append(dict(line))
         url += "Lines:["
         for s in lines:
             url += "{"
