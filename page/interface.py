@@ -491,9 +491,6 @@ sku_info = [
     ]
     """
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
-        # 有BUG必须等5秒
-        time.sleep(5)
-
         vip_info = get_vip_info(vip_name)
         js = " return model.NewId;"
         new_id = base.driver.execute_script(js)

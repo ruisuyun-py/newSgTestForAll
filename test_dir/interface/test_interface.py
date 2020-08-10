@@ -93,7 +93,7 @@ def test_new_pos_order():
         {'SkuCode': '测试商品1-红色 S', 'Qty': 2, 'Price': "90"},
         {'SkuCode': '测试商品1-红色 M', 'Qty': 2, 'Price': "100"},
     ]
-    result = interface.new_pos_oder("匿名会员", sku_info)
+    result = interface.new_pos_oder("芮苏云", sku_info)
     print(result)
 
 
