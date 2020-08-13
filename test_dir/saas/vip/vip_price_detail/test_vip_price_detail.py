@@ -1,12 +1,10 @@
 import sys
 import time
 import copy
-
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
 import page.login_page as login
 import page.base_page as base
 import page.interface as interface

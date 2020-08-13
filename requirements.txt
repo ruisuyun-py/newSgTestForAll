@@ -1,3 +1,4 @@
+Appium-Python-Client
 requests
 pymysql
 selenium==3.141.0
