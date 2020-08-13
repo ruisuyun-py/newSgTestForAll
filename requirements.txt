@@ -1,7 +1,7 @@
 Appium-Python-Client
 requests
 pymysql
-selenium==3.141.0
+selenium==3.3.1
 pytest==5.2.1
 pytest-html==2.1.0
 pytest-rerunfailures==7.0

@@ -1,3 +1,4 @@
 [
-  "test_vip_price_detail.py::test_vip_price_detail"
+  "test_vip_price_detail.py::test_vip_price_detail",
+  "test_vip_price_detail.py::test_001"
 ]
