@@ -12,8 +12,7 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
 def setup_module():
-    base.driver = webdriver.Chrome()
-    base.cookies = login.login()
+    base.cookies = interface.get_cookie()
 
 
 def setup_function():
@@ -25,13 +24,7 @@ def teardown_function():
 
 
 def teardown_module():
-    base.browser_close()
-    print("测试结束")
-
-
-def test_001():
-    with base.operate_page("订单", "门店收银", "门店收银框架")as e:
-        print(e)
+    pass
 
 
 def test_login_for_module():
@@ -112,7 +105,23 @@ def test_get_sku_info():
 
 
 def test_modify_sku_price():
-    result = interface.modify_sku_price("07080932-黑 XS XS", "7",)
+    result = interface.modify_sku_price("07080932-黑 XS XS", "7", )
+
+
+def test_001():
+    product_code = base.get_now_string()
+    interface.new_product(product_code)
+    print(f"新建商品,款号：{product_code}")
+    sku_id_list = interface.get_sku_id('', product_code)
+    print("sku_id列表：")
+    print(sku_id_list)
+    for i in sku_id_list:
+        print(i)
+    interface.new_create_sku_bar_code(sku_id_list)
+    barcode_list = interface.get_sku_bar_code('', product_code)
+    print("barcode_list列表：")
+    for i in barcode_list:
+        print(i)
 
 
 if __name__ == '__main__':

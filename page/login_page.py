@@ -1,3 +1,4 @@
+import os
 from selenium.webdriver.common.keys import Keys
 import page.base_page as base
 
@@ -22,7 +23,13 @@ def login():
         elif c['name'] == 'TENANTID':
             cookie_str += 'TENANTID='
             cookie_str += c['value']
-
+    # 获取当前文件的目录
+    cur_path = os.path.abspath(os.path.dirname(__file__))
+    # 获取根目录
+    root_path = cur_path[:cur_path.find("sgTestForAll\\") + len("sgTestForAll\\")]
+    with open(root_path+"/page/cookie.txt", "w") as file:
+        file.truncate()
+        file.write(cookie_str)
     return cookie_str
 
 

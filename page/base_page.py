@@ -1,7 +1,6 @@
 import datetime
 import time
 from contextlib import contextmanager
-
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
@@ -110,6 +109,22 @@ def wait_element(xpath):
         try:
             element = driver.find_element_by_xpath(xpath)
             if element:
+                return element
+            else:
+                continue
+        except Exception:
+            continue
+    assert 1 == 2, "元素不存在:{}".format(xpath)
+
+
+# 等待元素并点击
+def wait_element_click(xpath):
+    start = datetime.datetime.now()
+    while (datetime.datetime.now() - start).seconds < 30:
+        try:
+            element = driver.find_element_by_xpath(xpath)
+            if element:
+                element.click()
                 return element
             else:
                 continue

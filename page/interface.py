@@ -1,6 +1,17 @@
+import os
 import time
 import requests
 import page.base_page as base
+
+
+def get_cookie():
+    # 获取当前文件的目录
+    cur_path = os.path.abspath(os.path.dirname(__file__))
+    # 获取根目录
+    root_path = cur_path[:cur_path.find("sgTestForAll\\") + len("sgTestForAll\\")]
+    with open(root_path+"/page/cookie.txt", "r") as file:
+        cookie = file.readline()
+    return cookie
 
 
 # 新增会员
@@ -191,25 +202,25 @@ def new_product(product_code):
         url += f"'{k}':'{v}',"
     product_skus = [
         {"Id": "0", "Name": "红色 XS", "Code": "" + product_code + "-红色 XS", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 S", "Code": "" + product_code + "-红色 S", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 M", "Code": "" + product_code + "-红色 M", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 L", "Code": "" + product_code + "-红色 L", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 XL", "Code": "" + product_code + "-红色 XL", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 2XL", "Code": "" + product_code + "-红色 2XL", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
         {"Id": "0", "Name": "红色 3XL", "Code": "" + product_code + "-红色 3XL", "LastPurPrice": 0, "StandardPrice": 0,
-         "Weight": 0, "PackageWeight": 0, "BarCode": "null", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
+         "Weight": 0, "PackageWeight": 0, "BarCode": "", "ValidityDate": time.strftime('%Y-%m-%d %H:%M:%S'),
          "SkuImg": "null", "IsHide": "false", "V": 0},
     ]
     url += "'ProductSkus':["
@@ -230,7 +241,8 @@ def new_product(product_code):
 # 获取商家编码id
 def get_sku_info(sku_code, product_code=''):
     """
-    sku_code:需要查询的商家编码或者货号
+    sku_code:需要查询的商家编码
+    product_code:货号
     return:{'data': {'Items': [{'Id': '7494440356323262567', 'ProductId': '7494440356323262566',
     'PicUrl': '', 'ThumbnailUrl': '', 'SkuCode': '测试商品1-红色 XS', 'ProductCode': '测试商品1', 'ProductName': '测试商品1',
     'ProductShortName': '测试商品1', 'ProductCategoryId': '7494441867648435188', 'ProductCategory': '裤子', 'SupplierId':
@@ -257,6 +269,52 @@ def get_sku_info(sku_code, product_code=''):
     }
     response = requests.get(url, headers=headers)
     result = dict(response.json())
+    return result
+
+
+# 对get_sku_info进行包装，只返回商品id
+def get_sku_id(sku_code, product_code=''):
+    """
+    sku_code:需要查询的商家编码
+    product_code:货号
+    return:['sku_id','sku_id','sku_id','sku_id','sku_id','sku_id','sku_id','sku_id','sku_id',]
+    """
+    result = get_sku_info(sku_code, product_code)
+    sku_id_list = []
+    for info in result["data"]["Items"]:
+        sku_id_list.append(int(info["Id"]))
+    return sku_id_list
+
+
+def get_sku_bar_code(sku_code, product_code=''):
+
+    """
+        sku_code:需要查询的商家编码
+        product_code:货号
+        return:['sku_barcode_list','sku_barcode_list','sku_barcode_list','sku_barcode_list',]
+        """
+    result = get_sku_info(sku_code, product_code)
+    print("result:")
+    print(result)
+    sku_barcode_list = []
+    for info in result["data"]["Items"]:
+        sku_barcode_list.append(info["BarCode"])
+    return sku_barcode_list
+
+
+def new_create_sku_bar_code(sku_id_list):
+    url = "http://gw.erp12345.com/api/Products/FullProduct/NewCreateSkuBarCode?skuIds="
+    for i in sku_id_list:
+        url += f"{i},"
+    headers = {
+        'cookie': base.cookies
+    }
+    print(f"请求url:{url}")
+    response = requests.get(url, headers=headers)
+    print(f"请求的url:{response.url}")
+    result = dict(response.json())
+    print("创建barCode结果")
+    print(result)
     return result
 
 
