@@ -8,8 +8,8 @@ def get_cookie():
     # 获取当前文件的目录
     cur_path = os.path.abspath(os.path.dirname(__file__))
     # 获取根目录
-    root_path = cur_path[:cur_path.find("sgTestForAll\\") + len("sgTestForAll\\")]
-    with open(root_path+"/page/cookie.txt", "r") as file:
+    root_path = cur_path[:cur_path.find("newSgTestForAll\\") + len("newSgTestForAll\\")]
+    with open(root_path + "/page/cookie.txt", "r") as file:
         cookie = file.readline()
     return cookie
 
@@ -18,12 +18,19 @@ def get_cookie():
 def new_vip(name):
     """
     name:会员名称，一般用get_now_string()生成
-    return:{'data': {'Id': '7495034719080285576', 'VipId': '7495034719080285575',
-    'Platform': 0, 'PlatformName': '0', 'ShopId': '0', 'ShopName': '测试门店1', 'VipLevelId': '0', 'VipCode':
-    '20200731144129', 'VipName': '20200731144129', 'Email': None, 'IsPosVip': True, 'ShipName': '', 'ShipMobile': '',
-    'ReceiverName': '芮苏云', 'ReceiverMobile': '15221071395', 'ReceiverPhone': '', 'ReceiverZip': '',
-    'ReceiverAddress': '衡东路189', 'ReceiverRegionId': '0', 'IsIllegal': False, 'Balance': 0.0, 'Point': 0.0,
-    'LevelName': None, 'Company': None, 'IsHide': False, 'Amount': 0.0, 'PayTypeName': None}, 'code': 1, 'message':
+    return:
+    {'data':
+        {
+            'Id': '7495034719080285576', 'VipId': '7495034719080285575',
+            'Platform': 0, 'PlatformName': '0', 'ShopId': '0', 'ShopName': '测试门店1', 'VipLevelId': '0', 'VipCode':
+            '20200731144129', 'VipName': '20200731144129', 'Email': None, 'IsPosVip': True, 'ShipName': '',
+            'ShipMobile': '','ReceiverName': '芮苏云', 'ReceiverMobile': '15221071395', 'ReceiverPhone': '',
+            'ReceiverZip': '',
+            'ReceiverAddress': '衡东路189', 'ReceiverRegionId': '0', 'IsIllegal': False, 'Balance': 0.0, 'Point': 0.0,
+            'LevelName': None, 'Company': None, 'IsHide': False, 'Amount': 0.0, 'PayTypeName': None
+        },
+    'code': 1,
+    'message':
     None}
     """
     headers = {
@@ -62,12 +69,18 @@ def new_vip(name):
 def modify_vip(vip_name, level_name):
     """
     vip_info:[会员id, 会员名称]，一般通过新建会员返回
-    return:{'data': {'Id': '7495034716999911296', 'VipId': '7494440359611598114',
-    'Platform': 0, 'PlatformName': '0', 'ShopId': '0', 'ShopName': '测试门店1', 'VipLevelId': '0', 'VipCode': '测试会员1',
-    'VipName': '测试会员1', 'Email': '', 'IsPosVip': True, 'ShipName': '', 'ShipMobile': '', 'ReceiverName': '芮苏云',
-    'ReceiverMobile': '15221071395', 'ReceiverPhone': '', 'ReceiverZip': '', 'ReceiverAddress': '衡东路189',
-    'ReceiverRegionId': '0', 'IsIllegal': False, 'Balance': 0.0, 'Point': 0.0, 'LevelName': None, 'Company': None,
-    'IsHide': False, 'Amount': 0.0, 'PayTypeName': None}, 'code': 1, 'message': None}
+    return:
+    {'data':
+        {
+            'Id': '7495034716999911296', 'VipId': '7494440359611598114',
+            'Platform': 0, 'PlatformName': '0', 'ShopId': '0', 'ShopName': '测试门店1', 'VipLevelId': '0', 'VipCode': '测试会员1',
+            'VipName': '测试会员1', 'Email': '', 'IsPosVip': True, 'ShipName': '', 'ShipMobile': '', 'ReceiverName': '芮苏云',
+            'ReceiverMobile': '15221071395', 'ReceiverPhone': '', 'ReceiverZip': '', 'ReceiverAddress': '衡东路189',
+            'ReceiverRegionId': '0', 'IsIllegal': False, 'Balance': 0.0, 'Point': 0.0, 'LevelName': None, 'Company': None,
+            'IsHide': False, 'Amount': 0.0, 'PayTypeName': None
+        },
+    'code': 1,
+    'message': None}
     """
     vip_info = get_vip_info(vip_name)
     vip_level_info = get_vip_level_info(level_name)
@@ -110,12 +123,18 @@ def modify_vip(vip_name, level_name):
 def get_vip_info(name):
     """
     name:会员名称
-    return:{'data': {'Items': [{'Id': '7495034562951513075', 'VipId': '7494440359611598114', 'Platform': 0,
-    'PlatformName': '0', 'ShopId': '0', 'ShopName': None, 'VipLevelId': '7494730574376992769', 'VipCode': '测试会员1',
-    'VipName': '测试会员1', 'Email': '', 'IsPosVip': True, 'ShipName': '', 'ShipMobile': '', 'ReceiverName': '芮苏云',
-    'ReceiverMobile': '15221071395', 'ReceiverPhone': '', 'ReceiverZip': '', 'ReceiverAddress': '衡东路189',
-    'ReceiverRegionId': '1234668550602865521', 'IsIllegal': False, 'Balance': 9900.0, 'Point': 0.0, 'LevelName':
-    '固定减5-1', 'Company': '', 'IsHide': False, 'Amount': 3075300.0, 'PayTypeName': None}], 'TotalCount': 1},
+    return:
+    {'data':
+    {'Items':
+        [
+            {'Id': '7495034562951513075', 'VipId': '7494440359611598114', 'Platform': 0,
+            'PlatformName': '0', 'ShopId': '0', 'ShopName': None, 'VipLevelId': '7494730574376992769', 'VipCode': '测试会员1',
+            'VipName': '测试会员1', 'Email': '', 'IsPosVip': True, 'ShipName': '', 'ShipMobile': '', 'ReceiverName': '芮苏云',
+            'ReceiverMobile': '15221071395', 'ReceiverPhone': '', 'ReceiverZip': '', 'ReceiverAddress': '衡东路189',
+            'ReceiverRegionId': '1234668550602865521', 'IsIllegal': False, 'Balance': 9900.0, 'Point': 0.0, 'LevelName':
+            '固定减5-1', 'Company': '', 'IsHide': False, 'Amount': 3075300.0, 'PayTypeName': None}
+        ],
+    'TotalCount': 1},
     'code': 1, 'message': None}
     """
     user_info = {
@@ -140,9 +159,17 @@ def get_vip_info(name):
 def get_vip_level_info(level_name):
     """
     level_name:等级名称
-    return:{'data': {'Items': [{'Id': '7494745001692234941', 'VipLevelName': '8折', 'PriceType': 0,
-    'Discount': 8.0, 'Amount1': 0.0, 'Amount1Discount': 0.0, 'Amount2': 0.0, 'Amount2Discount': 0.0, 'Amount3': 0.0,
-    'Amount3Discount': 0.0, 'PriceTypeName': '标准售价'}], 'TotalCount': 1}, 'code': 1, 'message': None}
+    return:
+    {'data':
+        {'Items':
+            [
+                {'Id': '7494745001692234941', 'VipLevelName': '8折', 'PriceType': 0,
+                'Discount': 8.0, 'Amount1': 0.0, 'Amount1Discount': 0.0, 'Amount2': 0.0, 'Amount2Discount': 0.0, 'Amount3': 0.0,
+                'Amount3Discount': 0.0, 'PriceTypeName': '标准售价'}
+            ],
+         'TotalCount': 1},
+     'code': 1,
+     'message': None}
     """
     user_info = {
         'ModelTypeName': 'ErpWeb.Domain.ViewModels.Vips.VipLevelVmv',
@@ -163,27 +190,25 @@ def get_vip_level_info(level_name):
 def new_product(product_code):
     """
     product_code:商品货号，一般通过get_now_string 获取
-    return:{'data': {'Id': '7495034720204357633', 'Name': '20200731144235',
-    'Code': '20200731144235', 'ProductCategoryId': '0', 'ShortName': '', 'BrandId': '0', 'Unit': '', 'PicUrl': '',
-    'StandardPrice': 0.0, 'V': 0, 'ProductSkus': [{'Id': '7495034720204357634', 'Name': '红色 XS',
-    'Code': '20200731144235-红色 XS', 'LastPurPrice': 0.0, 'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0,
-    'BarCode': 'null', 'ValidityDate': '2020-07-31 14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0},
-    {'Id': '7495034720204357635', 'Name': '红色 S', 'Code': '20200731144235-红色 S', 'LastPurPrice': 0.0,
-    'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0, 'BarCode': 'null', 'ValidityDate': '2020-07-31
-    14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0}, {'Id': '7495034720204357636', 'Name': '红色 M',
-    'Code': '20200731144235-红色 M', 'LastPurPrice': 0.0, 'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0,
-    'BarCode': 'null', 'ValidityDate': '2020-07-31 14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0},
-    {'Id': '7495034720204357637', 'Name': '红色 L', 'Code': '20200731144235-红色 L', 'LastPurPrice': 0.0,
-    'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0, 'BarCode': 'null', 'ValidityDate': '2020-07-31
-    14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0}, {'Id': '7495034720204357638', 'Name': '红色 XL',
-    'Code': '20200731144235-红色 XL', 'LastPurPrice': 0.0, 'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0,
-    'BarCode': 'null', 'ValidityDate': '2020-07-31 14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0},
-    {'Id': '7495034720204357639', 'Name': '红色 2XL', 'Code': '20200731144235-红色 2XL', 'LastPurPrice': 0.0,
-    'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0, 'BarCode': 'null', 'ValidityDate': '2020-07-31
-    14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0}, {'Id': '7495034720204357640', 'Name': '红色 3XL',
-    'Code': '20200731144235-红色 3XL', 'LastPurPrice': 0.0, 'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0,
-    'BarCode': 'null', 'ValidityDate': '2020-07-31 14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0}]},
-    'code': 1, 'message': None}
+    return:
+    {'data':
+        {
+            'Id': '7495034720204357633', 'Name': '20200731144235',
+            'Code': '20200731144235', 'ProductCategoryId': '0', 'ShortName': '', 'BrandId': '0', 'Unit': '', 'PicUrl': '',
+            'StandardPrice': 0.0, 'V': 0,
+
+            'ProductSkus':
+                [
+                    {'Id': '7495034720204357634', 'Name': '红色 XS',
+                    'Code': '20200731144235-红色 XS', 'LastPurPrice': 0.0, 'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0,
+                    'BarCode': 'null', 'ValidityDate': '2020-07-31 14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0},
+                    {'Id': '7495034720204357635', 'Name': '红色 S', 'Code': '20200731144235-红色 S', 'LastPurPrice': 0.0,
+                    'StandardPrice': 0.0, 'Weight': 0.0, 'PackageWeight': 0.0, 'BarCode': 'null', 'ValidityDate': '2020-07-31
+                    14:42:35', 'SkuImg': 'null', 'IsHide': False, 'V': 0},
+                ]
+        },
+    'code': 1,
+    'message': None}
     """
     url = "http://gw.erp12345.com/api/Products/FullProduct/New"
     url += "?product={"
@@ -243,24 +268,32 @@ def get_sku_info(sku_code, product_code=''):
     """
     sku_code:需要查询的商家编码
     product_code:货号
-    return:{'data': {'Items': [{'Id': '7494440356323262567', 'ProductId': '7494440356323262566',
-    'PicUrl': '', 'ThumbnailUrl': '', 'SkuCode': '测试商品1-红色 XS', 'ProductCode': '测试商品1', 'ProductName': '测试商品1',
-    'ProductShortName': '测试商品1', 'ProductCategoryId': '7494441867648435188', 'ProductCategory': '裤子', 'SupplierId':
-    '7494553699939779471', 'SupplierName': '供应商3', 'BrandId': '7494556458986505405', 'BrandName': '阿迪达斯', 'Unit': '',
-    'BarCode': '1907150011407', 'SkuName': '红色 XS', 'StandardPrice': 100.0, 'SecPrice': 200.0, 'ThirPrice': 300.0,
-    'FourPrice': 400.0, 'Weight': 1.0, 'SalesPoint': 0.0, 'PackageWeight': 0.0, 'BoxSize': 30, 'SkuMemo': None,
-    'FirstField': '红色', 'SecField': 'XS', 'ThirField': '106', 'FourField': '121', 'FifthField': '136',
-    'FirstWarehouseId': '0', 'FirstWarehouseName': None, 'SyncType': 0, 'VirtualQty': 0, 'RealQty': 310,
-    'RecordDate': '2019-06-17 13:55:08', 'RecordUserName': '系统管理员', 'ProductShopMappingQty': 0, 'LocalCode':
-    'S-01-001-01-0002,D-01-001-01', 'IsHide': False, 'ValidityDate': None, 'PrintQty': 1, 'SyncTypeName': '不同步库存',
-    'LastPurPrice': 10.0}], 'TotalCount': 1}, 'code': 1, 'message': None}
+    return:{
+    'data':
+        {'Items':
+            [
+                {'Id': '7494440356323262567', 'ProductId': '7494440356323262566',
+                'PicUrl': '', 'ThumbnailUrl': '', 'SkuCode': '测试商品1-红色 XS', 'ProductCode': '测试商品1', 'ProductName': '测试商品1',
+                'ProductShortName': '测试商品1', 'ProductCategoryId': '7494441867648435188', 'ProductCategory': '裤子', 'SupplierId':
+                '7494553699939779471', 'SupplierName': '供应商3', 'BrandId': '7494556458986505405', 'BrandName': '阿迪达斯', 'Unit': '',
+                'BarCode': '1907150011407', 'SkuName': '红色 XS', 'StandardPrice': 100.0, 'SecPrice': 200.0, 'ThirPrice': 300.0,
+                'FourPrice': 400.0, 'Weight': 1.0, 'SalesPoint': 0.0, 'PackageWeight': 0.0, 'BoxSize': 30, 'SkuMemo': None,
+                'FirstField': '红色', 'SecField': 'XS', 'ThirField': '106', 'FourField': '121', 'FifthField': '136',
+                'FirstWarehouseId': '0', 'FirstWarehouseName': None, 'SyncType': 0, 'VirtualQty': 0, 'RealQty': 310,
+                'RecordDate': '2019-06-17 13:55:08', 'RecordUserName': '系统管理员', 'ProductShopMappingQty': 0, 'LocalCode':
+                'S-01-001-01-0002,D-01-001-01', 'IsHide': False, 'ValidityDate': None, 'PrintQty': 1, 'SyncTypeName': '不同步库存',
+                'LastPurPrice': 10.0}
+            ],
+            'TotalCount': 1},
+     'code': 1,
+     'message': None}
     """
     url_params = {
-                'ModelTypeName': 'ErpWeb.Domain.ViewModels.Products.FullProductVmv',
-                'SkuCode': sku_code,
-                'ProductCode': product_code,
-                'ishide': 'false',
-            }
+        'ModelTypeName': 'ErpWeb.Domain.ViewModels.Products.FullProductVmv',
+        'SkuCode': sku_code,
+        'ProductCode': product_code,
+        'ishide': 'false',
+    }
     url = "http://gw.erp12345.com/api/Products/FullProduct/QueryPage?"
     for k, v in url_params.items():
         url += f"{k}={v}&"
@@ -272,7 +305,7 @@ def get_sku_info(sku_code, product_code=''):
     return result
 
 
-# 对get_sku_info进行包装，只返回商品id
+# 通过product_code或者sku_code获取sku_id
 def get_sku_id(sku_code, product_code=''):
     """
     sku_code:需要查询的商家编码
@@ -286,35 +319,56 @@ def get_sku_id(sku_code, product_code=''):
     return sku_id_list
 
 
+# 通过product_code或者sku_code获取bar_code
 def get_sku_bar_code(sku_code, product_code=''):
-
     """
-        sku_code:需要查询的商家编码
-        product_code:货号
-        return:['sku_barcode_list','sku_barcode_list','sku_barcode_list','sku_barcode_list',]
-        """
+    sku_code:需要查询的商家编码
+    product_code:货号
+    return:['sku_barcode','sku_barcode','sku_barcode','sku_barcode',]
+    """
     result = get_sku_info(sku_code, product_code)
-    print("result:")
-    print(result)
     sku_barcode_list = []
     for info in result["data"]["Items"]:
         sku_barcode_list.append(info["BarCode"])
     return sku_barcode_list
 
 
+# 通过product_code获取该款所有sku_code
+def get_sku_code(sku_code, product_code=''):
+    """
+    sku_code:需要查询的商家编码
+    product_code:货号
+    return:['sku_code','sku_code','sku_code','sku_code',]
+
+    """
+    result = get_sku_info(sku_code, product_code)
+    sku_code_list = []
+    for info in result["data"]["Items"]:
+        sku_code_list.append(info["SkuCode"])
+    return sku_code_list
+
+
+# 生成商家编码
 def new_create_sku_bar_code(sku_id_list):
+    """
+    主要功能是生成商品条码，返回值目前没什么用
+    sku_id_list:['sku_id','sku_id',]
+    return:
+    {"data":[
+                {"Id":"7495000258460516455","BarCode":"2008030040407","BarCode2":null,"BarCode3":null},
+                {"Id":"7495000258460516457","BarCode":"2008160043477","BarCode2":null,"BarCode3":null}
+            ],
+    "code":1,
+    "message":null}
+    """
     url = "http://gw.erp12345.com/api/Products/FullProduct/NewCreateSkuBarCode?skuIds="
     for i in sku_id_list:
         url += f"{i},"
     headers = {
         'cookie': base.cookies
     }
-    print(f"请求url:{url}")
     response = requests.get(url, headers=headers)
-    print(f"请求的url:{response.url}")
     result = dict(response.json())
-    print("创建barCode结果")
-    print(result)
     return result
 
 
@@ -445,61 +499,19 @@ def get_product_info_by_id(vip_name, sku_code):
     """
     vip_name:会员名称
     sku_code:商家编码
-    return: {'data': [{'Id': '7494440356323262567', 'ProductId': '7494440356323262566',
-    'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XS', 'SkuName': '红色 XS', 'Price': 100.0,
-    'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'S-01-001-01-0002',
-    'InvQty': 261, 'CostQty': 0, 'CanInvQty': -15489, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 44'},
-    {'Id': '7494440356323262568', 'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1',
-    'SkuCode': '测试商品1-红色 S', 'SkuName': '红色 S', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0,
-    'StandardPrice': 100.0, 'Storage': 'S-01-001-01-0002', 'InvQty': 1967, 'CostQty': 0, 'CanInvQty': 1038, 'Qty': 0,
-    'ThumbnailUrl': '', 'DescField': '测试商品1_红色 46'}, {'Id': '7494440356323262569', 'ProductId':
-    '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 M', 'SkuName': '红色
-    M', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage':
-    'S-01-001-01-0003', 'InvQty': 930, 'CostQty': 0, 'CanInvQty': 329, 'Qty': 0, 'ThumbnailUrl': '', 'DescField':
-    '测试商品1_红色 48'}, {'Id': '7494440356323262570', 'ProductId': '7494440356323262566', 'ProductName': '测试商品1',
-    'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 L', 'SkuName': '红色 L', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '',
-    'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'S-01-001-01-0004', 'InvQty': 3279, 'CostQty': 0,
-    'CanInvQty': 2621, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 50'}, {'Id': '7494440356323262571',
-    'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XL',
-    'SkuName': '红色 XL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0,
-    'Storage': 'S-01-001-01-0005', 'InvQty': 6188, 'CostQty': 0, 'CanInvQty': 4411, 'Qty': 0, 'ThumbnailUrl': '',
-    'DescField': '测试商品1_红色 52'}, {'Id': '7494440356323262572', 'ProductId': '7494440356323262566', 'ProductName':
-    '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XXL', 'SkuName': '红色 XXL', 'Price': 100.0, 'Weight': 1.0,
-    'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'S-01-001-01-0005', 'InvQty': -181, 'CostQty':
-    0, 'CanInvQty': -187, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 55'}, {'Id': '7494440356323262573',
-    'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XXXL',
-    'SkuName': '红色 XXXL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0,
-    'Storage': 'A-01-002-03', 'InvQty': -181, 'CostQty': 0, 'CanInvQty': -187, 'Qty': 0, 'ThumbnailUrl': '',
-    'DescField': '测试商品1_红色 57'}, {'Id': '7494440356323262574', 'ProductId': '7494440356323262566', 'ProductName':
-    '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XXXXL', 'SkuName': '红色 XXXXL', 'Price': 100.0,
-    'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'A-01-002-03', 'InvQty': -181,
-    'CostQty': 0, 'CanInvQty': -192, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 59'},
-    {'Id': '7494440356323262575', 'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1',
-    'SkuCode': '测试商品1-红色 XXXXXL', 'SkuName': '红色 XXXXXL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount':
-    0.0, 'StandardPrice': 100.0, 'Storage': 'A-01-002-02', 'InvQty': -176, 'CostQty': 0, 'CanInvQty': -1170,
-    'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 61'}, {'Id': '7494440356323262576', 'ProductId':
-    '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 XXXXXXL', 'SkuName':
-    '红色 XXXXXXL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage':
-    'A-01-002-01', 'InvQty': -181, 'CostQty': 0, 'CanInvQty': -384, 'Qty': 0, 'ThumbnailUrl': '', 'DescField':
-    '测试商品1_红色 63'}, {'Id': '7494440356323262577', 'ProductId': '7494440356323262566', 'ProductName': '测试商品1',
-    'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 2XL', 'SkuName': '红色 2XL', 'Price': 100.0, 'Weight': 1.0,
-    'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'S-01-001-01-0005', 'InvQty': 1019, 'CostQty':
-    0, 'CanInvQty': 1013, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 54'}, {'Id': '7494440356323262578',
-    'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 3XL',
-    'SkuName': '红色 3XL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0,
-    'Storage': 'A-01-002-02', 'InvQty': 1140, 'CostQty': 0, 'CanInvQty': 1134, 'Qty': 0, 'ThumbnailUrl': '',
-    'DescField': '测试商品1_红色 56'}, {'Id': '7494440356323262579', 'ProductId': '7494440356323262566', 'ProductName':
-    '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 4XL', 'SkuName': '红色 4XL', 'Price': 100.0, 'Weight': 1.0,
-    'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'A-01-002-03', 'InvQty': -181, 'CostQty': 0,
-    'CanInvQty': -187, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 58'}, {'Id': '7494440356323262580',
-    'ProductId': '7494440356323262566', 'ProductName': '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 5XL',
-    'SkuName': '红色 5XL', 'Price': 100.0, 'Weight': 1.0, 'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0,
-    'Storage': 'A-01-002-02', 'InvQty': -82, 'CostQty': 0, 'CanInvQty': -104, 'Qty': 0, 'ThumbnailUrl': '',
-    'DescField': '测试商品1_红色 60'}, {'Id': '7494440356323262581', 'ProductId': '7494440356323262566', 'ProductName':
-    '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 6XL', 'SkuName': '红色 6XL', 'Price': 100.0, 'Weight': 1.0,
-    'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'A-01-002-03', 'InvQty': 18417, 'CostQty': 0,
-    'CanInvQty': 15619, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 62'}], 'code': 1, 'message': None}
-
+    return:
+    {
+    'data':
+        [
+            {'Id': '7494440356323262581', 'ProductId': '7494440356323262566', 'ProductName':
+            '测试商品1', 'ProductCode': '测试商品1', 'SkuCode': '测试商品1-红色 6XL', 'SkuName': '红色 6XL', 'Price': 100.0,
+            'Weight': 1.0,
+            'PicUrl': '', 'Discount': 0.0, 'StandardPrice': 100.0, 'Storage': 'A-01-002-03', 'InvQty': 18417, 'CostQty': 0,
+            'CanInvQty': 15619, 'Qty': 0, 'ThumbnailUrl': '', 'DescField': '测试商品1_红色 62'}
+        ],
+    'code': 1,
+    'message': None
+    }
     """
     url = "http://gw.erp12345.com/api/Pos/Pos/GetProductInfoById?"
     sku_info = get_sku_info(sku_code)
@@ -526,7 +538,7 @@ def get_sku_price_by_vip_id(vip_name, sku_code):
     """
     vip_name:会员名称
     sku_code:商家编码
-    return：商品对饮的会员价格
+    return：商品的会员价格
     """
     vip_price = ''
     result = get_product_info_by_id(vip_name, sku_code)
@@ -588,9 +600,9 @@ sku_info = [
             line["Qty"] = sku["Qty"]
             line["Price"] = sku["Price"]
             line["VipPrice"] = get_sku_price_by_vip_id(vip_name, sku["SkuCode"])
-            actual_amount = int(line["Price"])*int(line["Qty"])
+            actual_amount = int(line["Price"]) * int(line["Qty"])
             line["ActualAmount"] = actual_amount
-            discount = int(line["Price"])/int(line["VipPrice"])
+            discount = int(line["Price"]) / int(line["VipPrice"])
             line["Discount"] = discount
             lines.append(dict(line))
         url += "Lines:["

@@ -31,29 +31,8 @@ def teardown_module():
     print("预设会员价明细测试结束")
 
 
+# 验证预设会员价页面在修改时记录预设价格设置下（直接记录的模式后期基本就替代掉了）能否正确显示数据
 def test_vip_price_detail():
-    """
-    先设置为不同款同价+只有手工修改售价才会记录预设价格
-    新建一个会员
-    查询会员，此时应该是没有数据，通过<div class="fl">本页共0条数据</div>判断没有记录
-    新建一个商品，再次查询会员，还是没有记录
-    门店收银页面开单，商品此时没有设置预设会员价，售价显示为0，关闭商品窗口
-    设置商品标准售价，第二价格，第三价格，第四价格，此时再打开页面，显示为标准售价
-    再修改会员等级，设置会员等级为8折，此时价格应该是标准售价*0.8
-    直接开单，此时价格没有任何修改，不需要记录，再次查询，仍然是没有记录
-    再次开单，修改其中一个规格价格，再次查询记录，有一条记录，核对商家编码和预设价格等信息
-    再次开单，修改多个规格价格，再次查询，此时应该有多条记录，核对商家编码和预设价格等信息
-    再次新建一个商品，并直接设置标准售价，第二价格，第三价格，第四价格，再次开单包含两种商品，修改两种商品全部价格，再次查询此时应该
-    有两种商品的所有价格记录
-    修改所有商品价格，然后核对，再删除所有商品价格
-    修改设置为 同款同价+只有手工修改售价才会记录预设价格
-    新建一个会员
-    新建一个商品修改标准售价，第二价格，第三价格，第四价格
-    门店开单，不修改价格，没有任何记录
-    再次门店开单，修改一款价格，则只有一款记录
-    再次门店开单，这次试用两款，修改两款价格，这时有两款的记录
-
-    """
     # 先确定下设置
     setting_info = {
         "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
@@ -61,15 +40,16 @@ def test_vip_price_detail():
         "只有手工修改售价才会记录预设价格": "true",
     }
     interface.save_order_setting(setting_info)
-    print()
-    print("非同款同价模式设置完成，")
+    print("这就为了换个行")
+    print("非同款同价模式+修改才记录会员价设置完成，修改设置之后等5秒，让设置生效")
     time.sleep(5)
     base.close_page("预设会员价明细")
     base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
     # 新建会员
     vip_name = base.get_now_string()
-    print(f"新建会员会员名称：{vip_name}")
+    print(f"新建一个会员，会员名称：{vip_name}")
     interface.new_vip(vip_name)
+    print(f"新建的会员：{vip_name}在预设会员价页面没有任何记录")
     # 查询确认新会员没有任何记录
     base.wait_element(base.find_xpath_by_placeholder("会员")).click()
     base.change_frame("预设会员价明细框架")
@@ -77,11 +57,15 @@ def test_vip_price_detail():
     base.chose_vip(vip_name)
     base.change_frame("预设会员价明细框架")
     base.wait_element(base.find_xpath("本页共0条数据"))
+    print(f"新建会员：{vip_name}确定在预设会员价页面没有任何记录")
     # 新建商品
     product_code = base.get_now_string()
     print(f"新建商品货号：{product_code}")
-    # 解析出第一个skuCode
-    sku_code = interface.new_product(product_code)["data"]["ProductSkus"][0]["Code"]
+    # 新建商品
+    interface.new_product(product_code)
+    # 获取一个sku_code查看会员价格
+    sku_code = interface.get_sku_code('', product_code)[0]
+    print(f"取出一个商品：{sku_code}查看售价，此时售价应该为0")
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
@@ -95,8 +79,10 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '0'
+    print(f"确定{sku_code}的售价是0")
     # 设置商品的标准售价，第二价格，第三价格，第四价格
     interface.modify_sku_price(sku_code, "100", "200", "300", "400")
+    print(f"设置{sku_code}的价格分别为100,200,300,400，此时商品的价格应该是100")
     # 再次到门店开单页面查看售价是否是标准售价=100
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
@@ -111,7 +97,9 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '100'
+    print(f"确定{sku_code}的售价是100")
     # 设置会员等级为8折，再次查看售价是否是80
+    print(f"将会员{vip_name}的会员等级设置为8折，此时售价应该是100*0.8")
     vip_level = "8折"
     interface.modify_vip(vip_name, vip_level)
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
@@ -127,6 +115,7 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '80'
+    print(f"确定会员：{vip_name}商品{sku_code}的售价是80")
     # 门店开单，不修改商品价格，还是没有记录
     # sku_info_list 商品信息列表
     sku_info_list = []
@@ -143,6 +132,7 @@ def test_vip_price_detail():
     print("不改变任何sku价格是商品明细列表信息：")
     for i in sku_info_list:
         print(i)
+    print("不修改sku价格，预设会员价明细页面不应该有任何记录")
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面还是0
@@ -154,6 +144,7 @@ def test_vip_price_detail():
     base.change_frame("预设会员价明细框架")
     time.sleep(1)
     base.wait_element(base.find_xpath("本页共0条数据"))
+    print("确定不修改售价不会有任何记录")
     # 再次开单，修改其中一个规则的价格，必须有一条记录
     # 修改商品信息
     modify_info = {}
@@ -166,6 +157,7 @@ def test_vip_price_detail():
         print(f"修改{k}的价格为{v}")
     for i in sku_info_list:
         print(i)
+    print("修改一个商品的售价之后，预设会员价明细页面应该有一条记录")
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面有一条记录
@@ -183,6 +175,7 @@ def test_vip_price_detail():
         assert r in modify_info.keys()
         vip_price = base.wait_element(base.get_cell_xpath(r, "预设价格")).text
         assert float(modify_info[r]) == float(vip_price)
+    print("修改一个商品的售价之后，预设会员价页面记录的只有一条记录，并且sku_code，预设价格核对无误")
     # 修改两个规格的价格，预设会员价明细页面会有两条明细
     # 还是先修改商品价格
     modify_info.clear()
@@ -198,6 +191,7 @@ def test_vip_price_detail():
     print("修改两个sku价格之后的商品信息列表是：")
     for i in sku_info_list:
         print(i)
+    print("修改两个商品价格之后开单，会员预设价页面应该有两条数据")
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面有两条记录
@@ -215,6 +209,7 @@ def test_vip_price_detail():
         assert r in modify_info.keys()
         vip_price = base.wait_element(base.get_cell_xpath(r, "预设价格")).text
         assert float(modify_info[r]) == float(vip_price)
+    print("修改两个商品之后开单，会员预设价页面只有两条记录,商家编码，预设价格经核实无误")
     # 全部更改则需要显示全部该商品的全部记录
     modify_info.clear()
     for i in sku_info_list:
@@ -228,6 +223,7 @@ def test_vip_price_detail():
     print("修改全部商品价格之后的商品信息列表是：")
     for i in sku_info_list:
         print(i)
+    print("修改全部商品的价格之后，预设会员价页面应该有该款所有商品的记录")
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面有两条记录
@@ -245,6 +241,54 @@ def test_vip_price_detail():
         assert r in modify_info.keys()
         vip_price = base.wait_element(base.get_cell_xpath(r, "预设价格")).text
         assert float(modify_info[r]) == float(vip_price)
+    print("预设会员价页面有该款商品的全部记录，并且商家编码预设价格核对无误")
+    print("在选择会员的情况下，核实下标准售价，第二价格，第三价格，第四价格，会员价格取值是否正确")
+    result = base.get_column_text("标准售价")
+    for r in result:
+        print(f"标准售价应该是100实际是：{r},")
+        assert r == '100'
+    result = base.get_column_text("第二价格")
+    for r in result:
+        print(f"第二价格应该是200实际是：{r},")
+        assert r == '200'
+    result = base.get_column_text("第三价格")
+    for r in result:
+        print(f"第三价格应该是300实际是：{r},")
+        assert r == '300'
+    result = base.get_column_text("第四价格")
+    for r in result:
+        print(f"第四价格应该是400实际是：{r},")
+        assert r == '400'
+    result = base.get_column_text("会员价")
+    for r in result:
+        print(f"会员价应该是80实际是：{r},")
+        assert r == '80'
+    print("确定在选择会员的情况下，核实下标准售价，第二价格，第三价格，第四价格，会员价格取值是否正确")
+    print("清空搜索条件之后，搜索货号，查看所有价格的取值是否正确")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "货号")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("标准售价")
+    for r in result:
+        print(f"标准售价应该是100实际是：{r},")
+        assert r == '100'
+    result = base.get_column_text("第二价格")
+    for r in result:
+        print(f"第二价格应该是200实际是：{r},")
+        assert r == '200'
+    result = base.get_column_text("第三价格")
+    for r in result:
+        print(f"第三价格应该是300实际是：{r},")
+        assert r == '300'
+    result = base.get_column_text("第四价格")
+    for r in result:
+        print(f"第四价格应该是400实际是：{r},")
+        assert r == '400'
+    result = base.get_column_text("会员价")
+    for r in result:
+        print(f"会员价应该是80实际是：{r},")
+        assert r == '80'
+    print("确定清空搜索条件之后，搜索货号，查看所有价格的取值是否正确")
     # 修改设置，再来一遍
     print("修改设置为同款同价再跑一遍")
     print("修改设置为同款同价再跑一遍")
@@ -255,7 +299,8 @@ def test_vip_price_detail():
         "只有手工修改售价才会记录预设价格": "true",
     }
     interface.save_order_setting(setting_info)
-    print("同款同价模式设置完成，")
+    print("同款同价模式且只有修改时记录会员价格设置完成，")
+    print("修改设置之后等待5秒等设置生效")
     time.sleep(5)
     base.close_page("预设会员价明细")
     base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
@@ -274,6 +319,7 @@ def test_vip_price_detail():
     product_code = base.get_now_string()
     print(f"新建商品货号：{product_code}")
     # 解析出第一个skuCode
+    print("验证没有设置价格时，售价为0")
     sku_code = interface.new_product(product_code)["data"]["ProductSkus"][0]["Code"]
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
@@ -288,9 +334,11 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '0'
+    print("确定没有设置价格时，售价为0")
     # 设置商品的标准售价，第二价格，第三价格，第四价格
     interface.modify_sku_price(sku_code, "100", "200", "300", "400")
     # 再次到门店开单页面查看售价是否是标准售价=100
+    print("验证标准售价设置为100，之后售价应该为100")
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
@@ -304,6 +352,8 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '100'
+    print("确定标准售价设置为100，之后售价应该为100")
+    print("验证会员等级设置为8折之后，售价应该是80")
     # 设置会员等级为8折，再次查看售价是否是80
     vip_level = "8折"
     interface.modify_vip(vip_name, vip_level)
@@ -320,6 +370,7 @@ def test_vip_price_detail():
         base.switch_to_frame(base.find_frame("商品选择"))
         price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '80'
+    print("确定会员等级设置为8折之后，售价应该是80")
     # 门店开单，不修改商品价格，还是没有记录
     # sku_info_list 商品信息列表
     sku_info_list = []
@@ -336,6 +387,7 @@ def test_vip_price_detail():
     print("不改变任何sku价格是商品明细列表信息：")
     for i in sku_info_list:
         print(i)
+    print("验证不改变商品售价时，预设会员价页面没有记录")
     # 商品数据确定之后直接开单
     interface.new_pos_oder(vip_name, sku_info_list)
     # 再次核对预设会员价明细页面还是0
@@ -348,6 +400,8 @@ def test_vip_price_detail():
     time.sleep(1)
     base.wait_element(base.find_xpath("本页共0条数据"))
     # 再次开单，修改其中一个规则的价格，必须有一条记录
+    print("确定不改变商品售价时，预设会员价页面没有记录")
+    print("验证修改一个商品售价之后，预设会员价页面有该款记录")
     # 修改商品信息
     modify_info = {}
     for i in range(0, 1):
@@ -376,6 +430,8 @@ def test_vip_price_detail():
         assert r == product_code
         vip_price = base.wait_element(base.get_cell_xpath(r, "预设价格")).text
         assert float(vip_price) in modify_info.values()
+    print("确定修改一个商品售价之后，预设会员价页面有该款记录")
+    print("修改整款商品价格之后，预设会员价页面也只有一个价格")
     # 修改所有商品价格
     modify_info.clear()
     for i in sku_info_list:
@@ -405,7 +461,59 @@ def test_vip_price_detail():
         assert r == product_code
         vip_price = base.wait_element(base.get_cell_xpath(r, "预设价格")).text
         assert float(vip_price) in modify_info.values()
-    # 重构打印数据的可读性
+    print("修改整款商品价格之后，预设会员价页面也只有一个价格")
+    print("预设会员价页面有该款商品的全部记录，并且商家编码预设价格核对无误")
+    print("在选择会员的情况下，核实下标准售价，第二价格，第三价格，第四价格，会员价格取值是否正确")
+    result = base.get_column_text("标准售价")
+    for r in result:
+        print(f"标准售价应该是100实际是：{r},")
+        assert r == '100'
+    result = base.get_column_text("第二价格")
+    for r in result:
+        print(f"第二价格应该是200实际是：{r},")
+        assert r == '200'
+    result = base.get_column_text("第三价格")
+    for r in result:
+        print(f"第三价格应该是300实际是：{r},")
+        assert r == '300'
+    result = base.get_column_text("第四价格")
+    for r in result:
+        print(f"第四价格应该是400实际是：{r},")
+        assert r == '400'
+    result = base.get_column_text("会员价")
+    for r in result:
+        print(f"会员价应该是80实际是：{r},")
+        assert r == '80'
+    print("确定在选择会员的情况下，核实下标准售价，第二价格，第三价格，第四价格，会员价格取值是否正确")
+    print("清空搜索条件之后，搜索货号，查看所有价格的取值是否正确")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "货号")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("标准售价")
+    for r in result:
+        print(f"标准售价应该是100实际是：{r},")
+        assert r == '100'
+    result = base.get_column_text("第二价格")
+    for r in result:
+        print(f"第二价格应该是200实际是：{r},")
+        assert r == '200'
+    result = base.get_column_text("第三价格")
+    for r in result:
+        print(f"第三价格应该是300实际是：{r},")
+        assert r == '300'
+    result = base.get_column_text("第四价格")
+    for r in result:
+        print(f"第四价格应该是400实际是：{r},")
+        assert r == '400'
+    result = base.get_column_text("会员价")
+    for r in result:
+        print(f"会员价应该是80实际是：{r},")
+        assert r == '80'
+    print("确定清空搜索条件之后，搜索货号，查看所有价格的取值是否正确")
+
+
+def test_search_condition():
+    pass
 
 
 def test_001():
