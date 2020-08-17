@@ -1,1 +1,4 @@
-{}
+{
+  "test_vip_price_detail.py::test_001": true,
+  "test_vip_price_detail.py::test_vip_price_detail": true
+}
