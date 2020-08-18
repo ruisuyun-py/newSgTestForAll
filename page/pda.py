@@ -7,11 +7,11 @@ from selenium.webdriver.common.keys import Keys
 def login():
     # 获取登录按钮
     company_name = base.driver.find_element(By.ID, "com.pda.cleo:id/edit_login_companyname")
-    company_name.send_keys("测试专用")
+    company_name.set_text("测试专用")
     user_name = base.driver.find_element(By.ID, "com.pda.cleo:id/edit_login_username")
-    user_name.send_keys("测试")
+    user_name.set_text("测试")
     password = base.driver.find_element(By.ID, "com.pda.cleo:id/edit_login_password")
-    password.send_keys("8888")
+    password.set_text("8888")
     login_btn = base.driver.find_element(By.ID, "com.pda.cleo:id/btn_login_login")
     # 点击登录按钮
     login_btn.click()

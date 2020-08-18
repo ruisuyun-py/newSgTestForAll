@@ -63,7 +63,7 @@ def test_pos_order():
     for barcode in barcode_list:
         for i in range(1, j):
             print(f"第{i}次录入{barcode}")
-            barcode_input.send_keys(barcode)
+            barcode_input.set_text(barcode)
             pda.send_enter()
         j = j+1
     for barcode in barcode_list:
