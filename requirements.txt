@@ -1,4 +1,4 @@
-Appium-Python-Client
+Appium-Python-Client==1.0.1
 requests
 pymysql==0.9.3
 selenium==3.3.1
