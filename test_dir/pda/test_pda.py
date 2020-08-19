@@ -47,31 +47,44 @@ def test_pos_order():
     product_code = base.get_now_string()
     interface.new_product(product_code)
     print(f"新建商品,款号：{product_code}")
+    sku_code = interface.get_sku_code("",product_code)[0]
+    price = 50.0
+    interface.modify_sku_price(sku_code, price)
+    print(f"获取一个sku_code:{sku_code},并修改价格为{price}")
     sku_id_list = interface.get_sku_id('', product_code)
-    print("sku_id列表：")
+    print("获取所有商品的sku_id列表，用来创建商品条码：商品id列表：")
     for i in sku_id_list:
         print(i)
+    print("新建所有商品的商品条码")
     interface.new_create_sku_bar_code(sku_id_list)
+    print("用barcode_list保存商品的商家编码")
     barcode_list = interface.get_sku_bar_code('', product_code)
     print("barcode_list列表：")
+    num = 0
+    input_barcode_info = {}
     for i in barcode_list:
-        print(i)
-    j = 2
-    print("barcode_list[1:3]")
-    for i in barcode_list[0:3]:
-        print(i)
-    for barcode in barcode_list:
-        for i in range(1, j):
-            print(f"第{i}次录入{barcode}")
-            barcode_input.set_text(barcode)
+        print("barcode:"+i)
+        num += 1
+        input_barcode_info[i] = num
+    print("使用input_barcode_info记录要输入的商家编码和数量{'barcode':num ,'barcode':num}")
+    print("使用input_barcode_info录入商品条码")
+    for k, v in input_barcode_info.items():
+        print(f"输入条码：{k}共计：{v}次")
+        for i in range(0, v):
+            barcode_input.set_text(k)
             pda.send_enter()
-        j = j+1
-    for barcode in barcode_list:
+    print(f"验证条码输入的结果和input_barcode_info中记录的数据完全一致")
+    for k, v in input_barcode_info.items():
         # 条码必须等于barcode
-        result = base.wait_element(pda.get_cell_xpath(barcode, 1, 2)).text
-        assert result == barcode
-        # result = base.wait_element(pda.get_cell_xpath(barcode, 2)).text
-        # assert result == '1'
+        result = base.wait_element(pda.get_cell_xpath(k, 1, 2)).text
+        assert result == k
+        num = base.wait_element(pda.get_cell_xpath(k, 2)).text
+        assert num == str(v)
+        unit_price = base.wait_element(pda.get_cell_xpath(k, 3)).text
+        assert unit_price == str(price)
+        amount = base.wait_element(pda.get_cell_xpath(k, 4)).text
+        assert amount == str(float(num)*float(unit_price))
+        print(f"条码{result}输入了{num}个，每个单价{unit_price},总价{amount}")
 
 
 def test_001():
