@@ -50,7 +50,6 @@ def get_cell_xpath(row_key, column_index, inner_row_index=''):
         else:
             inner_row_index -= 1
             xpath = f"//*[@text='{row_key}']/../../*[@index='{column_index}']/*[@index='{inner_row_index}']"
-    print(xpath)
     return xpath
 
 
