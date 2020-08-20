@@ -76,6 +76,11 @@ def find_xpath_by_inner_tag_name(keywords1, keywords2):
     return xpath
 
 
+def find_xpath_by_preceding_tag_name(keywords1, keywords2):
+    xpath = f"//*[text()='{keywords1}']/preceding-sibling::{keywords2}"
+    return xpath
+
+
 def find_xpath_with_spaces(keywords):
     xpath = f"//*[contains(text(),'{keywords}')]"
     return xpath
@@ -299,7 +304,7 @@ def scroll_to_view(xpath):
 
 
 def select_all():
-    xpath = "//input[@ref='cbSelectAll']"
+    xpath = "//div[@class='ag-header-select-all ag-labeled ag-label-align-right ag-checkbox ag-input-field' and @ref='cbSelectAll']"
     wait_element(xpath).click()
 
 

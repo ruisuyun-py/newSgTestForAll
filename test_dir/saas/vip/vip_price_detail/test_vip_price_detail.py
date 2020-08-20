@@ -64,7 +64,7 @@ def test_vip_price_detail():
     # 新建商品
     interface.new_product(product_code)
     # 获取一个sku_code查看会员价格
-    sku_code = interface.get_sku_code('', product_code)[0]
+    sku_code = interface.get_sku_code(product_code)[0]
     print(f"取出一个商品：{sku_code}查看售价，此时售价应该为0")
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
@@ -101,7 +101,7 @@ def test_vip_price_detail():
     # 设置会员等级为8折，再次查看售价是否是80
     print(f"将会员{vip_name}的会员等级设置为8折，此时售价应该是100*0.8")
     vip_level = "8折"
-    interface.modify_vip(vip_name, vip_level)
+    interface.modify_vip_level(vip_name, vip_level)
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
@@ -356,7 +356,7 @@ def test_vip_price_detail():
     print("验证会员等级设置为8折之后，售价应该是80")
     # 设置会员等级为8折，再次查看售价是否是80
     vip_level = "8折"
-    interface.modify_vip(vip_name, vip_level)
+    interface.modify_vip_level(vip_name, vip_level)
     with base.operate_page("订单", "门店收银", "门店收银框架") as e:
         base.change_frame("门店收银框架", "选择会员")
         base.chose_vip(vip_name)
@@ -513,7 +513,241 @@ def test_vip_price_detail():
 
 
 def test_search_condition():
-    pass
+    # 先确定下设置
+    setting_info = {
+        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
+        "记录会员上次交易价 同款同价：手工单或者门店单保存时，记录会员的商品交易价格 同款同价": "false",
+        "只有手工修改售价才会记录预设价格": "true",
+    }
+    interface.save_order_setting(setting_info)
+    print("这就为了换个行")
+    print("非同款同价模式+修改才记录会员价设置完成，修改设置之后等5秒，让设置生效")
+    time.sleep(5)
+    base.close_page("预设会员价明细")
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    print("测试商品货号测试条件")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys("测试商品1")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    product_code_list = base.get_column_text("货号")
+    for i in product_code_list:
+        assert i == "测试商品1"
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "商家编码")
+    print("验证预设会员价范围条件是否生效")
+    print("先测试大于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("大于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) > float(vip_price)
+    print("再测试小于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("小于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) < float(vip_price)
+    print("再测试等于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("等于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) == float(vip_price)
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "商家编码")
+    print("测试价格差异")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异大于等于")).send_keys("10")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异小于")).send_keys("50")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+    preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+    assert 10.0 <= abs(float(preset_price)-float(vip_price)) <= 50.0
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "商家编码")
+    print("测试价格差异百分比")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异百分比大于等于")).send_keys("10")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异百分比小于")).send_keys("50")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        if float(vip_price) >= float(preset_price):
+            higher_price = float(vip_price)
+        else:
+            higher_price = float(preset_price)
+        assert 10.0 <= abs(float(preset_price) - float(vip_price))/higher_price*100 <= 50.0
+    # 先确定下设置
+    print("修改设置为同款同价，修改时才记录预设价格")
+    print("修改设置为同款同价，修改时才记录预设价格")
+    print("修改设置为同款同价，修改时才记录预设价格")
+    setting_info = {
+        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
+        "记录会员上次交易价 同款同价：手工单或者门店单保存时，记录会员的商品交易价格 同款同价": "true",
+        "只有手工修改售价才会记录预设价格": "true",
+    }
+    interface.save_order_setting(setting_info)
+    print("非同款同价模式+修改才记录会员价设置完成，修改设置之后等5秒，让设置生效")
+    time.sleep(5)
+    base.close_page("预设会员价明细")
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    print("测试商品货号测试条件")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys("测试商品1")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    product_code_list = base.get_column_text("货号")
+    for i in product_code_list:
+        assert i == "测试商品1"
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "货号")
+    print("验证预设会员价范围条件是否生效")
+    print("先测试大于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("大于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) > float(vip_price)
+    print("再测试小于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("小于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) < float(vip_price)
+    print("再测试等于会员价")
+    base.wait_element_click(base.find_xpath_with_spaces("等于会员价格"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        assert float(preset_price) == float(vip_price)
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "货号")
+    print("测试价格差异")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异大于等于")).send_keys("10")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异小于")).send_keys("50")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+    preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+    assert 10.0 <= abs(float(preset_price) - float(vip_price)) <= 50.0
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "货号")
+    print("测试价格差异百分比")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异百分比大于等于")).send_keys("10")
+    base.wait_element(base.find_xpath_by_placeholder("价格差异百分比小于")).send_keys("50")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    for i in range(1, 10):
+        vip_price = base.wait_element(base.get_cell_xpath(i, "会员价")).text
+        preset_price = base.wait_element(base.get_cell_xpath(i, "预设价格")).text
+        if float(vip_price) >= float(preset_price):
+            higher_price = float(vip_price)
+        else:
+            higher_price = float(preset_price)
+        assert 10.0 <= abs(float(preset_price) - float(vip_price)) / higher_price * 100 <= 50.0
+
+
+def test_function_button():
+    setting_info = {
+        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
+        "记录会员上次交易价 同款同价：手工单或者门店单保存时，记录会员的商品交易价格 同款同价": "false",
+        "只有手工修改售价才会记录预设价格": "true",
+    }
+    interface.save_order_setting(setting_info)
+    print("非同款同价模式+修改才记录会员价设置完成，修改设置之后等5秒，让设置生效")
+    time.sleep(5)
+    print("先准备测试数据：")
+    vip_name = "会员"+base.get_now_string()
+    interface.new_vip(vip_name)
+    print(f"新建会员{vip_name}")
+    product_code = base.get_now_string()
+    interface.new_product(product_code)
+    print(f"新建货号{product_code}")
+    sku_code = interface.get_sku_code(product_code)[0]
+    interface.modify_sku_price(sku_code, "100")
+    print(f"通过{sku_code}将{product_code}整款标准售价设置为100")
+    interface.modify_vip_level(vip_name, "8折")
+    print(f"修改会员{vip_name}的会员等级为：8折")
+    interface.modify_preset_price(vip_name, product_code, 0, 200)
+    print(f"修改会员{vip_name}的商品{product_code}预设价格为200")
+    base.close_page("预设会员价明细")
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    base.select_all()
+    base.wait_element_click(base.find_xpath_with_spaces("批量修改预设价格"))
+    base.wait_element_click("//input[@id='price']").clear()
+    base.wait_element_click("//input[@id='price']").send_keys("300")
+    element = base.wait_element(base.get_cell_xpath(1, "预设价格"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("修改"))
+    base.wait_element_refresh(element, text)
+    print(f"修改商品的价格为300")
+    print(f"验证所有商品的价格是300")
+    result = base.get_column_text("预设价格")
+    for i in result:
+        assert i == "300"
+    print(f"确定所有商品的价格是300")
+    sku_code_list = interface.get_sku_code(product_code)
+    for i in sku_code_list[0: 3]:
+        base.wait_element_click(base.get_cell_xpath(i, "会员名"))
+        base.click_space()
+    base.wait_element_click(base.find_xpath_with_spaces("批量删除预设价格"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("是否确认删除", "确认"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+    result = base.get_column_text("商家编码")
+    assert result == sku_code_list[3:]
+    print(result)
+    print(sku_code_list[3:])
+    print("修改设置再来")
+    print("修改设置再来")
+    setting_info = {
+        "记录会员上次交易价：手工单或者门店单保存时，记录会员的商品交易价格": "true",
+        "记录会员上次交易价 同款同价：手工单或者门店单保存时，记录会员的商品交易价格 同款同价": "true",
+        "只有手工修改售价才会记录预设价格": "true",
+    }
+    interface.save_order_setting(setting_info)
+    print("非同款同价模式+修改才记录会员价设置完成，修改设置之后等5秒，让设置生效")
+    time.sleep(5)
+    print("先准备测试数据：")
+    vip_name = "会员" + base.get_now_string()
+    interface.new_vip(vip_name)
+    print(f"新建会员{vip_name}")
+    product_code = base.get_now_string()
+    interface.new_product(product_code)
+    print(f"新建货号{product_code}")
+    sku_code = interface.get_sku_code(product_code)[0]
+    interface.modify_sku_price(sku_code, "100")
+    print(f"通过{sku_code}将{product_code}整款标准售价设置为100")
+    interface.modify_vip_level(vip_name, "8折")
+    print(f"修改会员{vip_name}的会员等级为：8折")
+    interface.modify_preset_price(vip_name, product_code, 0, 200)
+    print(f"修改会员{vip_name}的商品{product_code}预设价格为200")
+    base.close_page("预设会员价明细")
+    base.open_page("会员", "预设会员价明细", "预设会员价明细框架")
+    base.wait_element_click(base.find_xpath_by_placeholder("商品货号")).send_keys(product_code)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    base.select_all()
+    base.wait_element_click(base.find_xpath_with_spaces("批量修改预设价格"))
+    base.wait_element_click("//input[@id='price']").clear()
+    base.wait_element_click("//input[@id='price']").send_keys("300")
+    element = base.wait_element(base.get_cell_xpath(1, "预设价格"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("修改"))
+    base.wait_element_refresh(element, text)
+    print(f"修改商品的价格为300")
+    print(f"验证所有商品的价格是300")
+    result = base.get_column_text("预设价格")
+    for i in result:
+        assert i == "300"
+    print(f"确定所有商品的价格是300")
+    base.select_all()
+    base.wait_element_click(base.find_xpath_with_spaces("批量删除预设价格"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("是否确认删除", "确认"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    base.wait_element(base.find_xpath("本页共0条数据"))
 
 
 def test_001():

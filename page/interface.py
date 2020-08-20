@@ -115,7 +115,12 @@ def modify_vip(vip_name, level_name):
     url = "http://gw.erp12345.com/api/Vips/FullVip/SaveVip?vip={" + url_param + "}"
     response = requests.get(url, headers=headers, )
     result = dict(response.json())
-    # print(result)
+    return result
+
+
+# 修改会员等级
+def modify_vip_level(vip_name, level_name):
+    result = modify_vip(vip_name, level_name)
     return result
 
 
@@ -150,9 +155,14 @@ def get_vip_info(name):
     }
     response = requests.get(url, headers=headers)
     result = dict(response.json())
-    # print(result)
-    # vip_info = [result["data"]["Items"][0]["VipId"], result['data']["Items"][0]['VipName']]
     return result
+
+
+# 获取vip_id
+def get_vip_id(name):
+    result = get_vip_info(name)
+    vip_id = result["data"]["Items"][0]["VipId"]
+    return vip_id
 
 
 # 获取会员等级信息
@@ -305,6 +315,17 @@ def get_sku_info(sku_code, product_code=''):
     return result
 
 
+# 获取product_id
+def get_product_id(product_code=''):
+    """
+    product_code:货号
+    return: product_id
+    """
+    result = get_sku_info("", product_code)
+    product_id = result["data"]["Items"][0]["ProductId"]
+    return product_id
+
+
 # 通过product_code或者sku_code获取sku_id
 def get_sku_id(sku_code, product_code=''):
     """
@@ -334,14 +355,13 @@ def get_sku_bar_code(sku_code, product_code=''):
 
 
 # 通过product_code获取该款所有sku_code
-def get_sku_code(sku_code, product_code=''):
+def get_sku_code(product_code):
     """
-    sku_code:需要查询的商家编码
     product_code:货号
     return:['sku_code','sku_code','sku_code','sku_code',]
 
     """
-    result = get_sku_info(sku_code, product_code)
+    result = get_sku_info("", product_code)
     sku_code_list = []
     for info in result["data"]["Items"]:
         sku_code_list.append(info["SkuCode"])
@@ -417,7 +437,6 @@ def modify_sku_price(sku_code, stand_price, second_price="", third_price="", fou
     }
     response = requests.post(url, headers=headers)
     result = dict(response.json())
-    # print(result)
     return result
 
 
@@ -494,8 +513,35 @@ def new_order(vip_name, sku_info):
     return order_info
 
 
+def modify_preset_price(vip_name, product_code, old_price, price):
+    """
+    vipname:会员名称
+    product_code:款号
+    old_price:老价格，也就是原价
+    price:需要修改成的价格
+    return {"code":1,"message":null}
+    """
+    url = "http://gw.erp12345.com/api/Vips/VipPresupposePrice/NewModifyProductPrice?"
+    vip_id = get_vip_id(vip_name)
+    product_id = get_product_id(product_code)
+    url_params = {
+        "vipId": vip_id,
+        "productId": product_id,
+        "price": price,
+        "oldPrice": old_price,
+    }
+    for k, v in url_params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
+
+
 # 获取商品款号会员价格信息
-def get_product_info_by_id(vip_name, sku_code):
+def get_product_info_by_vip_id(vip_name, sku_code):
     """
     vip_name:会员名称
     sku_code:商家编码
@@ -541,7 +587,7 @@ def get_sku_price_by_vip_id(vip_name, sku_code):
     return：商品的会员价格
     """
     vip_price = ''
-    result = get_product_info_by_id(vip_name, sku_code)
+    result = get_product_info_by_vip_id(vip_name, sku_code)
     for sku_info in result["data"]:
         if sku_info["SkuCode"] == sku_code:
             vip_price = sku_info["Price"]
@@ -687,4 +733,3 @@ def save_order_setting(setting_info):
         url_param += f"'{k}':'{v}',"
     url = "http://gw.erp12345.com/api/Settings/OrderSetting/SaveSetting?setting={" + url_param + "}"
     response = requests.get(url, headers=headers)
-    print(response.status_code)
