@@ -53,5 +53,15 @@ def get_cell_xpath(row_key, column_index, inner_row_index=''):
     return xpath
 
 
+def get_column_text(column_index):
+    xpath = f"//android.widget.ListView/android.widget.LinearLayout/android.widget.TextView[@index='{column_index}']"
+    elements = base.wait_elements(xpath)
+    column_text = []
+    for i in elements:
+        text = i.text
+        column_text.append(text)
+    return column_text
+
+
 def send_enter():
     base.driver.keyevent(66)

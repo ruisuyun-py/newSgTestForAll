@@ -440,6 +440,64 @@ def modify_sku_price(sku_code, stand_price, second_price="", third_price="", fou
     return result
 
 
+def get_bar_code_print_data(sku_code, qty):
+    """
+    sku_code:商家编码
+    qty:数量
+    return：
+    {
+    "data":
+        {
+        "id":"7494441895767049203","tenantId":"7494308563943163372","name":"唯一码15位",
+            "data":
+                [
+                    { "Id":"7495000258460516455","ProductCode":"200707200742","AnalFullProductCode":null,
+                    "ProductImage_ImageUrl":null,"ProductName":"200707200742-红色-L","ProductShortName":null,
+                    "SkuCode":"200707200742-红色-L","SkuName":"红色-L","LocalCode":null,"LocalName":"","Qty":0,
+                    "BarCode":"20080300404077","BarCode2BarCode":null,"BarCode3BarCode":null,"StandardPrice":100.0,"SecPrice":200.0,
+                    "ThirPrice":300.0,"FourPrice":400.0,"LastPurPrice":0.0,"FirstField":null,"SecField":null,"ThirField":null,
+                    "FourField":null,"FifthField":null,"SupplierName":null,"CategoryName":null,"BrandName":null,"SkuMemo":null,
+                    "Unit":null,"CustomText":null,"PrintDate":"2020-08-20 22:29:54","SkuQty":0
+                    }
+                    { "Id":"7495000258460516455","ProductCode":"200707200742","AnalFullProductCode":null,
+                    "ProductImage_ImageUrl":null,"ProductName":"200707200742-红色-L","ProductShortName":null,
+                    "SkuCode":"200707200742-红色-L","SkuName":"红色-L","LocalCode":null,"LocalName":"","Qty":0,
+                    "BarCode":"20080300404077","BarCode2BarCode":null,"BarCode3BarCode":null,"StandardPrice":100.0,"SecPrice":200.0,
+                    "ThirPrice":300.0,"FourPrice":400.0,"LastPurPrice":0.0,"FirstField":null,"SecField":null,"ThirField":null,
+                    "FourField":null,"FifthField":null,"SupplierName":null,"CategoryName":null,"BrandName":null,"SkuMemo":null,
+                    "Unit":null,"CustomText":null,"PrintDate":"2020-08-20 22:29:54","SkuQty":0
+                    }
+                 ]
+        },
+    "code":1,
+    "message":null
+    }
+    """
+    sku_id = get_sku_id(sku_code)[0]
+    url = "http://gw.erp12345.com/api/Products/FullProduct/GetBarCodePrintData?print={'PrintItems':[{"
+    headers = {
+        'cookie': base.cookies
+    }
+    url_params = {
+        'SkuId': sku_id,
+        'Qty': qty
+    }
+    for k, v in url_params.items():
+        url += f"'{k}':'{v}',"
+    url += "}],'TemplateId':'7494441895767049203','PrintName':'Microsoft XPS Document Writer'}"
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
+
+
+def get_sku_unique_bar_code(sku_code, qty):
+    result = get_bar_code_print_data(sku_code, qty)
+    unique_bar_code_list = []
+    for i in result["data"]["data"]:
+        unique_bar_code_list.append(i["BarCode"])
+    return unique_bar_code_list
+
+
 # 新建订单
 def new_order(vip_name, sku_info):
     """
@@ -664,6 +722,56 @@ sku_info = [
         response = requests.post(url, headers=headers)
         result = dict(response.json())
         return result
+
+
+# 保存基础业务
+def save_base_setting(setting_info):
+    setting = {
+        "LockToOperate": "false",
+        "RecordOrderChangeDetail": "false",
+        "EnableLackOfInventery": "true",
+        "UseWarehousePurPrice": "true",
+        "FlagMemoSyncPlatform": "true",
+        "IsDeliveryReduceVirtualQty": "true",
+        "EnableSubScribeBill": "false",
+        "IsModifyProductInfUpdateHistoryData": "true",
+        "SerivceOrderMismatchPromotion": "false",
+        "ReDownloadProWhenMatchFaild": "false",
+        "CommodityManagementShopPermissions": "false",
+        "IntensityFinanceModel": "false",
+        "CreateComboIfProductNotExistCreateProduct": "true",
+        "AnalyticalPackageAutomaticAdditionSize": "true",
+        "CreateProCodeByAnalProCode": "true",
+        "FilterPrice": "false", "LockNewPurPrice": "false",
+        "PrintUniqueBarCode": "true",
+        "PrintBoxBarCode": "false",
+        "FastQuerySkuType": 1,
+        "BarCodeCreateRule": 3,
+        "SkuInterval": 0,
+        "MatchProductByBarCode": "true",
+        "ProductMappingType": 3,
+        "ProductMappingKeyWords": "",
+        "NextProductMappingType": 0,
+        "IsModifyProductNoCreateCode": "true",
+        "PlatformSkuCodeFilterFlag": "/.",
+        "IsOpenFineInventory": "false",
+        "OpenBackgroundSendService": "false",
+        "OpenBatchDeliverySend": "false",
+        "IsDetectionSingleTallying": "false",
+        "IsModifySkuBreakMapping": "false",
+        "IsCustomerBillOrderShop": "false"
+    }
+    for k, v in setting_info.items():
+        if k == "启用条码唯一码":
+            setting["PrintUniqueBarCode"] = v
+    headers = {
+        'Cookie': base.cookies
+    }
+    url_param = ''
+    for k, v in setting.items():
+        url_param += f"'{k}':'{v}',"
+    url = "http://gw.erp12345.com/api/Settings/BillSetting/savesetting?setting={" + url_param + "}"
+    response = requests.get(url, headers=headers)
 
 
 # 保存订单设置

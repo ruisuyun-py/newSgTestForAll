@@ -124,5 +124,11 @@ def test_001():
         print(i)
 
 
+def test_get_sku_unique_bar_code():
+    result = interface.get_sku_unique_bar_code("测试商品1-红色 XL", 2)
+    for i in result:
+        print(i)
+
+
 if __name__ == '__main__':
     pytest.main()
