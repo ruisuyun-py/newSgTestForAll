@@ -130,5 +130,10 @@ def test_get_sku_unique_bar_code():
         print(i)
 
 
+def test_get_delivery_order_info():
+    result = interface.get_delivery_order_info()
+    print(result)
+
+
 if __name__ == '__main__':
     pytest.main()

@@ -1,12 +1,15 @@
+import random
 import sys
 import time
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import test_dir.test_base as test
 import page.login_page as login
 import page.base_page as base
 import page.order.all_order_page as order
-
+import page.interface as interface
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
@@ -195,6 +198,73 @@ def test_fuzzy_search():
     """
     订单编码，平台单号，买家帐号，收货人姓名，收货人手机，收货人电话，物流单号
     """
+    column_name_list = ["订单编码", "平台单号", "会员名", "收货人", "手机号"]
+    for i in column_name_list:
+        test.test_fuzzy_search(i)
+    result = interface.get_delivery_order_column_value("物流单号", "会员名称")
+    for i in range(0, 10):
+        k = random.choice(list(result.keys()))
+        print(f"物流单号:{k}")
+        print(f"会员名：{result[k]}")
+        base.fuzzy_search("会员名", k)
+        vip_name = base.get_column_text("会员名")[0]
+        print(f"会员名：{vip_name}")
+        assert vip_name == result[k]
+
+
+def test_order_status_search_condition():
+    print("验证待审核无备注订单的状态均为待审核，且买家备注和卖家备注均为空或者以#结尾")
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（无备注）"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert i == "待审核"
+    seller_memo = base.get_column_text("卖家备注")
+    buyer_memo = base.get_column_text("买家备注")
+    for i in range(0, len(seller_memo)):
+        assert (seller_memo[i] == "" or seller_memo[i].endswith("#")) and (buyer_memo[i] == "" or buyer_memo[i].endswith("#"))
+    print("清空搜索条件")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    print("验证待审核有备注的订单状态为待审核，并且买家备注买家备注中必须有一个不为空，且不以# 结尾")
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（有备注）"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert i == "待审核"
+    seller_memo = base.get_column_text("卖家备注")
+    buyer_memo = base.get_column_text("买家备注")
+    for i in range(0, len(seller_memo)):
+        print(f"seller_memo:{seller_memo[i]} +buyer_memo:{buyer_memo[i]}")
+        has_memo = (seller_memo[i] != "" and not seller_memo[i].endswith("#")) or (
+                    buyer_memo[i] != "" and not buyer_memo[i].endswith("#"))
+        if not has_memo:
+            print(f"待合并订单备注则该订单也算有备注，但凡买家备注，卖家备注均为空，则必然存在一个待合并订单有买家备注，卖家备注")
+            order_sum = base.wait_element(base.get_cell_xpath(i, "订单数")).text
+            assert int(order_sum) >= 2
+            base.wait_element_click(base.get_cell_xpath(i, "订单数", order_sum))
+            base.change_frame("全部订单框架", "会员未出库订单页面")
+            old_seller_memo = base.get_old_column_text("卖家备注")
+            print("未出库订单的卖家备注为：")
+            for k in old_seller_memo:
+                print(f"{k}")
+            old_buyer_memo = base.get_old_column_text("买家备注")
+            print(f"未出库订单的买家备注为：")
+            for k in old_buyer_memo:
+                print(f"{k}")
+            one_order_has_memo = False
+            for j in range(0, len(old_seller_memo)):
+                one_order_has_memo = (old_seller_memo[j] != "" and not old_seller_memo[j].endswith("#")) or (
+                        old_buyer_memo[j] != "" and not old_buyer_memo[j].endswith("#"))
+                if one_order_has_memo:
+                    print(f"未出库订单有备注的行号是{j + 1}")
+                    order_info = base.wait_element(base.get_old_cell_xpath(j+1, "订单编码+平台单号")).text
+                    print(f"有备注的待合并订单信息为{order_info}")
+                    print(f"待合并订单的卖家备注为{old_seller_memo[j]}，买家备注为{old_buyer_memo[j]}")
+                    break
+            base.change_frame("全部订单框架")
+            base.wait_element_click(base.find_xpath_by_tag_name("会员未出库订单页面", "a"))
+            print(f"")
+            assert one_order_has_memo
 
 
 if __name__ == '__main__':

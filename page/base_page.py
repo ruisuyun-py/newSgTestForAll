@@ -225,20 +225,36 @@ def get_old_column_field(column_name):
 
 
 # 获取主表中指定行号指定列单元格
-def get_cell_xpath(row_key, column_name):
+def get_cell_xpath(row_key, column_name, icon_text=''):
     """
     row_id:行号，由于主表的行号是从0计数，这里做了-1处理
     column_name:列名
     return:单元格定位
     """
     if isinstance(row_key, int):
-        xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']"
+        if icon_text == '':
+            xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']"
+        else:
+            xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']/span[1]/" \
+                    f"span[text()='{icon_text}'] "
     else:
-        xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']"
+        if icon_text == '':
+            xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']"
+        else:
+            xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id=" \
+                    f"'{get_column_field(column_name)}']/span[1]/span[text()='{icon_text}'] "
     return xpath
 
 
 def get_old_cell_xpath(row_key, column_name):
+    if isinstance(row_key, int):
+        xpath = f"//tr[@datagrid-row-index='{row_key - 1}']/td[@field='{get_old_column_field(column_name)}']"
+    else:
+        xpath = f"//tr[contains(string(),'{row_key}')]/td[@field='{get_old_column_field(column_name)}']"
+    return xpath
+
+
+def get_old_cell_input_xpath(row_key, column_name):
     if isinstance(row_key, int):
         xpath = f"//tr[@datagrid-row-index='{row_key - 1}']/td[@field='{get_old_column_field(column_name)}']/div/input"
     else:
@@ -280,6 +296,16 @@ def get_column_text(column_name):
     return：文本列表
     """
     xpath = f"//div[@role='gridcell' and @col-id='{get_column_field(column_name)}']"
+    elements = wait_elements(xpath)
+    text_list = []
+    for element in elements:
+        text_list.append(element.text)
+    return text_list
+
+
+# 获取老表格组件中的一列文本
+def get_old_column_text(column_name):
+    xpath = f"//table[@class='datagrid-btable']/descendant::td[@field='{get_old_column_field(column_name)}']"
     elements = wait_elements(xpath)
     text_list = []
     for element in elements:
@@ -356,3 +382,13 @@ def operate_page(menu_name, page_name, frame_name):
         yield 1
     finally:
         close_page(page_name)
+        
+
+def fuzzy_search(column_name, keywords):
+    """
+    column_name:一般是需要搜索的列明或者随便什么主表存在的列名都行
+    key_words:需要搜搜的关键字
+    """
+    wait_element(find_xpath_by_placeholder("模糊搜索")).send_keys(Keys.CONTROL + 'a')
+    wait_element(find_xpath_by_placeholder("模糊搜索")).send_keys(keywords)
+    wait_table_refresh(find_xpath("组合查询"), 1, column_name)
