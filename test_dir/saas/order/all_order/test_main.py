@@ -212,7 +212,8 @@ def test_fuzzy_search():
         assert vip_name == result[k]
 
 
-def test_order_status_search_condition():
+# 待审核（无备注）
+def test_wait_to_approve_with_out_memo():
     print("验证待审核无备注订单的状态均为待审核，且买家备注和卖家备注均为空或者以#结尾")
     base.wait_element_click(base.find_xpath_with_spaces("待审核（无备注）"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
@@ -223,7 +224,24 @@ def test_order_status_search_condition():
     buyer_memo = base.get_column_text("买家备注")
     for i in range(0, len(seller_memo)):
         assert (seller_memo[i] == "" or seller_memo[i].endswith("#")) and (buyer_memo[i] == "" or buyer_memo[i].endswith("#"))
-    print("清空搜索条件")
+    print(f"验证商品信息没有任何商品被审核")
+    elements = base.wait_elements(base.get_column_xpath("商品信息"))
+    j = 0
+    for e in elements:
+        j += 1
+        e.click()
+        other_inf = order.get_all_float_sku_info("其他信息")
+        has_no_sku_approve = True
+        for i in range(0, len(other_inf)):
+            print(f"第{j}行订单的第{i + 1}行的其他信息：{other_inf[i]}")
+            if "审" in other_inf[i]:
+                has_no_sku_approve = False
+                break
+        assert has_no_sku_approve
+
+
+# 待审核（有备注）
+def test_wait_to_approve_with_memo():
     base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
     print("验证待审核有备注的订单状态为待审核，并且买家备注买家备注中必须有一个不为空，且不以# 结尾")
     base.wait_element_click(base.find_xpath_with_spaces("待审核（有备注）"))
@@ -265,6 +283,164 @@ def test_order_status_search_condition():
             base.wait_element_click(base.find_xpath_by_tag_name("会员未出库订单页面", "a"))
             print(f"")
             assert one_order_has_memo
+    print(f"验证商品信息没有任何商品被审核")
+    elements = base.wait_elements(base.get_column_xpath("商品信息"))
+    j = 0
+    for e in elements:
+        j += 1
+        e.click()
+        other_inf = order.get_all_float_sku_info("其他信息")
+        has_no_sku_approve = True
+        for i in range(0, len(other_inf)):
+            print(f"第{j}行订单的第{i + 1}行的其他信息：{other_inf[i]}")
+            if "审" in other_inf[i]:
+                has_no_sku_approve = False
+                break
+        assert has_no_sku_approve
+
+
+# 待审核（拆单）
+def test_wait_to_approve_with_split():
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（拆单）"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert i == "部分审核"
+    elements = base.wait_elements(base.get_column_xpath("商品信息"))
+    j = 0
+    for e in elements:
+        j += 1
+        e.click()
+        other_inf = order.get_all_float_sku_info("其他信息")
+        print(f"必须有至少一个商品被审核")
+        has_one_sku_approve = False
+        for i in range(0, len(other_inf)):
+            print(f"第{j}行订单的第{i + 1}行的其他信息：{other_inf[i]}")
+            if "审" in other_inf[i]:
+                has_one_sku_approve = True
+                break
+        assert has_one_sku_approve
+        print("必须至少有一个商品没有被全部审核")
+        has_one_sku_not_approve_all = False
+        for i in range(0, len(other_inf)):
+            print(f"第{j}行订单的第{i+1}行的其他信息：{other_inf[i]}")
+            if "已全审" not in other_inf[i]:
+                has_one_sku_not_approve_all = True
+                break
+        assert has_one_sku_not_approve_all
+
+
+# 发货中
+def test_delivery():
+    base.wait_element_click(base.find_xpath_with_spaces("发货中"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert "发货中" in i or "部分审核" in i
+
+
+# 已发货
+def test_delivered():
+    base.wait_element_click(base.find_xpath_with_spaces("已发货"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert "已发货" in i
+    elements = base.wait_elements(base.get_column_xpath("商品信息"))
+    j = 0
+    for e in elements:
+        j += 1
+        e.click()
+        other_inf = order.get_all_float_sku_info("其他信息")
+        print(f"所有商品必须全部发货")
+        has_one_sku_not_delivered = False
+        for i in range(0, len(other_inf)):
+            print(f"第{j}行订单的第{i + 1}行的其他信息：{other_inf[i]}")
+            if "已全审全部出库" not in other_inf[i]:
+                has_one_sku_not_delivered = True
+                break
+        assert not has_one_sku_not_delivered
+
+
+# 已终结
+def test_ended():
+    base.wait_element_click(base.find_xpath_with_spaces("已终结"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单状态")
+    for i in result:
+        assert "已终结" in i
+
+
+# 黑名单
+def test_black_list():
+    base.wait_element_click(base.find_xpath("异常", "未审核有异常"))
+    base.wait_element_click(base.find_xpath("未审核有异常", "黑名单"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if order_sum_text == "本页共0条数据":
+        print(f"没数据不用看")
+    else:
+        result = base.get_column_text("订单状态")
+        for i in result:
+            assert "黑名单" == i
+
+
+# 线上改商品
+def test_modify_sku_info_online():
+    base.wait_element_click(base.find_xpath("异常", "未审核有异常"))
+    base.wait_element_click(base.find_xpath("未审核有异常", "线上改商品"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if order_sum_text == "本页共0条数据":
+        print(f"没数据不用看")
+    else:
+        result = base.get_column_text("订单状态")
+        for i in result:
+            assert "线上改商品" == i
+
+
+# 标记异常
+def test_mark_exception():
+    base.wait_element_click(base.find_xpath("异常", "未审核有异常"))
+    base.wait_element_click(base.find_xpath("未审核有异常", "标记异常"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if order_sum_text == "本页共0条数据":
+        print(f"没数据不用看")
+    else:
+        result = base.get_column_text("订单状态")
+        for i in result:
+            assert "未审核" not in i
+        elements = base.wait_elements(base.get_column_xpath("商品信息"))
+        j = 0
+        print(f"必须没有一个商品被审核")
+        for e in elements:
+            j += 1
+            e.click()
+            other_inf = order.get_all_float_sku_info("其他信息")
+            has_one_sku_approved = False
+            for i in range(0, len(other_inf)):
+                print(f"第{j}行订单的第{i + 1}行的其他信息：{other_inf[i]}")
+                if "审" in other_inf[i]:
+                    has_one_sku_approved = True
+                    break
+            assert not has_one_sku_approved
+    normal_exception_list = order.get_normal_exception()
+    print(f"常用异常列表：")
+    for i in normal_exception_list:
+        print(i)
+    for i in normal_exception_list:
+        base.wait_element_click(base.find_xpath_by_placeholder("搜索异常"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath("线上改商品", i))
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+        order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if order_sum_text == "本页共0条数据":
+            print(f"没数据不用看")
+        else:
+            result = base.get_column_text("订单状态")
+            for j in result:
+                assert i == j
 
 
 if __name__ == '__main__':

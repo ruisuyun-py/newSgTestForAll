@@ -289,13 +289,19 @@ def get_input_xpath(column_name):
     return xpath
 
 
+# 获取一列定位
+def get_column_xpath(column_name):
+    xpath = f"//div[@role='gridcell' and @col-id='{get_column_field(column_name)}']"
+    return xpath
+
+
 # 获取主表中一列的文本
 def get_column_text(column_name):
     """
     column:列名
     return：文本列表
     """
-    xpath = f"//div[@role='gridcell' and @col-id='{get_column_field(column_name)}']"
+    xpath = get_column_xpath(column_name)
     elements = wait_elements(xpath)
     text_list = []
     for element in elements:
