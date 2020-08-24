@@ -247,6 +247,9 @@ def get_cell_xpath(row_key, column_name, icon_text=''):
 
 
 def get_old_cell_xpath(row_key, column_name):
+    """
+    row_key:做了减1
+    """
     if isinstance(row_key, int):
         xpath = f"//tr[@datagrid-row-index='{row_key - 1}']/td[@field='{get_old_column_field(column_name)}']"
     else:
