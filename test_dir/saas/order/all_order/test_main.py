@@ -63,7 +63,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     with open('file_for_multi_search/not_found_vip_list.txt', 'r', encoding='UTF-8') as f:
         not_found_vip_list = f.readlines()
     f.close()
-    base.wait_element(order.locations["批量搜索下拉按钮"]).click()
+    base.wait_element_click(order.locations["批量搜索下拉按钮"])
     base.wait_element(base.find_xpath("搜索类型", "买家账号")).click()
     for v in vip_list:
         base.wait_element(order.locations["批量搜索文本框"]).send_keys(v)
@@ -96,7 +96,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     with open('file_for_multi_search/not_found_express_code_list.txt', 'r', encoding='UTF-8') as f:
         not_found_express_code_list = f.readlines()
     f.close()
-    base.wait_element(order.locations["批量搜索下拉按钮"]).click()
+    base.wait_element_click(order.locations["批量搜索下拉按钮"])
     base.wait_element(base.find_xpath("搜索类型", "物流单号")).click()
     for v in express_code_list:
         base.wait_element(order.locations["批量搜索文本框"]).send_keys(v)
@@ -134,7 +134,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     with open('file_for_multi_search/not_found_platform_order_code.txt', 'r', encoding='UTF-8') as f:
         not_found_platform_order_code_list = f.readlines()
     f.close()
-    base.wait_element(order.locations["批量搜索下拉按钮"]).click()
+    base.wait_element_click(order.locations["批量搜索下拉按钮"])
     base.wait_element(base.find_xpath("搜索类型", "平台单号")).click()
     for v in platform_order_code_list:
         base.wait_element(order.locations["批量搜索文本框"]).send_keys(v)
@@ -170,7 +170,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
         not_found_address_list = f.readlines()
     f.close()
     print(not_found_address_list)
-    base.wait_element(order.locations["批量搜索下拉按钮"]).click()
+    base.wait_element_click(order.locations["批量搜索下拉按钮"])
     base.wait_element(base.find_xpath("搜索类型", "地址")).click()
     for v in address_list:
         base.wait_element(order.locations["批量搜索文本框"]).send_keys(v)
@@ -200,7 +200,7 @@ def test_fuzzy_search():
     """
     column_name_list = ["订单编码", "平台单号", "会员名", "收货人", "手机号"]
     for i in column_name_list:
-        test.test_fuzzy_search(i)
+        test.fuzzy_search_test(i)
     result = interface.get_delivery_order_column_value("物流单号", "会员名称")
     for i in range(0, 10):
         k = random.choice(list(result.keys()))
@@ -224,7 +224,7 @@ def test_wait_to_approve_with_out_memo():
     buyer_memo = base.get_column_text("买家备注")
     for i in range(0, len(seller_memo)):
         assert (seller_memo[i] == "" or seller_memo[i].endswith("#")) and (
-                    buyer_memo[i] == "" or buyer_memo[i].endswith("#"))
+                buyer_memo[i] == "" or buyer_memo[i].endswith("#"))
     print(f"验证商品信息没有任何商品被审核")
     elements = base.wait_elements(base.get_column_xpath("商品信息"))
     j = 0
@@ -649,6 +649,154 @@ def test_wait_merger_order_exception():
             base.change_frame("全部订单框架")
             base.wait_element_click(base.find_xpath_by_tag_name("会员未出库订单页面", "a"))
             time.sleep(1)
+
+
+def test_buyer_memo_search_condition():
+    base.wait_element_click(base.find_xpath_with_spaces("买家留言"))
+    base.wait_element_click(base.find_xpath("买家留言", "无留言"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "买家备注")
+    result = list(set(base.get_column_text("买家备注")))
+    for i in result:
+        assert i == ""
+    base.wait_element_click(base.find_xpath("买家留言", "有留言"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "买家备注")
+    result = list(set(base.get_column_text("买家备注")))
+    for i in result:
+        assert i != ""
+    for i in result:
+        buyer_memo = i.strip("#")
+        print(f"搜索买家留言：{buyer_memo}")
+        base.wait_element_click(base.find_xpath_by_placeholder("买家留言模糊搜索")).clear()
+        base.wait_element_click(base.find_xpath_by_placeholder("买家留言模糊搜索")).send_keys(buyer_memo)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "买家备注")
+        buyer_memo_list = list(set(base.get_column_text("买家备注")))
+        for j in buyer_memo_list:
+            print(f"搜索结果：{j}")
+            assert buyer_memo in j
+
+
+# 卖家备注
+def test_seller_memo_search_condition():
+    base.wait_element_click(base.find_xpath_with_spaces("卖家备注"))
+    base.wait_element_click(base.find_xpath("卖家备注", "无备注"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "卖家备注")
+    result = list(set(base.get_column_text("卖家备注")))
+    for i in result:
+        assert i == ""
+    base.wait_element_click(base.find_xpath("卖家备注", "有备注"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "卖家备注")
+    result = list(set(base.get_column_text("卖家备注")))
+    for i in result:
+        assert i != ""
+    for i in result:
+        buyer_memo = i.strip("#")
+        print(f"搜索卖家备注：{buyer_memo}")
+        base.wait_element_click(base.find_xpath_by_placeholder("卖家备注模糊搜索")).clear()
+        base.wait_element_click(base.find_xpath_by_placeholder("卖家备注模糊搜索")).send_keys(buyer_memo)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "卖家备注")
+        buyer_memo_list = list(set(base.get_column_text("卖家备注")))
+        for j in buyer_memo_list:
+            print(f"搜索结果：{j}")
+            assert buyer_memo in j
+
+
+# 便签搜索条件
+def test_note_search_condition():
+    base.wait_element_click(base.find_xpath_with_spaces("便签"))
+    base.wait_element_click(base.find_xpath("便签", "无便签"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
+    result = list(set(base.get_column_text("便签")))
+    for i in result:
+        assert i == ""
+    base.wait_element_click(base.find_xpath("便签", "有便签"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
+    result = list(set(base.get_column_text("便签")))
+    for i in result:
+        assert i != ""
+    for i in result:
+        print(f"搜索便签：{i}")
+        base.wait_element_click(base.find_xpath_by_placeholder("便签模糊搜索")).clear()
+        base.wait_element_click(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(i)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
+        buyer_memo_list = list(set(base.get_column_text("便签")))
+        for j in buyer_memo_list:
+            print(f"搜索结果：{j}")
+            assert i in j
+
+
+# 旗帜
+def test_flag_search_condition():
+    base.wait_element_click(base.find_xpath_with_spaces("旗帜"))
+    base.wait_element_click(base.find_xpath_by_tag_name("旗帜", "input"))
+    # ['【 无旗帜 】', '红色旗帜', '黄色旗帜', '绿色旗帜', '蓝色旗帜', '紫色旗帜', '排除红色旗帜', '排除黄色旗帜', '排除绿色旗帜', '排除蓝色旗帜', '排除紫色旗帜']
+    flag_id = {"红色旗帜": "红旗", "黄色旗帜": "黄旗", "绿色旗帜": "绿旗", "蓝色旗帜": "蓝旗", "紫色旗帜": "紫旗", }
+    flag_list = order.get_flag_list()
+    print(flag_list)
+    for i in flag_list:
+        print(f"搜索的旗帜类型：{i}")
+        base.wait_element_click(base.find_xpath_by_tag_name("旗帜", "input"))
+        base.wait_element_click(base.find_xpath(i))
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "旗帜")
+        order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if order_sum_text == "本页共0条数据":
+            print(f"没数据不用看")
+        else:
+            result = list(set(base.get_column_text("旗帜")))
+            if "无旗帜" in i:
+                for j in result:
+                    print(f"旗帜搜索结果：{j}")
+                    assert j == "无旗帜"
+            elif "排除" in i:
+                flag = i.replace("排除", "")
+                for j in result:
+                    print(f"旗帜搜索结果：{j}")
+                    assert flag_id[flag] != j
+            else:
+                for j in result:
+                    print(f"旗帜搜索结果：{j}")
+                    assert j == flag_id[i]
+
+
+# 会员名
+def test_vip_name_search_condition():
+    base.wait_element_click(base.find_xpath_with_spaces("收货人信息"))
+    vip_name_list = base.get_column_text("会员名")
+    for i in vip_name_list:
+        vip_name_keyword = base.get_random_substring(i)
+        base.wait_element(base.find_xpath_by_placeholder("会员名")).send_keys(Keys.CONTROL+'a')
+        base.wait_element(base.find_xpath_by_placeholder("会员名")).send_keys(vip_name_keyword)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "会员名")
+        result = base.get_column_text("会员名")
+        for j in result:
+            assert vip_name_keyword in j
+
+
+# 收货人姓名
+def test_receiver_name():
+    base.wait_element_click(base.find_xpath_with_spaces("收货人信息"))
+    receiver_name_list = base.get_column_text("收货人")
+    for i in receiver_name_list:
+        receiver_name_keyword = base.get_random_substring(i)
+        base.wait_element(base.find_xpath_by_placeholder("收货人姓名")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("收货人姓名")).send_keys(receiver_name_keyword)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "收货人")
+        result = base.get_column_text("收货人")
+        for j in result:
+            assert receiver_name_keyword in j
+
+
+# 创建时间测试
+def test_time_search_condition():
+    base.scroll_to(5)
+    test.time_component_test("创建时间")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "创建时间")
+    base.wait_element_click(base.find_xpath("时间"))
+    test.time_component_test("付款时间")
+    # TODO:(RUI):  no good idea with delivery time
+
+
+def test_001():
+    print(base.get_random_substring('zyxwvutsrqponmlkjihgfedcba'))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import datetime
+import random
 import time
 from contextlib import contextmanager
 from selenium.common.exceptions import StaleElementReferenceException
@@ -309,7 +310,7 @@ def get_column_text(column_name):
     text_list = []
     for element in elements:
         text_list.append(element.text)
-    return text_list
+    return list(set(text_list))
 
 
 # 获取老表格组件中的一列文本
@@ -327,6 +328,7 @@ def scroll_to(num):
     """
     将滚动条分成10份，选择移动到哪个位置
     """
+    wait_element_click(find_xpath("已选择", "本页共"))
     js = f"document.getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollLeft=document" \
          f".getElementsByClassName('ag-body-horizontal-scroll-viewport')[0].scrollWidth/10*{num}; "
     driver.execute_script(js)
@@ -339,7 +341,8 @@ def scroll_to_view(xpath):
 
 
 def select_all():
-    xpath = "//div[@class='ag-header-select-all ag-labeled ag-label-align-right ag-checkbox ag-input-field' and @ref='cbSelectAll']"
+    xpath = "//div[@class='ag-header-select-all ag-labeled ag-label-align-right ag-checkbox ag-input-field' and " \
+            "@ref='cbSelectAll'] "
     wait_element(xpath).click()
 
 
@@ -401,3 +404,11 @@ def fuzzy_search(column_name, keywords):
     wait_element(find_xpath_by_placeholder("模糊搜索")).send_keys(Keys.CONTROL + 'a')
     wait_element(find_xpath_by_placeholder("模糊搜索")).send_keys(keywords)
     wait_table_refresh(find_xpath("组合查询"), 1, column_name)
+
+
+# 为方便模糊搜索测试，随机获取子字符串
+def get_random_substring(source_string):
+    key_char = random.choice(source_string)
+    result = source_string[0:source_string.index(key_char)+1]
+    return result
+

@@ -92,3 +92,19 @@ def get_normal_exception():
     for i in elements:
         result.append(i.text)
     return result
+
+
+# 获取旗帜列表
+def get_flag_list():
+    """
+    获取全部旗帜类型
+    return:["红旗","绿旗","黄旗"]
+    """
+    xpath = "//span[text()='选择旗帜']/../span"
+    elements = base.wait_elements(xpath)
+    elements.pop(0)
+    flag_list = []
+    for i in elements:
+        flag_list.append(i.text)
+    return flag_list
+

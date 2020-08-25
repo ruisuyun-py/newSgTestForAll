@@ -1,4 +1,6 @@
 import os
+import time
+
 from selenium.webdriver.common.keys import Keys
 import page.base_page as base
 
