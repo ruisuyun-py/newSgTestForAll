@@ -841,16 +841,28 @@ def test_sku_info():
     base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
     print(f"解析出需要的信息列表")
     print(f"sku_code_list：{sku_code_list}")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    test.sku_info_search_condition_test(sku_code_list, "商家编码")
     print(f"product_name_list：{product_name_list}")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    test.sku_info_search_condition_test(product_name_list, "商品名称")
     print(f"sku_name_list：{sku_name_list}")
-    print(f"platform_sku_code_list：{platform_sku_code_list}")
-    print(f"platform_sku_name_list：{platform_sku_name_list}")
-    print(f"platform_sku_id_list：{platform_sku_id_list}")
-    for i in sku_code_list:
-        base.wait_element_click(base.find_xpath_by_placeholder("商家编码")).send_keys(Keys.CONTROL+'a')
-        base.wait_element_click(base.find_xpath_by_placeholder("商家编码")).send_keys(i)
-        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
-        
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    test.sku_info_search_condition_test(sku_name_list, "规格名称")
+    # print(f"platform_sku_code_list：{platform_sku_code_list}")
+    # base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    # test.sku_info_search_condition_test(platform_sku_code_list, "平台商家编码")
+    # print(f"platform_sku_name_list：{platform_sku_name_list}")
+    # base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    # test.sku_info_search_condition_test(platform_sku_name_list, "平台规格名称")
+    # print(f"platform_sku_id_list：{platform_sku_id_list}")
+    # base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    # test.sku_info_search_condition_test(platform_sku_id_list, "平台商品id")
+
+
+
+
+
 
 def test_001():
     with base.operate_page("设置", "订单设置", "订单设置框架"):
