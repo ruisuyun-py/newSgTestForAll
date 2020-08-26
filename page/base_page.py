@@ -337,7 +337,7 @@ def scroll_to(num):
 def scroll_to_view(xpath):
     element = wait_element(xpath)
     js = "arguments[0].scrollIntoView();"
-    driver.execute(js, element)
+    driver.execute_script(js, element)
 
 
 def select_all():

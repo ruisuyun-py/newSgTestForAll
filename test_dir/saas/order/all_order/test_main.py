@@ -795,8 +795,66 @@ def test_time_search_condition():
     # TODO:(RUI):  no good idea with delivery time
 
 
+# 商品信息
+def test_sku_info():
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（无备注）"))
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（有备注）"))
+    base.wait_element_click(base.find_xpath_with_spaces("待审核（拆单）"))
+    base.scroll_to_view(base.find_xpath("订单类型", "订单来源"))
+    base.wait_element_click(base.find_xpath("订单类型", "订单来源"))
+    base.wait_element_click(base.find_xpath("订单来源", "自动下载"))
+    base.wait_element_click(base.find_xpath("收货人信息", "商品信息"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    order_code_list = base.get_column_text("订单编码")
+    print(f"获取一批商品信息")
+    sku_code_list = []
+    product_name_list = []
+    sku_name_list = []
+    platform_sku_code_list = []
+    platform_sku_name_list = []
+    platform_sku_id_list = []
+    for i in order_code_list:
+        order_code = i[i.index("T"):]
+        order_id_list = interface.get_order_info_by_fuzzy(order_code, ["id"])
+        for j in order_id_list:
+            sku_info_list = interface.get_order_product_detail(j["id"], ["商家编码", "商品名称", "规格名称", "平台商家编码", "平台规格名称", "平台商品ID"])
+            for s in sku_info_list:
+                for k, v in s.items():
+                    if k == "商家编码":
+                        sku_code_list.append(v)
+                    elif k == "商品名称":
+                        product_name_list.append(v)
+                    elif k == "规格名称":
+                        sku_name_list.append(v)
+                    elif k == "平台商家编码":
+                        platform_sku_code_list.append(v)
+                    elif k == "平台规格名称":
+                        platform_sku_name_list.append(v)
+                    elif k == "平台商品ID":
+                        platform_sku_id_list.append(v)
+    sku_code_list = list(set(sku_code_list))
+    product_name_list = list(set(product_name_list))
+    sku_name_list = list(set(sku_name_list))
+    platform_sku_code_list = list(set(platform_sku_code_list))
+    platform_sku_name_list = list(set(platform_sku_name_list))
+    platform_sku_id_list = list(set(platform_sku_id_list))
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    print(f"解析出需要的信息列表")
+    print(f"sku_code_list：{sku_code_list}")
+    print(f"product_name_list：{product_name_list}")
+    print(f"sku_name_list：{sku_name_list}")
+    print(f"platform_sku_code_list：{platform_sku_code_list}")
+    print(f"platform_sku_name_list：{platform_sku_name_list}")
+    print(f"platform_sku_id_list：{platform_sku_id_list}")
+    for i in sku_code_list:
+        base.wait_element_click(base.find_xpath_by_placeholder("商家编码")).send_keys(Keys.CONTROL+'a')
+        base.wait_element_click(base.find_xpath_by_placeholder("商家编码")).send_keys(i)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+        
+
 def test_001():
-    print(base.get_random_substring('zyxwvutsrqponmlkjihgfedcba'))
+    with base.operate_page("设置", "订单设置", "订单设置框架"):
+        base.scroll_to_view(base.find_xpath_with_spaces("商品排序一单一货优先"))
 
 
 if __name__ == '__main__':

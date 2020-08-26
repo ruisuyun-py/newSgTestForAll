@@ -11,7 +11,7 @@ import page.login_page as login
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
-def setup_module():
+def setup_module(browser):
     base.cookies = interface.get_cookie()
 
 
@@ -132,6 +132,16 @@ def test_get_sku_unique_bar_code():
 
 def test_get_delivery_order_info():
     result = interface.get_delivery_order_info()
+    print(result)
+
+
+def test_get_order_info_by_fuzzy():
+    result = interface.get_order_info_by_fuzzy("1146084768821949721", ["订单编码", "会员名"])
+    print(result)
+
+
+def test_get_order_product_detail():
+    result = interface.get_order_product_detail("7495072077142033625", ["平台商品id"])
     print(result)
 
 

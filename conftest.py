@@ -92,12 +92,13 @@ def capture_screenshots(case_name):
     :return:
     """
     # global driver
-    file_name = case_name.split("/")[-1]
-    new_report_dir = new_report_time()
-    if new_report_dir is None:
-        raise RuntimeError('没有初始化测试目录')
-    image_dir = os.path.join(REPORT_DIR, new_report_dir, "image", file_name)
-    base.driver.save_screenshot(image_dir)
+    # file_name = case_name.split("/")[-1]
+    # new_report_dir = new_report_time()
+    # if new_report_dir is None:
+    #     raise RuntimeError('没有初始化测试目录')
+    # image_dir = os.path.join(REPORT_DIR, new_report_dir, "image", file_name)
+    # base.driver.save_screenshot(image_dir)
+    pass
 
 
 def new_report_time():

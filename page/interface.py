@@ -571,6 +571,246 @@ def new_order(vip_name, sku_info):
     return order_info
 
 
+# 获取订单信息
+def get_order_info_by_fuzzy(fuzzy_keywords, required_information_list):
+    """
+    fuzzy_keywords:模糊搜索的关键字
+    required_information_list：需要的信息名称,比如：[info_name1, info_name2, info_name3]
+    return:[{"info_name1": "value", "info_name2": "value", "info_name3": "value",}]
+    原始信息：
+    {data: {Items: [{WaitApproveMaxId: "7495029146578322338",…}], TotalCount: 1}, code: 1, message: null}
+    code: 1
+        data: {Items: [{WaitApproveMaxId: "7495029146578322338",…}], TotalCount: 1}
+            Items: [{WaitApproveMaxId: "7495029146578322338",…}]
+                0: {WaitApproveMaxId: "7495029146578322338",…}
+                    Approved: false
+                    BuyerMemo: ""
+                    Code: "TD200727007"
+                    DeliveryCompleted: false
+                    DispatchCompleted: false
+                    EncriptReceiverMobile: "$176$CkuuVaTZ5CdQYgSEVM/phA==$1$"
+                    EncriptReceiverName: "~xNPw4a7Nc5bLCphunyYZjQ==~1~"
+                    EncriptReceiverPhone: null
+                    ExceptionMessage: "其他ERP已发货"
+                    ExceptionType: 1048576
+                    ExpressId: "7494440373939341490"
+                    ExpressName: "邮政小包电子面单"
+                    ExpressNo: null
+                    Id: "7495029146578322338"
+                    ImBackGroundImgUrl: "https://amos.alicdn.com/online.aw?v=2&uid=t_1479214728795_0&site=cntaobao&s=2&charset=utf-8"
+                    ImUrl: "https://amos.alicdn.com/getcid.aw?v=3&site=cntaobao&groupid=0&s=1&fromid=&uid=t_1479214728795_0&status=1&charset=utf-8"
+                    InvoiceNo: null
+                    InvoiceTitle: null
+                    IsCod: false
+                    IsEnd: false
+                    LackType: 4
+                    Note: "{来源:WAP,WAP}"
+                    OrderCodeTid: "1146084768821949721<br/>[全缺]TD200727007"
+                    OrderCount: 4
+                    OrderStatus: "其他ERP已发货"
+                    OrderTypeName: "销售订单"
+                    PayDate: "2020-07-27 18:24:55"
+                    PayDays: 29
+                    Platform: 1
+                    PostFee: 0
+                    ProHtml: "<span class="good-box"><span class="label">1</span><img src="https://img.alicdn.com/bao/uploaded/i2/2462224143/O1CN01Bpi9Ny1gTXTt4cGoS_!!2462224143.jpg_30x30.jpg" title="07080932-黑 43-46 43-46" /></span><span class="good-box"><span class="label">1</span><img src="https://img.alicdn.com/bao/uploaded/i2/2462224143/O1CN01Bpi9Ny1gTXTt4cGoS_!!2462224143.jpg_30x30.jpg" title="07080932-蓝 35-38 35-38" /></span><span class="good-box"><span class="label">1</span><img src="https://img.alicdn.com/bao/uploaded/i2/2462224143/O1CN01Bpi9Ny1gTXTt4cGoS_!!2462224143.jpg_30x30.jpg" title="07080932-红 31-34 31-34" /></span>"
+                    ProList: [{Id: "7495029146578322338",…}, {Id: "7495029146578322338",…}, {Id: "7495029146578322338",…}]
+                    ReceiverAddress: "上海 上海市 闵行区 浦江镇永杰路439弄永康城浦晨雅苑1号楼401"
+                    ReceiverMobile: "17673647529"
+                    ReceiverName: "郭习浪"
+                    ReceiverPhone: null
+                    ReceiverRegionId: "1234668550602865521"
+                    RecordDate: "2020-07-27 18:25:48"
+                    SellerFlag: 1
+                    SellerMemo: "天下无敌  建单人：售后专用 - 建单时间：07/28 - 物流单号：568888544 -天下无敌共退1件;(货品信息:【07080932-蓝 35-蓝色 35—38*1】)|2020-07-28 17:12:48退货退款-ERP对接入仓自动退（淘宝）.195307080932-蓝 35-381.00  建单人：售后专用 - 建单时间：07/28 - 物流单号：568888544 -天下无敌共退1件;(货品信息:【07080932-蓝 35-蓝色 35—38*1】);共换1件(货品信息:【07080932-蓝 X-蓝色 XL*1】) （收）07080932-蓝 35-蓝色 3538*1（换）07080932-蓝 X-蓝色 XL*1"
+                    ShopId: "7494677199308457149"
+                    ShopName: "巨淘气"
+                    SortKey: "1_[07080932-黑 43-46 43-46][07080932-红 31-34 31-34][07080932-蓝 35-38 35-38]"
+                    SourceType: 1
+                    StatusType: 4
+                    SumAmount: 3
+                    SumDeliveriedQty: 0
+                    SumDiscountAmount: 0
+                    SumDispatchedQty: 0
+                    SumQty: 3
+                    Tid: "1146084768821949721"
+                    TradeOnlineUrl: "https://trade.taobao.com/trade/detail/trade_item_detail.htm?bizOrderId=1146084768821949721"
+                    TradeStatus: 8
+                    Type: 1
+                    UnPaidAmount: 0
+                    VipName: "t_1479214728795_0"
+                    WaitApproveMaxId: "7495029146578322338"
+                    WarehouseId: "162573418911628622"
+                    WarehouseName: "主仓库"
+                    Weight: 0
+        TotalCount: 1
+    message: null
+    """
+    url_params = {
+        "Fuzzy": fuzzy_keywords,
+        'ModelTypeName': 'ErpWeb.Domain.ViewModels.Orders.AllOrderVmv',
+    }
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/QueryPage?"
+    for k, v in url_params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    information_mapping = {
+        "是否审核": "Approved",
+        "买家备注": "BuyerMemo",
+        "订单编码": "Code",
+        "是否发货": "DeliveryCompleted",
+        "是否配货完成": "DispatchCompleted",
+        "加密收货人电话": "EncriptReceiverMobile",
+        "加密收货人姓名": "EncriptReceiverName",
+        "加密收货人手机": "EncriptReceiverPhone",
+        "异常消息": "ExceptionMessage",
+        "快递": "ExpressName",
+        "快递单号": "ExpressNo",
+        "id": "Id",
+        "发票编号": "InvoiceNo",
+        "发票抬头": "InvoiceTitle",
+        "是否锁定": "IsCod",
+        "是否终结": "IsEnd",
+        "便签": "Note",
+        "订单数": "OrderCount",
+        "订单状态": "OrderStatus",
+        "订单类型": "OrderTypeName",
+        "付款时间": "PayDate",
+        "付款天数": "PayDays",
+        "运费": "PostFee",
+        "商品信息": "ProList",
+        "收货地址": "ReceiverAddress",
+        "电话": "ReceiverMobile",
+        "收货人": "ReceiverName",
+        "手机": "ReceiverPhone",
+        "创建时间": "RecordDate",
+        "旗帜": "SellerFlag",
+        "卖家备注": "SellerMemo",
+        "店铺": "ShopName",
+        "总金额": "SumAmount",
+        "总发货数": "SumDeliveriedQty",
+        "总优惠金额": "SumDiscountAmount",
+        "总未配货数": "SumDispatchedQty",
+        "商品数量": "SumQty",
+        "平台单号": "Tid",
+        "未付金额": "UnPaidAmount",
+        "会员名": "VipName",
+        "仓库": "WarehouseName",
+        "重量": "Weight",
+    }
+    information_list = []
+    for k in result["data"]["Items"]:
+        info_dict = {}
+        for i in required_information_list:
+            info_code = information_mapping[i]
+            info_dict[i] = k[info_code]
+        information_list.append(info_dict)
+    return information_list
+
+
+# 获取订单的商品明细详情
+def get_order_product_detail(order_id, required_information_list):
+    """
+    order_id:该订单的id
+    required_information_list:比如：["商家编码", "商品名称", "规格名称", "平台商家编码", "平台规格名称", "平台商品ID", ]
+    return:[{"商家编码":"value", "": "", "": "", "": "", "": "", "": "", "": "",},.....]
+    原始数据
+    {data: {SumQty: 3, ProductAmount: 3, ExceptionItems: [],…}, code: 1, message: null}
+    code: 1
+        data: {SumQty: 3, ProductAmount: 3, ExceptionItems: [], Lines: [],…}
+            ExceptionItems: []
+                Lines: [{Id: "7495029146578322340", ProductId: "7495033536907314668", SkuId: "7495003057839669914",…},…]
+                    0: {Id: "7495029146578322340", ProductId: "7495033536907314668", SkuId: "7495003057839669914",…}
+                    1: {Id: "7495029146578322341", ProductId: "7495033536907314668", SkuId: "7495003057822892485",…}
+                    2: {Id: "7495029146578322342", ProductId: "7495033536907314668", SkuId: "7495003057806115286",…}
+                        Amount: 1
+                        CanDispatchQty: -6
+                        ComboQty: 0
+                        DeliveriedQty: 0
+                        DeliveryCompleted: false
+                        DispatchedQty: 0
+                        ExceptionTypeMessage: null
+                        HeaderId: "0"
+                        Id: "7495029146578322342"
+                        IsCombo: false
+                        IsGift: false
+                        Oid: "1146084768824949721"
+                        OnlineStatus: "交易完成"
+                        OnlineUrl: "https://item.taobao.com/item.htm?id=610510713972"
+                        OriginPrice: 1
+                        PicUrl: "https://img.alicdn.com/bao/uploaded/i2/2462224143/O1CN01Bpi9Ny1gTXTt4cGoS_!!2462224143.jpg"
+                        PlatProductCode: "200615192123"
+                        PlatProductId: "610510713972"
+                        PlatProductName: "测试专用 勿拍，不发货"
+                        PlatSkuCode: "07080932-红 31-34"
+                        PlatSkuId: "4555424594867"
+                        PlatSkuName: "红色 31-34"
+                        ProductCategoryId: "0"
+                        ProductCode: "07080932"
+                        ProductId: "7495033536907314668"
+                        ProductName: "07080932"
+                        Qty: 1
+                        SkuCode: "07080932-红 31-34 31-34"
+                        SkuId: "7495003057806115286"
+                        SkuName: "红色 31-34"
+                        SkuWeight: 0
+                        SupplierId: "0"
+                        ThumbnailUrl: "https://img.alicdn.com/bao/uploaded/i2/2462224143/O1CN01Bpi9Ny1gTXTt4cGoS_!!2462224143.jpg_30x30.jpg"
+                        Tid: null
+            ProductAmount: 3
+            SumQty: 3
+    message: null
+    """
+    url_params = {
+        "orderId": order_id,
+    }
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/GetOrderLines?"
+    for k, v in url_params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    information_mapping = {
+        "总金额": "Amount",
+        "可配货库存": "CanDispatchQty",
+        "配货数量": "DispatchedQty",
+        "是否套餐": "IsCombo",
+        "是否赠品": "IsGift",
+        "平台单号": "Oid",
+        "线上状态": "OnlineStatus",
+        "原始单价": "OriginPrice",
+        "平台货号": "PlatProductCode",
+        "平台商品ID": "PlatProductId",
+        "平台商品名称": "PlatProductName",
+        "平台商家编码": "PlatSkuCode",
+        "平台规格ID": "PlatSkuId",
+        "平台规格名称": "PlatSkuName",
+        "货号": "ProductCode",
+        "商品名称": "ProductName",
+        "数量": "Qty",
+        "商家编码": "SkuCode",
+        "商品ID": "SkuId",
+        "规格名称": "SkuName",
+        "商品重量": "SkuWeight",
+        "供应商ID": "SupplierId",
+    }
+    information_list = []
+    for k in result["data"]["Lines"]:
+        info_dict = {}
+        for i in required_information_list:
+            info_code = information_mapping[i]
+            info_dict[i] = k[info_code]
+        information_list.append(info_dict)
+    return information_list
+
+
+# 修改预设会员价
 def modify_preset_price(vip_name, product_code, old_price, price):
     """
     vipname:会员名称
