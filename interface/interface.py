@@ -670,7 +670,7 @@ def get_order_info_by_fuzzy(fuzzy_keywords, required_information_list):
         "异常消息": "ExceptionMessage",
         "快递": "ExpressName",
         "快递单号": "ExpressNo",
-        "id": "Id",
+        "ID": "Id",
         "发票编号": "InvoiceNo",
         "发票抬头": "InvoiceTitle",
         "是否锁定": "IsCod",

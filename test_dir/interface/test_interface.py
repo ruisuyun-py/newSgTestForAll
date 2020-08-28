@@ -1,12 +1,9 @@
 import sys
-import time
 from os.path import dirname, abspath
-from selenium import webdriver
 import page.base_page as base
-import page.interface as interface
+import interface.interface as interface
 import pytest
 import requests
-import page.login_page as login
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
@@ -136,12 +133,12 @@ def test_get_delivery_order_info():
 
 
 def test_get_order_info_by_fuzzy():
-    result = interface.get_order_info_by_fuzzy("1146084768821949721", ["订单编码", "会员名"])
+    result = interface.get_order_info_by_fuzzy("1146084768821949721", ["ID"])
     print(result)
 
 
 def test_get_order_product_detail():
-    result = interface.get_order_product_detail("7495072077142033625", ["平台商品id"])
+    result = interface.get_order_product_detail("7495072077142033625", ["供应商ID"])
     print(result)
 
 

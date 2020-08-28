@@ -98,7 +98,8 @@ def find_frame(frame_name):
 
 
 def switch_to_frame(xpath):
-    driver.switch_to.frame(driver.find_element_by_xpath(xpath))
+    frame = wait_element(xpath)
+    driver.switch_to.frame(frame)
 
 
 def open_page(menu_name, page_name, frame_name):
@@ -310,7 +311,21 @@ def get_column_text(column_name):
     text_list = []
     for element in elements:
         text_list.append(element.text)
-    return list(set(text_list))
+    return text_list
+
+
+# 获取主表中一列的文本,并去掉重复值
+def get_unique_column_text(column_name):
+    """
+    column:列名
+    return：文本列表
+    """
+    xpath = get_column_xpath(column_name)
+    elements = wait_elements(xpath)
+    text_list = []
+    for element in elements:
+        text_list.append(element.text)
+    return text_list
 
 
 # 获取老表格组件中的一列文本
@@ -372,19 +387,42 @@ def chose_vip(vip_name):
     double_click(get_cell_xpath(vip_name, "会员名称"))
 
 
-# 简化切换框架方法
-def change_frame(frame_name, frame_name2=''):
-    """
-    frame_name:一级框架，比如全部订单框架
-    frame_name2：二级框架，比如选择会员
-    """
-    if frame_name2 == '':
-        driver.switch_to.default_content()
-        switch_to_frame(locations[frame_name])
+# 选择供应商
+def chose_supplier_by_text(supplier_name_list):
+    supplier_name_text = ""
+    if isinstance(supplier_name_list, list):
+        for i in supplier_name_list:
+            supplier_name_text += i
     else:
+        supplier_name_text = supplier_name_list
+    supplier_input = wait_element_click(find_xpath_by_placeholder("请输入完整的供应商名称，多个供应商以逗号（，）分隔"))
+    supplier_input.send_keys(Keys.CONTROL+'a')
+    supplier_input.send_keys(supplier_name_text)
+    supplier_input.send_keys(Keys.ENTER)
+    # assert supplier_input.get_attribute("value") == "supplier_name_text", "输入了不存在的供应商"
+
+
+# 简化切换框架方法
+def change_frame(frame_name='', frame_name2=''):
+    """
+    frame_name:一级框架/二级框架，比如全部订单框架
+    frame_name2：二级框架，比如选择会员
+    如果不填任何参数则直接返回底层框架
+    """
+    if frame_name == '':
         driver.switch_to.default_content()
-        switch_to_frame(locations[frame_name])
-        switch_to_frame(find_frame(frame_name2))
+    else:
+        if frame_name2 == '':
+            if "框架" in frame_name:
+                driver.switch_to.default_content()
+                switch_to_frame(locations[frame_name])
+            else:
+                driver.switch_to.default_content()
+                switch_to_frame(find_frame(frame_name))
+        else:
+            driver.switch_to.default_content()
+            switch_to_frame(locations[frame_name])
+            switch_to_frame(find_frame(frame_name2))
 
 
 @contextmanager

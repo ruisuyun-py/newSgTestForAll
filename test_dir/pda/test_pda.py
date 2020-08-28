@@ -3,10 +3,10 @@ import time
 import pytest
 from os.path import dirname, abspath
 from appium import webdriver
-import page.pda as pda
+import pda.pda as pda
 import page.base_page as base
-import page.interface as interface
-import page.login_page as login
+import interface.interface as interface
+
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 

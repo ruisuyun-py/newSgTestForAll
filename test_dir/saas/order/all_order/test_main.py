@@ -9,7 +9,8 @@ import test_dir.test_base as test
 import page.login_page as login
 import page.base_page as base
 import page.order.all_order_page as order
-import page.interface as interface
+import interface.interface as interface
+import interface.supplier.supplier_interface as supplier_interface
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
@@ -76,6 +77,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     print(not_found_vip_result)
     for v in not_found_vip_result:
         assert v + '\n' in not_found_vip_list
+    time.sleep(1)
     base.wait_element(base.find_xpath("信息", "确定")).click()
     base.driver.switch_to.default_content()
     base.switch_to_frame(base.locations["全部订单框架"])
@@ -110,6 +112,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     print(not_found_express_code_result)
     for v in not_found_express_code_result:
         assert v + '\n' in not_found_express_code_list
+    time.sleep(1)
     base.wait_element(base.find_xpath("信息", "确定")).click()
     base.driver.switch_to.default_content()
     base.switch_to_frame(base.locations["全部订单框架"])
@@ -148,6 +151,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     print(not_found_platform_order_code_result)
     for v in not_found_platform_order_code_result:
         assert v + '\n' in not_found_platform_order_code_list
+    time.sleep(1)
     base.wait_element(base.find_xpath("信息", "确定")).click()
     base.driver.switch_to.default_content()
     base.switch_to_frame(base.locations["全部订单框架"])
@@ -184,6 +188,7 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     print(not_found_address_result)
     for v in not_found_address_result:
         assert v + '\n' in not_found_address_list
+    time.sleep(1)
     base.wait_element(base.find_xpath("信息", "确定")).click()
     base.driver.switch_to.default_content()
     base.switch_to_frame(base.locations["全部订单框架"])
@@ -631,7 +636,7 @@ def test_wait_merger_order_exception():
         for i in result:
             assert "待审核" == i
         print("验证订单数必须大于2且必须至少有一个待合并订单状态异常")
-        for i in range(1, len(result) + 1):
+        for i in range(1, len(result)):
             order_sum = base.wait_element(base.get_cell_xpath(i + 1, "订单数")).text
             assert int(order_sum) >= 2
             base.wait_element_click(base.get_cell_xpath(i + 1, "订单数", order_sum))
@@ -787,6 +792,10 @@ def test_receiver_name():
 
 # 创建时间测试
 def test_time_search_condition():
+    name = base.get_now_string()
+    interface.new_vip(name)
+    sku_info = [{'SkuCode': '测试商品1-红色 XS', 'Qty': '2'}, ]
+    order_info = interface.new_order(name, sku_info)
     base.scroll_to(5)
     test.time_component_test("创建时间")
     base.wait_table_refresh(base.find_xpath("清空"), 1, "创建时间")
@@ -795,7 +804,7 @@ def test_time_search_condition():
     # TODO:(RUI):  no good idea with delivery time
 
 
-# 商品信息
+# 商品信息:商家编码/商品名称/规格名称/平台商家编码/平台规格名称/平台商品ID
 def test_sku_info():
     base.wait_element_click(base.find_xpath_with_spaces("待审核（无备注）"))
     base.wait_element_click(base.find_xpath_with_spaces("待审核（有备注）"))
@@ -815,7 +824,7 @@ def test_sku_info():
     platform_sku_id_list = []
     for i in order_code_list:
         order_code = i[i.index("T"):]
-        order_id_list = interface.get_order_info_by_fuzzy(order_code, ["id"])
+        order_id_list = interface.get_order_info_by_fuzzy(order_code, ["ID"])
         for j in order_id_list:
             sku_info_list = interface.get_order_product_detail(j["id"], ["商家编码", "商品名称", "规格名称", "平台商家编码", "平台规格名称", "平台商品ID"])
             for s in sku_info_list:
@@ -848,9 +857,9 @@ def test_sku_info():
     print(f"sku_name_list：{sku_name_list}")
     base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
     test.sku_info_search_condition_test(sku_name_list, "规格名称")
-    # print(f"platform_sku_code_list：{platform_sku_code_list}")
-    # base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
-    # test.sku_info_search_condition_test(platform_sku_code_list, "平台商家编码")
+    print(f"platform_sku_code_list：{platform_sku_code_list}")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    test.sku_info_search_condition_test(platform_sku_code_list, "平台商家编码")
     print(f"platform_sku_name_list：{platform_sku_name_list}")
     base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
     test.sku_info_search_condition_test(platform_sku_name_list, "平台规格名称")
@@ -859,14 +868,79 @@ def test_sku_info():
     test.sku_info_search_condition_test(platform_sku_id_list, "平台商品ID")
 
 
+# 商品数量
+def test_sku_num_search_condition():
+    base.wait_element_click(base.find_xpath("商品信息"))
+    base.wait_element_click(base.find_xpath_by_placeholder("数量大于等于")).send_keys("2")
+    base.wait_element_click(base.find_xpath_by_placeholder("数量小于")).send_keys("10")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_unique_column_text("商品数量")
+    for i in result:
+        assert 2 <= int(i) < 10
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "订单编码")
+    base.wait_element_click(base.find_xpath_by_placeholder("金额大于等于")).send_keys("2")
+    base.wait_element_click(base.find_xpath_by_placeholder("金额小于")).send_keys("10")
+    base.scroll_to(5)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "总金额")
+    result = base.get_unique_column_text("总金额")
+    for i in result:
+        assert 2.00 <= float(i) < 10.00
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "总金额")
+    base.wait_element_click(base.find_xpath_by_placeholder("种类数大于等于")).send_keys("6")
+    base.wait_element_click(base.find_xpath_by_placeholder("种类数小于")).send_keys("7")
+    base.scroll_to(0)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    elements = base.wait_elements(base.get_column_xpath("商品信息"))
+    for i in elements:
+        i.click()
+        sku_code_list = order.get_all_float_sku_info("商家编码")
+        assert 6 <= len(sku_code_list) < 7
 
 
+# 供应商/排除供应商搜索条件
+def test_supplier_search_condition():
+    base.wait_element_click(base.find_xpath("商品信息"))
+    supplier_name_list = [
+        "供应商1",
+        "供应商2",
+        "供应商3",
+        "供应商4",
+        "供应商5",
+    ]
+    print(f"订单的所有明细供应商必须是指定供应商才符合供应商搜索条件")
+    for i in supplier_name_list:
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_by_placeholder("供应商"))
+        base.change_frame("选择供应商")
+        base.chose_supplier_by_text(i)
+        base.change_frame()
+        base.wait_element_click(base.find_xpath("选择供应商", "确认"))
+        base.change_frame("全部订单框架")
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if order_sum_text == "本页共0条数据":
+            print(f"没数据不用看")
+        else:
+            order_code_list = base.get_column_text("订单编码")
+            supplier_id = supplier_interface.get_supplier_info(i, ["供应商ID"])["供应商ID"]
+            print(f"指定供应商: {i}的供应商id是: {supplier_id}")
+            for order_code in order_code_list:
+                order_code = order_code[order_code.index("T"):]
+                # print(f"order_code:{order_code}")
+                order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
+                # print(f"order_id:{order_id}")
+                supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
+                for s in supplier_id_result:
+                    print(f"商品明细的供应商id是: {s['供应商ID']}")
+                    assert s["供应商ID"] == supplier_id
 
 
-def test_001():
-    with base.operate_page("设置", "订单设置", "订单设置框架"):
-        base.scroll_to_view(base.find_xpath_with_spaces("商品排序一单一货优先"))
-
+# def test_001():
+#     with base.operate_page("设置", "订单设置", "订单设置框架"):
+#         base.scroll_to_view(base.find_xpath_with_spaces("商品排序一单一货优先"))
 
 if __name__ == '__main__':
     pytest.main()

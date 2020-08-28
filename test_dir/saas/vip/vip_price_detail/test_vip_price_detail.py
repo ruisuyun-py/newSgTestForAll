@@ -5,10 +5,9 @@ import copy
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 import page.login_page as login
 import page.base_page as base
-import page.interface as interface
+import interface.interface as interface
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
