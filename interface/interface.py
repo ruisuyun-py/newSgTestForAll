@@ -1083,55 +1083,6 @@ def save_order_setting(setting_info):
     response = requests.get(url, headers=headers)
 
 
-def get_delivery_order_info():
-    """
-    return:
-    {"data":
-        { "Items":
-            [
-                {"Id":"7495067250655756700","OrderType":8,"OrderTypeName":"[门店]",
-                "WarehouseName":"主仓库","ExpressName":"买家自提","Code":"DO200823007","ExpressNo":"DO200823007","PlatCode":null,
-                "ProductQuantity":2,"PickCount":0,"PayDate":"2020-08-23 01:18:43","ExpressPrintDate":"2020-08-23 01:18:44",
-                "DeliverySendDate":"2020-08-23 01:18:44","TranStatusModifyDate":null,"ScanDate":null,"IsPlatDelivery":false,
-                "IsPrintExpress":true,"IsWeight":false,"IsScan":false,"IsTrans":false,"IsSplit":false,"ShopName":"测试门店1",
-                "VipName":"20200823011805","Note":null,"ConsigneeName":"7495067250018222081","Weight":0.0,"WeightQty":0.0,
-                "SumAmount":200.0,"ConsigneeAdress":"7495067250018222081","DeliverySendUser":"测试","ScanUser":null,
-                "WeightUser":null,"PackageUser":null,"PlatDeliveryDate":null,"TranStatusName":"未知状态","ExpressCost":0.0,
-                "BatchCode":null,"PackageMemo":null,"Platform":0,"EncriptReceiverMobile":null,"EncriptReceiverPhone":null,
-                "EncriptReceiverName":null},
-            ]
-        ,"TotalCount":2393
-        },
-    "code":1,
-    "message":null
-    }
-    """
-    user_info = {
-        'ModelTypeName': 'ErpWeb.Domain.ViewModels.Deliverys.DeliveryOrderQueryVmv',
-    }
-    url = "http://gw.erp12345.com/api/Deliverys/DeliveryOrderQuery/QueryPage?"
-    for k, v in user_info.items():
-        url += f"{k}={v}&"
-    headers = {
-        'Cookie': base.cookies
-    }
-    response = requests.get(url, headers=headers)
-    result = dict(response.json())
-    return result
 
-
-# 获取发货单特定列的值对照表
-def get_delivery_order_column_value(key_column, value_column):
-    name_code_map = {
-        "物流单号": "ExpressNo",
-        "会员名称": "VipName",
-    }
-    result = get_delivery_order_info()
-    column_info = {}
-    for i in result["data"]["Items"]:
-        key = i[name_code_map[key_column]]
-        value = i[name_code_map[value_column]]
-        column_info[key] = value
-    return column_info
 
 

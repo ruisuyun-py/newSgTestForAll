@@ -2,6 +2,7 @@ import sys
 from os.path import dirname, abspath
 import page.base_page as base
 import interface.interface as interface
+import interface.order.delivery_order_interface as delivery_interface
 import pytest
 import requests
 
@@ -127,7 +128,7 @@ def test_get_sku_unique_bar_code():
         print(i)
 
 
-def test_get_delivery_order_info():
+def test_old_get_delivery_order_info():
     result = interface.get_delivery_order_info()
     print(result)
 
@@ -139,6 +140,13 @@ def test_get_order_info_by_fuzzy():
 
 def test_get_order_product_detail():
     result = interface.get_order_product_detail("7495072077142033625", ["供应商ID"])
+    print(result)
+
+
+def test_get_delivery_order_info():
+    query_params = {}
+    return_info = ["物流单号", "会员名称", ]
+    result = delivery_interface.get_delivery_order_info(query_params, return_info)
     print(result)
 
 

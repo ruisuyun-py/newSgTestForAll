@@ -392,14 +392,18 @@ def chose_supplier_by_text(supplier_name_list):
     supplier_name_text = ""
     if isinstance(supplier_name_list, list):
         for i in supplier_name_list:
-            supplier_name_text += i
+            supplier_name_text += i + ","
     else:
         supplier_name_text = supplier_name_list
+    supplier_name_text = supplier_name_text.strip(",")
     supplier_input = wait_element_click(find_xpath_by_placeholder("请输入完整的供应商名称，多个供应商以逗号（，）分隔"))
     supplier_input.send_keys(Keys.CONTROL+'a')
     supplier_input.send_keys(supplier_name_text)
     supplier_input.send_keys(Keys.ENTER)
-    # assert supplier_input.get_attribute("value") == "supplier_name_text", "输入了不存在的供应商"
+    time.sleep(1)
+    print(f"输入的供应商文本{supplier_name_text}")
+    print(f"输入之后选择的供应商{supplier_input.get_attribute('value')}")
+    assert supplier_input.get_attribute("value") == supplier_name_text, "输入了不存在的供应商"
 
 
 # 简化切换框架方法

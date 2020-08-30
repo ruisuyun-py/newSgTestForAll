@@ -5,8 +5,10 @@ import page.base_page as base
 locations = {
     "批量搜索下拉按钮": "//*[@id='ordermenu']/div[2]/form/div[1]/div/div[2]/i",
     "批量搜索文本框": "//*[@id='ordermenu']/div[2]/form/div[1]/div/div[5]/div[2]/textarea",
-
-
+    "店铺下拉按钮": "//*[@id='ordermenu']/div[2]/form/div[11]/label[1]/i",
+    "快递下拉按钮": "//*[@id='ordermenu']/div[2]/form/div[12]/label[1]/i",
+    "仓库下拉按钮": "//*[@id='ordermenu']/div[2]/form/div[13]/label[1]/i",
+    "省份下拉按钮": "//*[@id='ordermenu']/div[2]/form/div[16]/label[1]/i",
 }
 
 
@@ -116,3 +118,12 @@ def get_flag_list():
         flag_list.append(i.text)
     return flag_list
 
+
+# 获取省份
+def get_province_list():
+    xpath = "//label[text()='省份']/../ul/li/label"
+    province_elements = base.wait_elements(xpath)
+    province_list = []
+    for i in province_elements:
+        province_list.append(i.text)
+    return province_list

@@ -77,7 +77,8 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '0'
     print(f"确定{sku_code}的售价是0")
     # 设置商品的标准售价，第二价格，第三价格，第四价格
@@ -95,7 +96,7 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '100'
     print(f"确定{sku_code}的售价是100")
     # 设置会员等级为8折，再次查看售价是否是80
@@ -113,7 +114,7 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '80'
     print(f"确定会员：{vip_name}商品{sku_code}的售价是80")
     # 门店开单，不修改商品价格，还是没有记录
@@ -332,8 +333,8 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
-        assert price == '0'
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
+        assert price == '0' or price is None
     print("确定没有设置价格时，售价为0")
     # 设置商品的标准售价，第二价格，第三价格，第四价格
     interface.modify_sku_price(sku_code, "100", "200", "300", "400")
@@ -350,7 +351,7 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '100'
     print("确定标准售价设置为100，之后售价应该为100")
     print("验证会员等级设置为8折之后，售价应该是80")
@@ -368,7 +369,7 @@ def test_vip_price_detail():
         base.wait_element(base.find_xpath(product_code)).click()
         base.change_frame("门店收银框架")
         base.switch_to_frame(base.find_frame("商品选择"))
-        price = base.wait_element(base.get_old_cell_xpath("红色 XS", "交易价格")).get_attribute("value")
+        price = base.wait_element(base.get_old_cell_input_xpath("红色 XS", "交易价格")).get_attribute("value")
         assert price == '80'
     print("确定会员等级设置为8折之后，售价应该是80")
     # 门店开单，不修改商品价格，还是没有记录

@@ -1,6 +1,9 @@
 import random
+import os
 import sys
 import time
+from datetime import datetime
+
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
@@ -10,6 +13,7 @@ import page.login_page as login
 import page.base_page as base
 import page.order.all_order_page as order
 import interface.interface as interface
+import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
@@ -58,10 +62,16 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     # 先进行会员名称测试
     # 111111111111111111111111111111
     # ————————————————————————————
-    with open('file_for_multi_search/vip_list.txt', 'r', encoding='UTF-8') as f:
+    # 获取当前文件的目录
+    cur_path = os.path.abspath(os.path.dirname(__file__))
+    # 获取根目录
+    root_path = cur_path[:cur_path.find("newSgTestForAll\\") + len("newSgTestForAll\\")]
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/vip_list.txt', 'r',
+              encoding='UTF-8') as f:
         vip_list = f.readlines()
     f.close()
-    with open('file_for_multi_search/not_found_vip_list.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/not_found_vip_list.txt', 'r',
+              encoding='UTF-8') as f:
         not_found_vip_list = f.readlines()
     f.close()
     base.wait_element_click(order.locations["批量搜索下拉按钮"])
@@ -92,10 +102,12 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     time.sleep(1)
     base.wait_table_refresh(base.find_xpath('清空'), 1, '会员名')
     # 测试批量搜索物流单号
-    with open('file_for_multi_search/express_code.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/express_code.txt', 'r',
+              encoding='UTF-8') as f:
         express_code_list = f.readlines()
     f.close()
-    with open('file_for_multi_search/not_found_express_code_list.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/not_found_express_code_list.txt', 'r',
+              encoding='UTF-8') as f:
         not_found_express_code_list = f.readlines()
     f.close()
     base.wait_element_click(order.locations["批量搜索下拉按钮"])
@@ -118,7 +130,8 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     base.switch_to_frame(base.locations["全部订单框架"])
     vip_result = base.get_column_text("会员名")
     # 全部订单页面没有物流单号字段只能使用会员名称替代下
-    with open('file_for_multi_search/express_code_vip_name_result.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/express_code_vip_name_result.txt', 'r',
+              encoding='UTF-8') as f:
         vip_name_result = f.readlines()
     f.close()
     for v in vip_result:
@@ -131,10 +144,12 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     time.sleep(1)
     base.wait_table_refresh(base.find_xpath('清空'), 1, '会员名')
     # 开始平台单号批量搜索测试
-    with open('file_for_multi_search/platform_order_code.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/platform_order_code.txt', 'r',
+              encoding='UTF-8') as f:
         platform_order_code_list = f.readlines()
     f.close()
-    with open('file_for_multi_search/not_found_platform_order_code.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/not_found_platform_order_code.txt', 'r',
+              encoding='UTF-8') as f:
         not_found_platform_order_code_list = f.readlines()
     f.close()
     base.wait_element_click(order.locations["批量搜索下拉按钮"])
@@ -166,11 +181,13 @@ def test_multi_search():  # TODO:("RUI"):优化刷新方法
     time.sleep(1)
     base.wait_table_refresh(base.find_xpath('清空'), 1, '会员名')
     # 最后开始地址（未发货）批量搜索测试
-    with open('file_for_multi_search/address_list.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/address_list.txt', 'r',
+              encoding='UTF-8') as f:
         address_list = f.readlines()
     f.close()
     print(address_list)
-    with open('file_for_multi_search/not_found_address_list.txt', 'r', encoding='UTF-8') as f:
+    with open(root_path + '/test_dir/saas/order/all_order/file_for_multi_search/not_found_address_list.txt', 'r',
+              encoding='UTF-8') as f:
         not_found_address_list = f.readlines()
     f.close()
     print(not_found_address_list)
@@ -206,15 +223,17 @@ def test_fuzzy_search():
     column_name_list = ["订单编码", "平台单号", "会员名", "收货人", "手机号"]
     for i in column_name_list:
         test.fuzzy_search_test(i)
-    result = interface.get_delivery_order_column_value("物流单号", "会员名称")
+    result = delivery_interface.get_delivery_order_info({}, ["物流单号", "会员名称"])
+    print(result)
     for i in range(0, 10):
-        k = random.choice(list(result.keys()))
-        print(f"物流单号:{k}")
-        print(f"会员名：{result[k]}")
-        base.fuzzy_search("会员名", k)
-        vip_name = base.get_column_text("会员名")[0]
+        express_code = result[i]["物流单号"]
+        vip_name = result[i]["会员名称"]
+        print(f"物流单号:{express_code}")
         print(f"会员名：{vip_name}")
-        assert vip_name == result[k]
+        base.fuzzy_search("会员名", express_code)
+        vip_name_search_result = base.get_column_text("会员名")[0]
+        print(f"会员名搜索结果：{vip_name_search_result}")
+        assert vip_name == vip_name_search_result
 
 
 # 待审核（无备注）
@@ -671,8 +690,8 @@ def test_buyer_memo_search_condition():
     for i in result:
         buyer_memo = i.strip("#")
         print(f"搜索买家留言：{buyer_memo}")
-        base.wait_element_click(base.find_xpath_by_placeholder("买家留言模糊搜索")).clear()
-        base.wait_element_click(base.find_xpath_by_placeholder("买家留言模糊搜索")).send_keys(buyer_memo)
+        base.wait_element(base.find_xpath_by_placeholder("买家留言模糊搜索")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("买家留言模糊搜索")).send_keys(buyer_memo)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "买家备注")
         buyer_memo_list = list(set(base.get_column_text("买家备注")))
         for j in buyer_memo_list:
@@ -696,8 +715,8 @@ def test_seller_memo_search_condition():
     for i in result:
         buyer_memo = i.strip("#")
         print(f"搜索卖家备注：{buyer_memo}")
-        base.wait_element_click(base.find_xpath_by_placeholder("卖家备注模糊搜索")).clear()
-        base.wait_element_click(base.find_xpath_by_placeholder("卖家备注模糊搜索")).send_keys(buyer_memo)
+        base.wait_element(base.find_xpath_by_placeholder("卖家备注模糊搜索")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("卖家备注模糊搜索")).send_keys(buyer_memo)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "卖家备注")
         buyer_memo_list = list(set(base.get_column_text("卖家备注")))
         for j in buyer_memo_list:
@@ -720,8 +739,8 @@ def test_note_search_condition():
         assert i != ""
     for i in result:
         print(f"搜索便签：{i}")
-        base.wait_element_click(base.find_xpath_by_placeholder("便签模糊搜索")).clear()
-        base.wait_element_click(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(i)
+        base.wait_element(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(i)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
         buyer_memo_list = list(set(base.get_column_text("便签")))
         for j in buyer_memo_list:
@@ -768,7 +787,7 @@ def test_vip_name_search_condition():
     vip_name_list = base.get_column_text("会员名")
     for i in vip_name_list:
         vip_name_keyword = base.get_random_substring(i)
-        base.wait_element(base.find_xpath_by_placeholder("会员名")).send_keys(Keys.CONTROL+'a')
+        base.wait_element(base.find_xpath_by_placeholder("会员名")).send_keys(Keys.CONTROL + 'a')
         base.wait_element(base.find_xpath_by_placeholder("会员名")).send_keys(vip_name_keyword)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "会员名")
         result = base.get_column_text("会员名")
@@ -826,7 +845,8 @@ def test_sku_info():
         order_code = i[i.index("T"):]
         order_id_list = interface.get_order_info_by_fuzzy(order_code, ["ID"])
         for j in order_id_list:
-            sku_info_list = interface.get_order_product_detail(j["id"], ["商家编码", "商品名称", "规格名称", "平台商家编码", "平台规格名称", "平台商品ID"])
+            sku_info_list = interface.get_order_product_detail(j["ID"],
+                                                               ["商家编码", "商品名称", "规格名称", "平台商家编码", "平台规格名称", "平台商品ID"])
             for s in sku_info_list:
                 for k, v in s.items():
                     if k == "商家编码":
@@ -934,13 +954,327 @@ def test_supplier_search_condition():
                 # print(f"order_id:{order_id}")
                 supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
                 for s in supplier_id_result:
-                    print(f"商品明细的供应商id是: {s['供应商ID']}")
+                    print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
                     assert s["供应商ID"] == supplier_id
+    print(f"再试下指定多个供应商：供应商1-5")
+    supplier_id_list = []
+    for i in supplier_name_list:
+        supplier_id = supplier_interface.get_supplier_info(i, ["供应商ID"])["供应商ID"]
+        supplier_id_list.append(supplier_id)
+    print(f"供应商文本是")
+    print(f"供应商id集合是{supplier_id_list}")
+    print("指定多个供应商时，订单明细的供应商只要是指定供应商其中之一即可")
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath_by_placeholder("供应商"))
+    base.change_frame("选择供应商")
+    base.chose_supplier_by_text(supplier_name_list)
+    base.change_frame()
+    base.wait_element_click(base.find_xpath("选择供应商", "确认"))
+    base.change_frame("全部订单框架")
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if order_sum_text == "本页共0条数据":
+        print(f"没数据不用看")
+    else:
+        order_code_list = base.get_column_text("订单编码")
+        for order_code in order_code_list:
+            order_code = order_code[order_code.index("T"):]
+            # print(f"order_code:{order_code}")
+            order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
+            # print(f"order_id:{order_id}")
+            supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
+            for s in supplier_id_result:
+                print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
+                assert s["供应商ID"] in supplier_id_list
+    print(f"测试排除供应商，订单的所有商品必须全部不是指定供应商才符合条件")
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("清空"))
+    base.wait_element_refresh(element, text)
+    for i in supplier_name_list:
+        print(f"供应商点快了没有用")
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_by_placeholder("排除供应商"))
+        base.change_frame("选择供应商")
+        base.chose_supplier_by_text(i)
+        base.change_frame()
+        base.wait_element_click(base.find_xpath("选择供应商", "确认"))
+        base.change_frame("全部订单框架")
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if order_sum_text == "本页共0条数据":
+            print(f"没数据不用看")
+        else:
+            order_code_list = base.get_column_text("订单编码")
+            supplier_id = supplier_interface.get_supplier_info(i, ["供应商ID"])["供应商ID"]
+            print(f"指定供应商: {i}的供应商id是: {supplier_id}")
+            for order_code in order_code_list:
+                order_code = order_code[order_code.index("T"):]
+                # print(f"order_code:{order_code}")
+                order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
+                # print(f"order_id:{order_id}")
+                supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
+                for s in supplier_id_result:
+                    print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
+                    assert s["供应商ID"] != supplier_id
+    print(f"供应商id集合是{supplier_id_list}")
+    print("指定排除多个供应商时，订单明细的供应商不能是指定供应商其中之一")
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath_by_placeholder("排除供应商"))
+    base.change_frame("选择供应商")
+    base.chose_supplier_by_text(supplier_name_list)
+    base.change_frame()
+    base.wait_element_click(base.find_xpath("选择供应商", "确认"))
+    base.change_frame("全部订单框架")
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_sum_text = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if order_sum_text == "本页共0条数据":
+        print(f"没数据不用看")
+    else:
+        order_code_list = base.get_column_text("订单编码")
+        for order_code in order_code_list:
+            order_code = order_code[order_code.index("T"):]
+            # print(f"order_code:{order_code}")
+            order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
+            # print(f"order_id:{order_id}")
+            supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
+            for s in supplier_id_result:
+                print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
+                assert s["供应商ID"] not in supplier_id_list
 
 
-# def test_001():
-#     with base.operate_page("设置", "订单设置", "订单设置框架"):
-#         base.scroll_to_view(base.find_xpath_with_spaces("商品排序一单一货优先"))
+# 缺货类型
+def test_shortage_status_search_condition():
+    base.wait_element_click(base.find_xpath("缺货状态"))
+    base.wait_element_click(base.find_xpath("缺货状态", "库存充足"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单编码")
+    for i in result:
+        assert "充足" in i
+    base.wait_element_click(base.find_xpath("缺货状态", "部分缺货"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单编码")
+    for i in result:
+        assert "部分缺" in i
+    base.wait_element_click(base.find_xpath("缺货状态", "全部缺货"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单编码")
+    for i in result:
+        assert "全缺" in i
+    print(f"有缺货搜索出来的订单可以是全缺或者部分缺")
+    base.wait_element_click(base.find_xpath("缺货状态", "有缺货"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("订单编码")
+    for i in result:
+        assert "缺" in i
+
+
+# 店铺搜索条件
+def test_shop_search_condition():
+    base.wait_element_click(order.locations["店铺下拉按钮"])
+    base.wait_element_click(base.find_xpath("巨淘气"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("店铺")
+    for i in result:
+        assert "巨淘气" == i
+    base.wait_element_click(base.find_xpath("阿里测试店铺01"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("店铺")
+    for i in result:
+        assert "阿里测试店铺01" == i or "巨淘气" == i
+
+
+# 仓库搜索条件
+def test_warehouse_search_condition():
+    base.wait_element_click(order.locations["仓库下拉按钮"])
+    base.wait_element_click(base.find_xpath("主仓库"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("仓库")
+    for i in result:
+        assert "主仓库" == i
+    base.wait_element_click(base.find_xpath("测试仓"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("仓库")
+    for i in result:
+        assert "主仓库" == i or "测试仓" == i
+
+
+# 快递搜索条件
+def test_express_search_condition():
+    base.wait_element_click(order.locations["快递下拉按钮"])
+    base.wait_element_click(base.find_xpath("EMS"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("快递")
+    for i in result:
+        assert "EMS" == i
+    base.wait_element_click(base.find_xpath("邮政小包电子面单"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
+    result = base.get_column_text("快递")
+    for i in result:
+        assert "EMS" == i or "邮政小包电子面单" == i
+
+
+# 订单类型
+def test_order_type_search_condition():
+    order_type_list = ["销售订单", "换货订单", "补发订单", "POS订单", "已发货订单", "冲红订单", "被冲红订单", "预售订单", "订阅订单", ]
+    base.wait_element_click(base.find_xpath("订单类型"))
+    base.scroll_to(5)
+    for i in order_type_list:
+        print(f"本次搜索的订单类型是:{i}")
+        base.wait_element_click(base.find_xpath("订单类型", i))
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+        if order_num_text == "本页共0条数据":
+            print("没有数据不用看")
+        else:
+            result = base.get_column_text("订单类型")
+            print(f"订单类型{i}的搜索结果是：")
+            for j in result:
+                print(f"{j}")
+                assert j == i
+
+
+# 订单来源
+def test_order_source_search_condition():
+    order_source_type_list = ["自动下载", "手工下载", "手工新增", "导入", "单据生成"]
+    base.wait_element_click(base.find_xpath("订单来源"))
+    for i in order_source_type_list:
+        print(f"本次搜索的订单来源类型是：{i}")
+        base.wait_element_click(base.find_xpath("订单来源", i))
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+        if order_num_text == "本页共0条数据":
+            print("没有数据不用看")
+        else:
+            order_code_list = base.get_column_text("订单编码")
+            for order_code in order_code_list:
+                base.wait_element_click(base.get_cell_xpath(order_code, "订单编码"))
+                base.wait_element_click(base.get_cell_xpath(order_code, "订单编码", "详"))
+                base.change_frame("全部订单框架", "订单详情")
+                order_detail_order_source_type = base.wait_element(base.find_xpath_by_tag_name("订单来源:", "div")).text
+                assert order_detail_order_source_type == i
+                base.change_frame("全部订单框架")
+                base.wait_element_click(base.find_xpath_by_tag_name("订单详情", "a"))
+
+
+# 省份搜索条件
+def test_province_search_condition():
+    base.wait_element_click(order.locations["省份下拉按钮"])
+    province_list = order.get_province_list()
+    for i in province_list:
+        print(f"本次搜索的省份是：{i}")
+        base.wait_element_click(base.find_xpath("省份", i))
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+        if order_num_text == "本页共0条数据":
+            print("没有数据不用看")
+        else:
+            result = base.get_column_text("省")
+            for j in result:
+                print(f"本次搜索出的省份是:{j}")
+                assert j == i
+        base.wait_element_click(base.find_xpath("省份", i))
+
+
+# 订单状态
+def test_order_status_search_condition():
+    order_status_list = ["待发货", "已发货", "交易成功", "交易关闭", "已锁定", "异常", "有退款"]
+    base.wait_element_click(base.find_xpath("其他"))
+    base.wait_element_click(base.find_xpath_by_tag_name("其他", "select"))
+    for i in order_status_list:
+        base.wait_element_click(base.find_xpath("请选择交易状态", i))
+        print(f"本次搜索的订单状态是：{i}")
+        element = base.wait_element(base.find_xpath("本页共", "加载"))
+        text = element.text
+        base.wait_element_click(base.find_xpath("组合查询"))
+        base.wait_element_refresh(element, text)
+        order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+        if order_num_text == "本页共0条数据":
+            print("没有数据不用看")
+        else:
+            sku_info_elements = base.wait_elements(base.get_column_xpath("商品信息"))
+            for j in sku_info_elements:
+                j.click()
+                sku_other_info = order.get_all_float_sku_info("其他信息")
+                print(f"订单状态信息是：{sku_other_info}")
+                has_one_sku_contains_order_status = False
+                if "交易成功" == i:
+                    for k in sku_other_info:
+                        if "交易完成" in k:
+                            has_one_sku_contains_order_status = True
+                            break
+                else:
+                    for k in sku_other_info:
+                        if i in k:
+                            has_one_sku_contains_order_status = True
+                            break
+                assert has_one_sku_contains_order_status
+
+
+# 运费范围
+def test_freight_search_condition():
+    base.wait_element_click(base.find_xpath("其他"))
+    base.wait_element_click(base.find_xpath_by_placeholder("运费大于等于")).send_keys(2)
+    base.wait_element_click(base.find_xpath_by_placeholder("运费数小于")).send_keys(10)
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        order_code_list = base.get_column_text("订单编码")
+        for i in order_code_list:
+            base.wait_element_click(base.get_cell_xpath(i, "订单编码"))
+            base.wait_element_click(base.get_cell_xpath(i, "订单编码", "详"))
+            base.change_frame("全部订单框架", "订单详情")
+            post_fee = base.wait_element(base.find_xpath_by_tag_name("运费:", "input")).get_attribute("value")
+            assert 2.00 <= float(post_fee) < 10.00
+            base.change_frame("全部订单框架")
+            base.wait_element_click(base.find_xpath_by_tag_name("订单详情", "a"))
+
+
+# 付款时间
+def test_pay_time_search_condition():
+    base.wait_element_click(base.find_xpath("其他"))
+    base.wait_element_click(base.find_xpath_by_placeholder("付款天数大于等于")).send_keys(3)
+    base.wait_element_click(base.find_xpath_by_placeholder("付款天数小于")).send_keys(10)
+    base.scroll_to(5)
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        result = base.get_column_text("付款时间")
+        for i in result:
+            i = i.replace("\n", " ")
+            pay_time = datetime.strptime(i, "%Y-%m-%d %H:%M:%S")
+            days = (datetime.now()-pay_time).total_seconds()/(60*60)
+            print(f"订单的间隔天数{int(days)}")
+            assert 3*24 <= int(days) < 10*24
+
 
 if __name__ == '__main__':
     pytest.main()
