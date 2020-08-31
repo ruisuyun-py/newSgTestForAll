@@ -1,6 +1,7 @@
 import time
 import requests
 import page.base_page as base
+import interface.supplier.supplier_interface as supplier_interface
 
 
 # 新建商品
@@ -303,3 +304,65 @@ def get_sku_unique_bar_code(sku_code, qty):
     for i in result["data"]["data"]:
         unique_bar_code_list.append(i["BarCode"])
     return unique_bar_code_list
+
+
+# 批量修改
+def multi_modify_sku_info(sku_id_list, modify_info_dict):
+    """
+    sku_code_lsit:["测试商品1-红色 XS", "测试商品1-红色 XS", "测试商品1-红色 S", "测试商品1-红色 M", "测试商品1-红色 L", ]
+    modify_info_dict:{"商品简称":"奖惩", "商品分类":"上衣", "供应商":"供应商1", "品牌":"阿迪达斯", "标准售价":"1", }
+    """
+    sku_ids = ""
+    for i in sku_id_list:
+        sku_ids += str(i)
+        sku_ids += ","
+    print(f"sku_ids={sku_ids}")
+    modify_info_mapping = {
+        "商品简称": "ProductShortName",
+        "商品分类ID": "ProductCategoryId",
+        # TODO:(RUI) 获取商品分类ID方法
+        "品牌ID": "BrandId",
+        # TODO:(RUI) 获取品牌ID 方法
+        "单位": "Unit",
+        "标准售价": "StandardPrice",
+        "最新进价": "LastPurPrice",
+        "重量": "Weight",
+        "箱规": "BoxSize",
+        "库存同步类型": "SyncType",
+        "虚拟库存数": "VirtualQty",
+        "包装重量": "PackageWeight",
+        "优先出库仓": "FirstWarehouseId",
+        "供应商ID": "SupplierId",
+        "积分": "SalesPoint",
+        "库存预警值": "WarningQty",
+        "扩展字段1": "FirstField",
+        "扩展字段2": "SecField",
+        "扩展字段3": "ThirField",
+        "扩展字段4": "FourField",
+        "扩展字段5": "FifthField",
+        "长": "SkuLength",
+        "宽": "SkuWidth",
+        "高": "SkuHeight",
+        "周长": "PackingPerimeter",
+        "规格便签": "SkuMemo",
+    }
+    url = "http://gw.erp12345.com/api/Products/FullProduct/BatchUpdateProduct?model={"
+    params = {}
+    for k, v in modify_info_dict.items():
+        if k == "供应商ID":
+            supplier_id = supplier_interface.get_supplier_info(v, ["供应商ID"])["供应商ID"]
+            params[modify_info_mapping[k]] = supplier_id
+        elif k in ["商品分类ID", "品牌ID"]:
+            assert 1 == 2, "商品分类和品牌获取ID方法需要完善"
+        else:
+            params[modify_info_mapping[k]] = v
+    print(f"params={params}")
+    for k, v in params.items():
+        url += f"'{k}':'{v}',"
+    url += "}&ids="
+    url += sku_ids
+    headers = {
+        'cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    print(response.json())
