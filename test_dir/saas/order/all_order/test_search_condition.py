@@ -1,9 +1,7 @@
-import random
 import os
 import sys
 import time
 from datetime import datetime
-
 import pytest
 from os.path import dirname, abspath
 from selenium import webdriver
@@ -1274,6 +1272,92 @@ def test_pay_time_search_condition():
             days = (datetime.now()-pay_time).total_seconds()/(60*60)
             print(f"订单的间隔天数{int(days)}")
             assert 3*24 <= int(days) < 10*24
+
+
+# 相同会员不同地址
+def test_same_vip_with_different_address():
+    base.wait_element_click(base.find_xpath("其他"))
+    base.wait_element_click(base.find_xpath("相同会员不同收货地址", "是"))
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        print(f"搜索出来的会员名必然存在多个不同的收货地址")
+        vip_name_list = list(set(base.get_column_text("会员名")))
+        base.scroll_to(5)
+        for i in vip_name_list:
+            print(f"本次搜索的会员是：{i}")
+            base.fuzzy_search("收货地址", i)
+            address_list = list(set(base.get_column_text("收货地址")))
+            print(f"搜索出来的地址是{address_list}")
+            assert len(address_list) >= 2
+    base.scroll_to(0)
+    print(f"勾选否的设置下，同会员，地址必然相同")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "会员名")
+    base.wait_element_click(base.find_xpath("相同会员不同收货地址", "否"))
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        print(f"搜索出来的会员名必然存在只有一个收货地址")
+        vip_name_list = list(set(base.get_column_text("会员名")))
+        base.scroll_to(5)
+        for i in vip_name_list:
+            print(f"本次搜索的会员是：{i}")
+            base.fuzzy_search("收货地址", i)
+            address_list = list(set(base.get_column_text("收货地址")))
+            print(f"搜索出来的地址是{address_list}")
+            assert len(address_list) == 1
+
+
+# 相同手机号不同收货地址
+def test_same_phone_number_with_different_address():
+    base.wait_element_click(base.find_xpath("其他"))
+    base.wait_element_click(base.find_xpath("相同手机号不同收货地址", "是"))
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        print(f"搜索出来的手机号必然存在多个不同的收货地址")
+        base.scroll_to(5)
+        phone_num_list = list(set(base.get_column_text("手机号")))
+        for i in phone_num_list:
+            print(f"本次搜索的手机号是：{i}")
+            base.fuzzy_search("收货地址", i)
+            address_list = list(set(base.get_column_text("收货地址")))
+            print(f"搜索出来的地址是{address_list}")
+            assert len(address_list) >= 2
+    print(f"勾选否的设置下，同手机号，地址必然相同")
+    base.wait_table_refresh(base.find_xpath("清空"), 1, "手机号")
+    base.wait_element_click(base.find_xpath("相同手机号不同收货地址", "否"))
+    element = base.wait_element(base.find_xpath("本页共", "加载"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("组合查询"))
+    base.wait_element_refresh(element, text)
+    order_num_text = base.wait_element_click(base.find_xpath("已选择", "本页共")).text
+    if order_num_text == "本页共0条数据":
+        print("没有数据不用看")
+    else:
+        print(f"搜索出来的会员名必然存在只有一个收货地址")
+        vip_name_list = list(set(base.get_column_text("手机号")))
+        for i in vip_name_list:
+            print(f"本次搜索的手机号是：{i}")
+            base.fuzzy_search("收货地址", i)
+            address_list = list(set(base.get_column_text("收货地址")))
+            print(f"搜索出来的地址是{address_list}")
+            assert len(address_list) == 1
 
 
 if __name__ == '__main__':
