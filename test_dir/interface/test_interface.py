@@ -5,6 +5,7 @@ import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.product.product_interface as product_interface
 import interface.supplier.supplier_interface as supplier_interface
+import interface.inventory.inventory_interface as inventory_interface
 import pytest
 import requests
 
@@ -156,6 +157,12 @@ def test_multi_modify_sku_info():
     sku_id_list = product_interface.get_sku_id("", "20200831095731")
     modify_info_dict = {"商品简称": "奖惩", "供应商ID": "供应商1", "标准售价": "1", }
     product_interface.multi_modify_sku_info(sku_id_list, modify_info_dict)
+
+
+# 获取仓库信息接口
+def test_get_inventory_info():
+    result = inventory_interface.get_inventory_info()
+    print(result)
 
 
 if __name__ == '__main__':
