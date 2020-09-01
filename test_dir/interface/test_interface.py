@@ -6,6 +6,7 @@ import interface.order.delivery_order_interface as delivery_interface
 import interface.product.product_interface as product_interface
 import interface.supplier.supplier_interface as supplier_interface
 import interface.inventory.inventory_interface as inventory_interface
+import interface.purchase.purchase_interface as purchase_interface
 import pytest
 import requests
 
@@ -162,6 +163,15 @@ def test_multi_modify_sku_info():
 # 获取仓库信息接口
 def test_get_inventory_info():
     result = inventory_interface.get_inventory_info()
+    print(result)
+
+
+def test_new_purchase_order():
+    sku_info_list = [{"商家编码": "测试商品1-红色 S", "单价": "20", "数量": "10"}]
+    result = purchase_interface.new_purchase_order("主仓库", "供应商1", sku_info_list)
+    print(result)
+    purchase_order_id = result["ID"]
+    result = purchase_interface.approve_and_stock_in_purchase_order(purchase_order_id)
     print(result)
 
 

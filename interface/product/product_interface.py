@@ -316,7 +316,7 @@ def multi_modify_sku_info(sku_id_list, modify_info_dict):
     for i in sku_id_list:
         sku_ids += str(i)
         sku_ids += ","
-    print(f"sku_ids={sku_ids}")
+    # print(f"sku_ids={sku_ids}")
     modify_info_mapping = {
         "商品简称": "ProductShortName",
         "商品分类ID": "ProductCategoryId",
@@ -356,7 +356,7 @@ def multi_modify_sku_info(sku_id_list, modify_info_dict):
             assert 1 == 2, "商品分类和品牌获取ID方法需要完善"
         else:
             params[modify_info_mapping[k]] = v
-    print(f"params={params}")
+    # print(f"params={params}")
     for k, v in params.items():
         url += f"'{k}':'{v}',"
     url += "}&ids="
@@ -365,4 +365,4 @@ def multi_modify_sku_info(sku_id_list, modify_info_dict):
         'cookie': base.cookies
     }
     response = requests.get(url, headers=headers)
-    print(response.json())
+    # print(response.json())

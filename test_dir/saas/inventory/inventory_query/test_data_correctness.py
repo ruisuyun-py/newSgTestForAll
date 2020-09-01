@@ -13,6 +13,7 @@ import page.order.all_order_page as order
 import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
+import interface.purchase.purchase_interface as purchase_interface
 import  interface.product.product_interface as product_interface
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
@@ -75,3 +76,29 @@ def test_data_correctness():
     result = base.get_column_text("商品简称")
     for i in result:
         assert i == "简称"
+    sku_info_list = []
+    for i in sku_code_list:
+        sku_info_list.append({"商家编码": i, "单价": "20", "数量": "10"})
+    purchase_order_id = purchase_interface.new_purchase_order("主仓库", "供应商1", sku_info_list)["ID"]
+    purchase_interface.approve_and_stock_in_purchase_order(purchase_order_id)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    base.scroll_to(3)
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert i == '10'
+    result = base.get_column_text("库存")
+    for i in result:
+        assert i == '10'
+    result = base.get_column_text("余额")
+    for i in result:
+        assert i == "200.00"
+    result = base.get_column_text("暂存位库存")
+    for i in result:
+        assert i == '10'
+    result = base.get_column_text("最新进价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("成本价")
+    for i in result:
+        assert i == '20.00'
+    print(f"每个规格采购10个，单价20，验证可销库存数是10，库存数是10，余额是200.00,暂存位库存是10,最新进价是20.00,成本单价是20.00")

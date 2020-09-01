@@ -7,6 +7,16 @@ import interface.supplier.supplier_interface as supplier_interface
 # 获取仓库信息
 def get_inventory_info():
     """
+    return:
+    [
+    {'仓库ID': '162573418911628622', '仓库名称': '主仓库'},
+    {'仓库ID': '7494446596088660373', '仓库名称': '测试仓'},
+    {'仓库ID': '7494805888474021990', '仓库名称': '新仓库'}
+    ]
+
+    """
+    """
+    原始数据：
     return = {'data':
     [
     {'Id': '162573418911628622', 'Code': '001', 'Name': '主仓库', 'OuterWarehouseId': '0', 'Type': 0, 'EnablePurchaseBin':
@@ -42,3 +52,13 @@ def get_inventory_info():
                 inventory_info["仓库名称"] = v
         inventory_info_list.append(inventory_info)
     return inventory_info_list
+
+
+# 获取仓库ID
+def get_inventory_id(inventory_name):
+    inventory_info_list = get_inventory_info()
+    inventory_id = ""
+    for i in inventory_info_list:
+        if i["仓库名称"] == inventory_name:
+            inventory_id = i["仓库ID"]
+    return inventory_id
