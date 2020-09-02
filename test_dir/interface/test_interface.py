@@ -7,6 +7,7 @@ import interface.product.product_interface as product_interface
 import interface.supplier.supplier_interface as supplier_interface
 import interface.inventory.inventory_interface as inventory_interface
 import interface.purchase.purchase_interface as purchase_interface
+import interface.finance.finance_interface as finance_interface
 import pytest
 import requests
 
@@ -172,6 +173,23 @@ def test_new_purchase_order():
     print(result)
     purchase_order_id = result["ID"]
     result = purchase_interface.approve_and_stock_in_purchase_order(purchase_order_id)
+    print(result)
+
+
+# 获取最新进价成本单价
+def test_get_warehouse_cost_price_info():
+    query_info_list = {"仓库": "主仓库", "商家编码": "测试商品1-红色 XS"}
+    return_info_list = ["最新进价", "成本单价"]
+    result = finance_interface.get_warehouse_cost_price_info(query_info_list, return_info_list)
+    print(result)
+
+
+def test_new_stock_in_order():
+    sku_info_list = [{"商家编码": "测试商品1-红色 S", "数量": "10"}]
+    result = inventory_interface.new_stock_in_order("主仓库", "供应商1", sku_info_list)
+    print(result)
+    stock_in_order_id = result["ID"]
+    result = inventory_interface.stock_in_stock_in_order(stock_in_order_id)
     print(result)
 
 

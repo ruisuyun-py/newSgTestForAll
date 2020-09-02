@@ -14,8 +14,8 @@ import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
 import interface.purchase.purchase_interface as purchase_interface
-import  interface.product.product_interface as product_interface
-
+import interface.product.product_interface as product_interface
+import interface.inventory.inventory_interface as inventory_interface
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
@@ -102,3 +102,25 @@ def test_data_correctness():
     for i in result:
         assert i == '20.00'
     print(f"每个规格采购10个，单价20，验证可销库存数是10，库存数是10，余额是200.00,暂存位库存是10,最新进价是20.00,成本单价是20.00")
+    stock_in_order_id = inventory_interface.new_stock_in_order("主仓库", "供应商1", sku_info_list)["ID"]
+    inventory_interface.stock_in_stock_in_order(stock_in_order_id)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    base.scroll_to(3)
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert i == '20'
+    result = base.get_column_text("库存")
+    for i in result:
+        assert i == '20'
+    result = base.get_column_text("余额")
+    for i in result:
+        assert i == "400.00"
+    result = base.get_column_text("暂存位库存")
+    for i in result:
+        assert i == '20'
+    result = base.get_column_text("最新进价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("成本价")
+    for i in result:
+        assert i == '20.00'
