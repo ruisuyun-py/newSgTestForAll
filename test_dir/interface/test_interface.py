@@ -193,5 +193,23 @@ def test_new_stock_in_order():
     print(result)
 
 
+def test_new_stock_out_order():
+    sku_info_list = [{"商家编码": "测试商品1-红色 S", "数量": "10"}]
+    result = inventory_interface.new_stock_out_order("主仓库", "供应商1", sku_info_list)
+    print(result)
+    stock_out_order_id = result["ID"]
+    result = inventory_interface.stock_out_stock_out_order(stock_out_order_id)
+    print(result)
+
+
+def test_new_refund_out_order():
+    sku_info_list = [{"商家编码": "测试商品1-红色 S", "数量": "10"}]
+    result = inventory_interface.new_refund_out_order("主仓库", "供应商1", sku_info_list)
+    print(result)
+    refund_out_order_id = result["ID"]
+    result = inventory_interface.stock_out_stock_out_order(refund_out_order_id)
+    print(result)
+
+
 if __name__ == '__main__':
     pytest.main()

@@ -165,3 +165,185 @@ def stock_in_stock_in_order(stock_in_order_id):
     response = requests.get(url, headers=headers)
     result = dict(response.json())
     return result
+
+
+# 新建出库单
+def new_stock_out_order(warehouse_name, supplier_name, sku_info_list, memo=''):
+    """
+                warehouse_name:仓库名称
+                supplier_name:供应商名称
+                memo:备注
+                sku_info_list :
+                [
+                {"商家编码":"测试商品1-红色 S","数量":"10"},
+                {},
+                ]
+                return:{'ID': '7495081608949531534', 'Code': 'PUO2009010003'}
+    """
+    """
+    sku_info_list : [
+    {"SkuId":"7494440356323262567","CostPrice":811.63,"Qty":1},
+    {"SkuId":"7494440356323262568","CostPrice":133.99,"Qty":1}
+    ]
+    返回数据：
+    {"data":
+        {
+            "Id":"7495082984681243534",
+            "Code":"SOO2009020002",
+            "SourceOrderCode":null,
+            "StockOutType":1,
+            "StockOutTypeName":"采购退货出库",
+            "StockOutSort":null,
+            "SupplierId":"7494849432077207121",
+            "SupplierName":"00000",
+            "WarehouseId":"162573418911628622",
+            "WarehouseName":"主仓库",
+            "Qty":4,
+            "Amount":1891.24,
+            "StockOutUserName":null,
+            "StockOutDate":null,
+            "StockOut":false,
+            "Memo":"",
+            "RecordDate":"2020-09-02 21:49:05",
+            "RecordUserName":"测试"
+        },
+    "code":1,
+    "message":null
+    }
+    """
+    params = {"WarehouseId": get_inventory_id(warehouse_name),
+              "SupplierId": supplier_interface.get_supplier_info(supplier_name, ["供应商ID"])["供应商ID"],
+              "Memo": memo,
+              }
+    lines = []
+    for i in sku_info_list:
+        query_info_list = {"仓库": "主仓库", "商家编码": i["商家编码"]}
+        return_info_list = ["成本单价"]
+        cost_price = finance_interface.get_warehouse_cost_price_info(query_info_list, return_info_list)[0]["成本单价"]
+        line = {"SkuId": product_interface.get_sku_id(i["商家编码"])[0],
+                "ActualPrice": cost_price,
+                "Qty": i["数量"]
+                }
+        lines.append(line)
+    # print(lines)
+    url = "http://gw.erp12345.com/api/Stocks/StockOutOrder/AddStockOutOrder?&stock={"
+    for k, v in params.items():
+        url += f"'{k}':'{v}',"
+    url += "'Lines':["
+    for i in lines:
+        url += "{"
+        for k, v in i.items():
+            url += f"'{k}':{v},"
+        url += "},"
+    url += "]}"
+    headers = {
+        'Cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    purchase_order_info_list = {
+        "ID": result["data"]["Id"],
+        "Code": result["data"]["Code"],
+    }
+    return purchase_order_info_list
+
+
+# 出库出库单
+def stock_out_stock_out_order(stock_out_order_id):
+    """
+        purchase_order_id:入库单ID
+        """
+    url = "http://gw.erp12345.com/api/Stocks/StockOutOrder/NewStockOut?"
+    params = {
+        "stockIds": stock_out_order_id
+    }
+    for k, v in params.items():
+        url += f"{k}={v}"
+    headers = {
+        'Cookie': base.cookies
+    }
+    # print(url)
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
+
+
+# 新建退货出库单
+def new_refund_out_order(warehouse_name, supplier_name, sku_info_list, memo=''):
+    """
+                    warehouse_name:仓库名称
+                    supplier_name:供应商名称
+                    memo:备注
+                    sku_info_list :
+                    [
+                    {"商家编码":"测试商品1-红色 S","数量":"10"},
+                    {},
+                    ]
+                    return:{'ID': '7495081608949531534', 'Code': 'PUO2009010003'}
+    """
+    """
+    sku_info_list : [
+    {"SkuId":"7494440356323262567","CostPrice":811.63,"Qty":1},
+    {"SkuId":"7494440356323262568","CostPrice":133.99,"Qty":1}
+    ]
+    返回数据：
+    {"data":
+        {
+            "Id":"7495082984681243534",
+            "Code":"SOO2009020002",
+            "SourceOrderCode":null,
+            "StockOutType":1,
+            "StockOutTypeName":"采购退货出库",
+            "StockOutSort":null,
+            "SupplierId":"7494849432077207121",
+            "SupplierName":"00000",
+            "WarehouseId":"162573418911628622",
+            "WarehouseName":"主仓库",
+            "Qty":4,
+            "Amount":1891.24,
+            "StockOutUserName":null,
+            "StockOutDate":null,
+            "StockOut":false,
+            "Memo":"",
+            "RecordDate":"2020-09-02 21:49:05",
+            "RecordUserName":"测试"
+        },
+    "code":1,
+    "message":null
+    }
+    """
+    params = {"WarehouseId": get_inventory_id(warehouse_name),
+              "SupplierId": supplier_interface.get_supplier_info(supplier_name, ["供应商ID"])["供应商ID"],
+              "Memo": memo,
+              }
+    lines = []
+    for i in sku_info_list:
+        query_info_list = {"仓库": "主仓库", "商家编码": i["商家编码"]}
+        return_info_list = ["成本单价"]
+        cost_price = finance_interface.get_warehouse_cost_price_info(query_info_list, return_info_list)[0]["成本单价"]
+        line = {"SkuId": product_interface.get_sku_id(i["商家编码"])[0],
+                "ActualPrice": cost_price,
+                "Qty": i["数量"]
+                }
+        lines.append(line)
+    # print(lines)
+    url = "http://gw.erp12345.com/api/Stocks/StockOutOrder/AddStockOutProductOrder?stock={"
+    for k, v in params.items():
+        url += f"'{k}':'{v}',"
+    url += "'Lines':["
+    for i in lines:
+        url += "{"
+        for k, v in i.items():
+            url += f"'{k}':{v},"
+        url += "},"
+    url += "]}"
+    headers = {
+        'Cookie': base.cookies
+    }
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    purchase_order_info_list = {
+        "ID": result["data"]["Id"],
+        "Code": result["data"]["Code"],
+    }
+    return purchase_order_info_list

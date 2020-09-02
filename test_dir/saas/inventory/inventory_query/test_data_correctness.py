@@ -78,49 +78,125 @@ def test_data_correctness():
         assert i == "简称"
     sku_info_list = []
     for i in sku_code_list:
-        sku_info_list.append({"商家编码": i, "单价": "20", "数量": "10"})
+        sku_info_list.append({"商家编码": i, "单价": "20", "数量": "100"})
     purchase_order_id = purchase_interface.new_purchase_order("主仓库", "供应商1", sku_info_list)["ID"]
     purchase_interface.approve_and_stock_in_purchase_order(purchase_order_id)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     base.scroll_to(3)
     result = base.get_column_text("可销库存数")
     for i in result:
-        assert i == '10'
+        assert i == '100'
     result = base.get_column_text("库存")
     for i in result:
-        assert i == '10'
+        assert i == '100'
     result = base.get_column_text("余额")
     for i in result:
-        assert i == "200.00"
+        assert i == "2000.00"
     result = base.get_column_text("暂存位库存")
     for i in result:
-        assert i == '10'
+        assert i == '100'
     result = base.get_column_text("最新进价")
     for i in result:
         assert i == '20.00'
     result = base.get_column_text("成本价")
     for i in result:
         assert i == '20.00'
-    print(f"每个规格采购10个，单价20，验证可销库存数是10，库存数是10，余额是200.00,暂存位库存是10,最新进价是20.00,成本单价是20.00")
+    print(f"每个规格采购100个，单价20，验证可销库存数是100，库存数是100，余额是2000.00,暂存位库存是100,最新进价是20.00,成本单价是20.00")
     stock_in_order_id = inventory_interface.new_stock_in_order("主仓库", "供应商1", sku_info_list)["ID"]
     inventory_interface.stock_in_stock_in_order(stock_in_order_id)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
     base.scroll_to(3)
     result = base.get_column_text("可销库存数")
     for i in result:
-        assert i == '20'
+        assert i == '200'
     result = base.get_column_text("库存")
     for i in result:
-        assert i == '20'
+        assert i == '200'
     result = base.get_column_text("余额")
     for i in result:
-        assert i == "400.00"
+        assert i == "4000.00"
     result = base.get_column_text("暂存位库存")
     for i in result:
-        assert i == '20'
+        assert i == '200'
     result = base.get_column_text("最新进价")
     for i in result:
         assert i == '20.00'
     result = base.get_column_text("成本价")
     for i in result:
         assert i == '20.00'
+    print(f"每个规格入库100个，验证可销售库存是200，库存是200，余额是4000， 暂存位库存是200， 最新进价 20， 成本单价是20")
+    stock_out_info = []
+    for i in sku_code_list:
+        stock_out_info.append({"商家编码": i, "单价": "20", "数量": "50"})
+    result = inventory_interface.new_stock_out_order("主仓库", "供应商1", stock_out_info)
+    stock_out_order_id = result["ID"]
+    inventory_interface.stock_out_stock_out_order(stock_out_order_id)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert i == '150'
+    result = base.get_column_text("库存")
+    for i in result:
+        assert i == '150'
+    result = base.get_column_text("余额")
+    for i in result:
+        assert i == "3000.00"
+    result = base.get_column_text("暂存位库存")
+    for i in result:
+        assert i == '150'
+    result = base.get_column_text("最新进价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("成本价")
+    for i in result:
+        assert i == '20.00'
+    print(f"每个规格出库50个，验证可销售库存150个，库存150个， 余额3000， 暂存位库存15， ")
+    result = inventory_interface.new_refund_out_order("主仓库", "供应商1", stock_out_info)
+    refund_out_order_id = result["ID"]
+    inventory_interface.stock_out_stock_out_order(refund_out_order_id)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("库存")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("余额")
+    for i in result:
+        assert i == "2000.00"
+    result = base.get_column_text("暂存位库存")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("最新进价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("成本价")
+    for i in result:
+        assert i == '20.00'
+    print(f"每个规格退货出库50个，验证可销售库存100个，库存100个， 余额2000， 暂存位库存100， ")
+    purchase_order_id = purchase_interface.new_purchase_order("主仓库", "供应商1", stock_out_info)["ID"]
+    purchase_interface.approve_purchase_order(purchase_order_id)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("库存")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("余额")
+    for i in result:
+        assert i == "2000.00"
+    result = base.get_column_text("暂存位库存")
+    for i in result:
+        assert i == '100'
+    result = base.get_column_text("最新进价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("成本价")
+    for i in result:
+        assert i == '20.00'
+    result = base.get_column_text("采购在途数")
+    for i in result:
+        assert i == "50"
+    print(f"每个规格采购50个，不入库，验证可销售库存100个，库存100个， 余额2000， 暂存位库存100， 采购在途数是50")
+    

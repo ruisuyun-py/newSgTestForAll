@@ -117,4 +117,22 @@ def approve_and_stock_in_purchase_order(purchase_order_id):
     return result
 
 
+# 采购单审核
+def approve_purchase_order(purchase_order_id):
+    """
+        purchase_order_id:采购单Id
+        """
+    url = "http://gw.erp12345.com/api/Purchase/Purchase/ApprovePurchase?"
+    params = {
+        "purchaseIds": purchase_order_id
+    }
+    for k, v in params.items():
+        url += f"{k}={v}"
+    headers = {
+        'Cookie': base.cookies
+    }
+    # print(url)
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
 
