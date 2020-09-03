@@ -3,10 +3,12 @@ import requests
 import page.base_page as base
 import interface.vip.vip_interface as vip_interface
 import interface.product.product_interface as product_interface
+import interface.inventory.inventory_interface as inventory_interface
+import interface.setting.setting_interface as setting_interface
 
 
 # 新建订单
-def new_order(vip_name, sku_info):
+def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买家自提'):
     """
     vip_name:会员名
     sku_info:商品信息列表，商品信息字典，如下
@@ -14,7 +16,7 @@ def new_order(vip_name, sku_info):
         {'SkuCode': '测试商品1-红色 XS', 'Qty': '2'},
     ]
     return:order_info ，订单信息，包含订单id和订单编码
-    格式： [order_id,order_code]
+    格式：{'ID': '7495084473608831886', 'Code': 'TD200903013'}
     """
     vip_info = vip_interface.get_vip_info(vip_name)
     order = {
@@ -25,9 +27,9 @@ def new_order(vip_name, sku_info):
         "ShopId": "7494440439622140309",
         "VipId": vip_info["data"]["Items"][0]["VipId"],
         "VipName": vip_info["data"]["Items"][0]["VipName"],
-        "ExpressId": "7494440373939341490",
+        "ExpressId": setting_interface.get_express_id(warehouse_name, express_name),
         "PostFee": 0,
-        "WarehouseId": "162573418911628622",
+        "WarehouseId": inventory_interface.get_inventory_id(warehouse_name),
         "ProvinceName": "上海",
         "CityName": "上海市",
         "DistrictName": "闵行区",
@@ -58,7 +60,7 @@ def new_order(vip_name, sku_info):
     result = dict(response.json())
     start = result['data']['OrderCodeTid'].find("T")
     end = len(result['data']['OrderCodeTid'])
-    order_info = [result['data']['WaitApproveMaxId'], result['data']['OrderCodeTid'][start: end]]
+    order_info = {"ID": result['data']['WaitApproveMaxId'], "Code": result['data']['OrderCodeTid'][start: end]}
     # 添加订单主体完成，下面需要添加商品信息
     url_param = ''
 
@@ -70,10 +72,10 @@ def new_order(vip_name, sku_info):
             url_param += f"'{k}':'{v}',"
         url_param += '},'
     url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrderLine?orderId=" + order_info[
-        0] + "&skus=[" + url_param + "]"
+        "ID"] + "&skus=[" + url_param + "]"
     requests.get(url, headers=headers, )
     # 添加支付信息
-    url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info[0] + ""
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info["ID"] + ""
     requests.get(url, headers=headers)
     return order_info
 
@@ -391,3 +393,24 @@ sku_info = [
         response = requests.post(url, headers=headers)
         result = dict(response.json())
         return result
+
+
+# 审核订单
+def approve_order(order_id):
+    """
+    order_id:订单ID
+    """
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/ApproveSalesOrder?"
+    params = {
+        "orderIds": order_id,
+        "isForcedNonCheckDispatched": "false"
+    }
+    for k, v in params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    # print(url)
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result

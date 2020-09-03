@@ -1,4 +1,5 @@
 import sys
+import time
 from os.path import dirname, abspath
 import page.base_page as base
 import interface.interface as interface
@@ -8,6 +9,7 @@ import interface.supplier.supplier_interface as supplier_interface
 import interface.inventory.inventory_interface as inventory_interface
 import interface.purchase.purchase_interface as purchase_interface
 import interface.finance.finance_interface as finance_interface
+import interface.order.order_interface as order_interface
 import pytest
 import requests
 
@@ -74,8 +76,19 @@ def test_new_order():
     print(name)
     interface.new_vip(name)
     sku_info = [{'SkuCode': '测试商品1-红色 XS', 'Qty': '2'}, ]
-    order_info = interface.new_order(name, sku_info)
+    order_info = order_interface.new_order(name, sku_info)
     print(order_info)
+    order_id = order_info["ID"]
+    order_code = order_info["Code"]
+    print(f"创建订单单号:{order_code}")
+    result = order_interface.approve_order(order_id)
+    print(result)
+    time.sleep(1)
+    delivery_order_id = delivery_interface.get_delivery_order_info({"模糊搜索": order_code}, ["ID"])[0]["ID"]
+    print(f"发货单ID是{delivery_order_id}")
+    delivery_interface.send_delivery(delivery_order_id)
+    delivery_order_id = delivery_interface.get_delivered_order_info({"模糊搜索": name}, ["ID"])
+    print(f"发货单ID是{delivery_order_id}")
 
 
 def test_get_product_info_by_id():
@@ -149,7 +162,7 @@ def test_get_order_product_detail():
 
 
 def test_get_delivery_order_info():
-    query_params = {}
+    query_params = {"模糊搜索": "TD200903025"}
     return_info = ["物流单号", "会员名称", ]
     result = delivery_interface.get_delivery_order_info(query_params, return_info)
     print(result)

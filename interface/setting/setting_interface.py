@@ -1,6 +1,7 @@
 import time
 import requests
 import page.base_page as base
+import interface.inventory.inventory_interface as inventory_interface
 
 
 # 保存基础业务
@@ -120,3 +121,62 @@ def save_order_setting(setting_info):
         url_param += f"'{k}':'{v}',"
     url = "http://gw.erp12345.com/api/Settings/OrderSetting/SaveSetting?setting={" + url_param + "}"
     response = requests.get(url, headers=headers)
+
+
+# 获取快递ID
+def get_express_info(warehouse_name, express_name):
+    """
+    warehouse_name:仓库名称
+    express_name:快递名称
+    return:express_id
+    """
+    """
+    {"data":[
+        {"Code":"POSTB","TmsExpressId":"3413544150343193823","Name":"邮政小包电子面单（拼多多）","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":"7494440377512888705","CodType":1,"IsWayBill":true,"Id":"7494446596608753867","HasSetting":true},
+        {"Code":"POSTB","TmsExpressId":"3413544150343193823","Name":"邮政小包电子面单","IsDisable":false,"PrintTempletId":"0","WayBillConfigId":"7494805874565711749","CodType":1,"IsWayBill":true,"Id":"7494440373939341490","HasSetting":true},
+        {"Code":"SF","TmsExpressId":"1385921083136794008","Name":"顺丰速运电子面单","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":"7494805874565711749","CodType":1,"IsWayBill":true,"Id":"7494806984277886040","HasSetting":true},
+        {"Code":"HTKY","TmsExpressId":"1220813892426788076","Name":"不设置运费计算规则","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":"7494805874565711749","CodType":1,"IsWayBill":true,"Id":"7494805888910230111","HasSetting":false},
+        {"Code":"HTKY","TmsExpressId":"1220813892426788076","Name":"百世汇通电子面单","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":"7494440377512888697","CodType":1,"IsWayBill":true,"Id":"7494505992315469926","HasSetting":false},
+        {"Code":"EMS","TmsExpressId":"2186415495986999893","Name":"EMS","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":"7494886860653593385","CodType":1,"IsWayBill":true,"Id":"7494505997868728927","HasSetting":false},
+        {"Code":"OFFLINE","TmsExpressId":"1983430599389482375","Name":"买家自提","IsDisable":false,"PrintTempletId":"7494440374308438523","WayBillConfigId":null,"CodType":1,"IsWayBill":false,"Id":"7494515725952877959","HasSetting":false}
+        ],
+    "code":1,
+    "message":null
+    }
+    """
+    url = "http://gw.erp12345.com/api/Basics/WarehouseExpress/GetExpressList?"
+    headers = {
+        'cookie': base.cookies
+    }
+    url_params = {
+        'isDisable': 'false',
+        'warehouseId': inventory_interface.get_inventory_id(warehouse_name)
+    }
+    for k, v in url_params.items():
+        url += f"'{k}'='{v}',"
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    express_info_list = []
+    for i in result["data"]:
+        express_info = {}
+        for k, v in i.items():
+            if k == "Id":
+                express_info["快递ID"] = v
+            elif k == "Name":
+                express_info["快递名称"] = v
+        express_info_list.append(express_info)
+    print(f"快递信息列表：{express_info_list}")
+    return express_info_list
+
+
+# 获取快递ID
+def get_express_id(warehouse_name, express_name):
+    express_info = get_express_info(warehouse_name, express_name)
+    express_id = ""
+    for i in express_info:
+        if i["快递名称"] == express_name:
+            express_id = i["快递ID"]
+            break
+    print(f"快递ID：{express_id}")
+    return express_id
+

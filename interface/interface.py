@@ -551,7 +551,7 @@ def new_order(vip_name, sku_info):
     result = dict(response.json())
     start = result['data']['OrderCodeTid'].find("T")
     end = len(result['data']['OrderCodeTid'])
-    order_info = [result['data']['WaitApproveMaxId'], result['data']['OrderCodeTid'][start: end]]
+    order_info = {"ID": result['data']['WaitApproveMaxId'], "Code": result['data']['OrderCodeTid'][start: end]}
     # 添加订单主体完成，下面需要添加商品信息
     url_param = ''
 
@@ -562,11 +562,10 @@ def new_order(vip_name, sku_info):
         for k, v in sku.items():
             url_param += f"'{k}':'{v}',"
         url_param += '},'
-    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrderLine?orderId=" + order_info[
-        0] + "&skus=[" + url_param + "]"
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrderLine?orderId=" + order_info["ID"] + "&skus=[" + url_param + "]"
     requests.get(url, headers=headers, )
     # 添加支付信息
-    url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info[0] + ""
+    url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info["ID"] + ""
     requests.get(url, headers=headers)
     return order_info
 

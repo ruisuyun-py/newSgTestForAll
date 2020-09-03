@@ -5,6 +5,7 @@ import interface.supplier.supplier_interface as supplier_interface
 import interface.product.product_interface as product_interface
 import interface.finance.finance_interface as finance_interface
 
+
 # 获取仓库信息
 def get_inventory_info():
     """

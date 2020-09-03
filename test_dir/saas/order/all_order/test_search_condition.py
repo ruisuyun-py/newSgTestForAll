@@ -221,7 +221,7 @@ def test_fuzzy_search():
     column_name_list = ["订单编码", "平台单号", "会员名", "收货人", "手机号"]
     for i in column_name_list:
         test.fuzzy_search_test(i)
-    result = delivery_interface.get_delivery_order_info({}, ["物流单号", "会员名称"])
+    result = delivery_interface.get_delivered_order_info({}, ["物流单号", "会员名称"])
     print(result)
     for i in range(0, 10):
         express_code = result[i]["物流单号"]
