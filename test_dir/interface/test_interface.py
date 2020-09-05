@@ -75,7 +75,7 @@ def test_new_order():
     name = base.get_now_string()
     print(name)
     interface.new_vip(name)
-    sku_info = [{'SkuCode': '测试商品1-红色 XS', 'Qty': '2'}, ]
+    sku_info = [{'商家编码': '测试商品1-红色 XS', '数量': '2'}, ]
     order_info = order_interface.new_order(name, sku_info)
     print(order_info)
     order_id = order_info["ID"]
@@ -108,15 +108,15 @@ def test_new_pos_order():
 
 def test_new_product():
     product_code = base.get_now_string()
-    result = interface.new_product(product_code)
+    result = product_interface.new_product(product_code)
     print(result)
 
 
 def test_get_sku_info():
     sku_code = "测试商品1-红色 XS"
-    sku_id = interface.get_sku_info(sku_code)
+    sku_id = product_interface.get_sku_info(sku_code)
     print(sku_id)
-    product_info = interface.get_sku_info('', "测试商品1")
+    product_info = product_interface.get_sku_info('', "测试商品1")
     print(product_info)
 
 

@@ -12,9 +12,7 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
     """
     vip_name:会员名
     sku_info:商品信息列表，商品信息字典，如下
-    sku_info = [
-        {'SkuCode': '测试商品1-红色 XS', 'Qty': '2'},
-    ]
+    sku_info = [{'商家编码': '测试商品1-红色 XS', '数量': '2'}, ]
     return:order_info ，订单信息，包含订单id和订单编码
     格式：{'ID': '7495084473608831886', 'Code': 'TD200903013'}
     """
@@ -63,10 +61,15 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
     order_info = {"ID": result['data']['WaitApproveMaxId'], "Code": result['data']['OrderCodeTid'][start: end]}
     # 添加订单主体完成，下面需要添加商品信息
     url_param = ''
-
-    for sku in sku_info:
-        sku["SkuId"] = product_interface.get_sku_info(sku["SkuCode"])["data"]["Items"][0]["Id"]
-        sku.pop("SkuCode")
+    sku_info_list = []
+    for i in sku_info:
+        sku = {"SkuId": product_interface.get_sku_info(i["商家编码"])["data"]["Items"][0]["Id"], "Qty": i["数量"]}
+        sku_info_list.append(sku)
+    for sku in sku_info_list:
+        # sku["SkuId"] = product_interface.get_sku_info(sku["商家编码"])["data"]["Items"][0]["Id"]
+        # sku.pop("商家编码")
+        # sku["Qty"] = sku["数量"]
+        # sku.pop("数量")
         url_param += '{'
         for k, v in sku.items():
             url_param += f"'{k}':'{v}',"

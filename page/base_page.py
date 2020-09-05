@@ -210,8 +210,11 @@ def wait_element_focus(xpath):
 
 
 # 获取新表格组件的列域值
-def get_column_field(column_name):
-    xpath = "//div[contains(@class,'ag-header-cell') and contains(string(),'{}')]".format(column_name)
+def get_column_field(column_name, column_name2=""):
+    if column_name2 == "":
+        xpath = "//div[contains(@class,'ag-header-cell') and contains(string(),'{}')]".format(column_name)
+    else:
+        xpath = f"//div[contains(@class,'ag-header-cell') and contains(string(),'{column_name}')]/following::div[contains(@class,'ag-header-cell') and contains(string(),'{column_name2}')]"
     column_field = wait_element(xpath).get_attribute("col-id")
     return column_field
 
@@ -295,18 +298,18 @@ def get_input_xpath(column_name):
 
 
 # 获取一列定位
-def get_column_xpath(column_name):
-    xpath = f"//div[@role='gridcell' and @col-id='{get_column_field(column_name)}']"
+def get_column_xpath(column_name, column_name2=''):
+    xpath = f"//div[@role='gridcell' and @col-id='{get_column_field(column_name, column_name2)}']"
     return xpath
 
 
 # 获取主表中一列的文本
-def get_column_text(column_name):
+def get_column_text(column_name, column_name2=''):
     """
     column:列名
     return：文本列表
     """
-    xpath = get_column_xpath(column_name)
+    xpath = get_column_xpath(column_name, column_name2)
     elements = wait_elements(xpath)
     text_list = []
     for element in elements:
