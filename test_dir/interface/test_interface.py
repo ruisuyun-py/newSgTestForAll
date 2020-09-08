@@ -10,14 +10,17 @@ import interface.inventory.inventory_interface as inventory_interface
 import interface.purchase.purchase_interface as purchase_interface
 import interface.finance.finance_interface as finance_interface
 import interface.order.order_interface as order_interface
+import interface.pda.pda_interface as pda_interface
+import interface.setting.setting_interface as setting_interface
 import pytest
 import requests
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
-def setup_module(browser):
+def setup_module():
     base.cookies = interface.get_cookie()
+    pda_interface.cookies = pda_interface.login()
 
 
 def setup_function():
@@ -124,7 +127,7 @@ def test_modify_sku_price():
     result = interface.modify_sku_price("07080932-黑 XS XS", "7", )
 
 
-def test_001():
+def test_new_create_sku_bar_code():
     product_code = base.get_now_string()
     interface.new_product(product_code)
     print(f"新建商品,款号：{product_code}")
@@ -222,6 +225,31 @@ def test_new_refund_out_order():
     refund_out_order_id = result["ID"]
     result = inventory_interface.stock_out_stock_out_order(refund_out_order_id)
     print(result)
+
+
+def test_pda_login():
+    cookie_str = pda_interface.login()
+    print(f"{cookie_str}")
+
+
+def test_quick_put_away():
+    # print(f"pda_cookies:{pda_interface.cookies}")
+    bin = "A-1-5-62"
+    result = pda_interface.quick_put_away(bin, "1907150011407", 5)
+    print(result)
+
+
+def test_quick_sold_out():
+    # print(f"pda_cookies:{pda_interface.cookies}")
+    bin = "A-1-5-62"
+    result = pda_interface.quick_sold_out(bin, "1907150011407", 2)
+    print(result)
+
+
+def test_get_bin_info():
+    result = setting_interface.get_bin_info("主仓库")
+    result = setting_interface.get_random_bin("主仓库")
+    print(f"{result}")
 
 
 if __name__ == '__main__':

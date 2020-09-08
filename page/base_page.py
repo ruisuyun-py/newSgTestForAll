@@ -7,7 +7,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 global driver
-cookies = []
+cookies = ""
 locations = {
     "自由打印框架": "//iframe[contains(@src,'Products/FreePrint/FreePrintBrowserView')]",
     "平台编码上传框架": "//iframe[contains(@src,"

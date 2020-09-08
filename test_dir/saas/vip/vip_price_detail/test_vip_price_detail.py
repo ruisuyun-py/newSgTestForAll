@@ -15,6 +15,7 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 def setup_module():
     base.driver = webdriver.Chrome()
     base.cookies = login.login()
+    print(f"{base.cookies}")
     print("预设会员价明细测试开始")
 
 

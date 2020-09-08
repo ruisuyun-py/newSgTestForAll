@@ -1,4 +1,5 @@
 import time
+import random
 import requests
 import page.base_page as base
 import interface.inventory.inventory_interface as inventory_interface
@@ -180,3 +181,44 @@ def get_express_id(warehouse_name, express_name):
     print(f"快递ID：{express_id}")
     return express_id
 
+
+# 获取库位信息
+def get_bin_info(warehouse_name):
+    """
+      warehouse_name:仓库名
+      """
+    url = "http://gw.erp12345.com/api/Basics/WarehouseStorage/QueryPage?"
+    params = {
+        "WarehouseId": inventory_interface.get_inventory_id(warehouse_name),
+        "BinType": 11,
+        "ModelTypeName": "ErpWeb.Domain.ViewModels.Basics.WarehouseStorageVmv",
+        "page": 1,
+        "pagesize": 2000,
+    }
+    for k, v in params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    # print(url)
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
+
+
+# 获取随机库位
+def get_random_bin(warehouse_name):
+    """
+    warehouse_name: 仓库名称
+    return :{'ID': '7494878028288230927', '库位': 'P-1-975-1', '绑定商品': None}
+
+    """
+    """
+    原始结果：{'WarehouseStorageProSku': None, 'Name': 'R-1-1-1-49', 'WarehouseStorage': None, 'WarehouseId': '162573418911628622', 'Id': '7494878028338561085'}
+
+    """
+    result = get_bin_info(warehouse_name)
+    random_num = random.randint(1, 2000)
+    random_bin = result["data"]["Items"][random_num]
+    random_bin_info = {"ID": random_bin["Id"], "库位": random_bin["Name"], "绑定商品": random_bin["WarehouseStorageProSku"]}
+    return random_bin_info
