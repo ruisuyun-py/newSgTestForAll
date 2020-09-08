@@ -275,25 +275,118 @@ def test_data_correctness():
     balance -= 100
     check_data(bin_inventory, marketability_inventory, inventory, balance, temporary_inventory, purchase_price,
                cost_price, purchase_num, sales_num, occupy_num)
+    print(f"换成测试仓再来一次")
+    print(f"测试仓每个规格采购入库100")
+    purchase_order_id = purchase_interface.new_purchase_order("测试仓", "供应商1", sku_info_list)["ID"]
+    purchase_interface.approve_and_stock_in_purchase_order(purchase_order_id)
+    print(f"测试仓每个规格入库100")
+    stock_in_order_id = inventory_interface.new_stock_in_order("测试仓", "供应商1", sku_info_list)["ID"]
+    inventory_interface.stock_in_stock_in_order(stock_in_order_id)
+    print(f"测试仓每个规格出库50个")
+    result = inventory_interface.new_stock_out_order("测试仓", "供应商1", stock_out_info)
+    stock_out_order_id = result["ID"]
+    inventory_interface.stock_out_stock_out_order(stock_out_order_id)
+    print(f"测试仓每个规格退货出库50个")
+    result = inventory_interface.new_refund_out_order("测试仓", "供应商1", stock_out_info)
+    refund_out_order_id = result["ID"]
+    inventory_interface.stock_out_stock_out_order(refund_out_order_id)
+    print(f"测试仓每个规格采购100个，不入库")
+    purchase_order_id = purchase_interface.new_purchase_order("测试仓", "供应商1", stock_out_info)["ID"]
+    purchase_interface.approve_purchase_order(purchase_order_id)
+    print(f"发货出库10个")
+    vip_name = base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    order_info = order_interface.new_order(vip_name, sku_info, "测试仓")
+    order_id = order_info["ID"]
+    order_code = order_info["Code"]
+    print(f"创建订单单号:{order_code}")
+    result = order_interface.approve_order(order_id)
+    print(f"审核订单的信息是：{result}")
+    delivery_order_id = delivery_interface.get_delivery_order_info({"模糊搜索": order_code}, ["ID"])[0]["ID"]
+    print(f"发货单ID是{delivery_order_id}")
+    delivery_interface.send_delivery(delivery_order_id)
+    print(f"订单发货出库")
+    print(f"创建并审核10个")
+    vip_name = base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"商品信息是{sku_info}")
+    order_info = order_interface.new_order(vip_name, sku_info, "测试仓")
+    order_id = order_info["ID"]
+    order_code = order_info["Code"]
+    print(f"创建订单单号:{order_code}")
+    result = order_interface.approve_order(order_id)
+    print(f"审核订单的信息是：{result}")
+    print(f"创建订单不审核")
+    vip_name = base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"商品信息是{sku_info}")
+    order_info = order_interface.new_order(vip_name, sku_info, "测试仓")
+    order_code = order_info["Code"]
+    print(f"创建订单单号:{order_code}")
+    print(f"每个规格上架10个")
+    pda_interface.cookies = pda_interface.change_warehouse("测试仓")
+    bin_sku_mapping = {}
+    for i in sku_info:
+        bin_name = setting_interface.get_random_bin("测试仓")["库位"]
+        print(f"库位名称是{bin_name}")
+        bin_sku_mapping[i["商家编码"]] = bin_name
+        barcode = product_interface.get_sku_bar_code(i["商家编码"])[0]
+        pda_interface.quick_put_away(bin_name, barcode, i["数量"])
+    print(f"每个规格下架5个")
+    for i in sku_info:
+        barcode = product_interface.get_sku_bar_code(i["商家编码"])[0]
+        num = int(i["数量"]) - 5
+        pda_interface.quick_sold_out(bin_sku_mapping[i["商家编码"]], barcode, num)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    bin_inventory *= 2
+    marketability_inventory *= 2
+    inventory *= 2
+    balance *= 2
+    temporary_inventory *= 2
+    sales_num *= 2
+    purchase_num *= 2
+    occupy_num *= 2
+    check_data(bin_inventory, marketability_inventory, inventory, balance, temporary_inventory, purchase_price,
+               cost_price, purchase_num, sales_num, occupy_num)
+    print(f"选择主仓库搜索搜索出具数值减半")
+    bin_inventory /= 2
+    marketability_inventory /= 2
+    inventory /= 2
+    balance /= 2
+    temporary_inventory /= 2
+    sales_num /= 2
+    purchase_num /= 2
+    occupy_num /= 2
+    base.wait_element_click(base.find_xpath_by_placeholder("请选择仓库"))
+    base.wait_element_click(base.find_xpath("主仓库"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    check_data(bin_inventory, marketability_inventory, inventory, balance, temporary_inventory, purchase_price,
+               cost_price, purchase_num, sales_num, occupy_num)
+    base.wait_element_click(base.find_xpath_by_placeholder("请选择仓库"))
+    base.wait_element_click(base.find_xpath("主仓库"))
+    base.wait_element_click(base.find_xpath("测试仓"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "可销库存数")
+    check_data(bin_inventory, marketability_inventory, inventory, balance, temporary_inventory, purchase_price,
+               cost_price, purchase_num, sales_num, occupy_num)
 
 
 def check_data(bin_inventory, marketability_inventory, inventory, balance, temporary_inventory, purchase_price,
                cost_price, purchase_num, sales_num, occupy_num):
     result = base.get_column_text("库位库存")
     for i in result:
-        assert i == str(bin_inventory)
+        assert i == str(int(bin_inventory))
     result = base.get_column_text("可销库存数")
     for i in result:
-        assert i == str(marketability_inventory)
+        assert i == str(int(marketability_inventory))
     result = base.get_column_text("库存预警值", "库存数")
     for i in result:
-        assert i == str(inventory)
+        assert i == str(int(inventory))
     result = base.get_column_text("余额")
     for i in result:
         assert i == format(balance, '.2f')
     result = base.get_column_text("暂存位库存")
     for i in result:
-        assert i == str(temporary_inventory)
+        assert i == str(int(temporary_inventory))
     result = base.get_column_text("最新进价")
     for i in result:
         assert i == format(purchase_price, '.2f')
@@ -302,7 +395,7 @@ def check_data(bin_inventory, marketability_inventory, inventory, balance, tempo
         assert i == format(cost_price, '.2f')
     result = base.get_column_text("采购在途数")
     for i in result:
-        assert i == str(purchase_num)
+        assert i == str(int(purchase_num))
     base.wait_element_click(base.find_xpath("刷新报表"))
     base.wait_element(base.find_xpath("刷新报表缓存", "确定"))
     time.sleep(1)
@@ -314,13 +407,13 @@ def check_data(bin_inventory, marketability_inventory, inventory, balance, tempo
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "三十天销量")
     result = base.get_column_text("三十天销量")
     for i in result:
-        assert i == str(sales_num)
+        assert i == str(int(sales_num))
     result = base.get_column_text("七天销量")
     for i in result:
-        assert i == str(sales_num)
+        assert i == str(int(sales_num))
     result = base.get_column_text("占用数")
     for i in result:
-        assert i == str(occupy_num)
+        assert i == str(int(occupy_num))
 
 
 if __name__ == '__main__':

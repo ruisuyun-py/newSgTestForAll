@@ -92,3 +92,20 @@ def quick_sold_out(bin, barcode, qty):
     response = requests.get(url)
     result = dict(response.json())
     return result
+
+
+def change_warehouse(warehouse_name):
+    url = "http://gw.erp12345.com/api/PdaUser/ChangeCurrentWarehouse/?"
+    params = {
+        "newWarehouseName": warehouse_name,
+        "LoginToken": cookies,
+        "putawayType": 5,
+        "tenantId": "7494308563943163372",
+
+    }
+    for k, v in params.items():
+        url += f"{k}={v}&"
+    response = requests.get(url)
+    result = dict(response.json())
+    return result["data"]["LoginToken"]
+

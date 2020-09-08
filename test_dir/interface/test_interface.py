@@ -234,7 +234,10 @@ def test_pda_login():
 
 def test_quick_put_away():
     # print(f"pda_cookies:{pda_interface.cookies}")
-    bin = "A-1-5-62"
+    bin = "T-1-1-3"
+    # bin = "A-1-5-63"
+    pda_interface.cookies = pda_interface.change_warehouse("测试仓")["data"]["LoginToken"]
+    print(pda_interface.cookies)
     result = pda_interface.quick_put_away(bin, "1907150011407", 5)
     print(result)
 
