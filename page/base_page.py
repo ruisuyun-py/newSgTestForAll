@@ -237,18 +237,35 @@ def get_cell_xpath(row_key, column_name, icon_text=''):
     return:单元格定位
     """
     if isinstance(row_key, int):
-        if icon_text == '':
-            xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']"
+        if isinstance(column_name, str):
+            if icon_text == '':
+                xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']"
+            else:
+                xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']/span[1]/" \
+                        f"*[text()='{icon_text}'] "
         else:
-            xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name)}']/span[1]/" \
-                    f"span[text()='{icon_text}'] "
+            if icon_text == '':
+                xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name[0], column_name[1])}']"
+            else:
+                xpath = f"//div[@row-id='{row_key - 1}']/div[@col-id='{get_column_field(column_name[0], column_name[1])}']/span[1]/*[text()='{icon_text}'] "
     else:
-        if icon_text == '':
-            xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']"
+        if isinstance(column_name, str):
+            if icon_text == '':
+                xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name)}']"
+            else:
+                xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id=" \
+                        f"'{get_column_field(column_name)}']/span[1]/*[text()='{icon_text}'] "
         else:
-            xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id=" \
-                    f"'{get_column_field(column_name)}']/span[1]/span[text()='{icon_text}'] "
+            if icon_text == '':
+                xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id='{get_column_field(column_name[0], column_name[1])}'] "
+            else:
+                xpath = f"//div[@role='row' and contains(string(),'{row_key}')]/div[@col-id=" \
+                        f"'{get_column_field(column_name[0], column_name[1])}']/span[1]/*[text()='{icon_text}'] "
+
     return xpath
+
+
+
 
 
 def get_old_cell_xpath(row_key, column_name):
