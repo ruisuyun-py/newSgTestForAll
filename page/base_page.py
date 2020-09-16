@@ -328,7 +328,7 @@ def get_unique_column_text(column_name):
     text_list = []
     for element in elements:
         text_list.append(element.text)
-    return text_list
+    return list(set(text_list))
 
 
 # 获取老表格组件中的一列文本

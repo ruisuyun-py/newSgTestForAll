@@ -109,6 +109,96 @@ def test_product_code_search_condition():
                 assert product in i
 
 
+def test_product_name_search_condition():
+    product_name_list = list(set(base.get_column_text("商品名称")))
+    for product in product_name_list:
+        if product == "":
+            continue
+        print(f"需要搜索的货号是：{product}")
+        base.wait_element(base.find_xpath_by_placeholder("商品名称")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("商品名称")).send_keys(product)
+        base.wait_table_refresh(base.find_xpath('组合查询'), 1, "货号")
+        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if result_num == '本页共0条数据':
+            print(f"商品名称[{product}]没数据不用查看")
+        else:
+            result = base.get_column_text("商品名称")
+            for i in result:
+                assert product in i
+
+
+def test_sku_name_search_condition():
+    sku_name_list = list(set(base.get_column_text("规格名称")))
+    for sku in sku_name_list:
+        if sku == "":
+            continue
+        print(f"需要搜索的规格名称是：{sku}")
+        base.wait_element(base.find_xpath_by_placeholder("规格名称")).send_keys(Keys.CONTROL + 'a')
+        base.wait_element(base.find_xpath_by_placeholder("规格名称")).send_keys(sku)
+        base.wait_table_refresh(base.find_xpath('组合查询'), 1, "货号")
+        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if result_num == '本页共0条数据':
+            print(f"规格名称[{sku}]没数据不用查看")
+        else:
+            result = base.get_column_text("规格名称")
+            for i in result:
+                assert sku in i
+
+
+def test_barcode_search_condition():
+    print(f"先用商家编码获取条码单个搜索，再用货号批量搜索")
+    sku_code_list = base.get_column_text("商家编码")
+    for sku_code in sku_code_list:
+        barcode = product_interface.get_sku_bar_code(sku_code)[0]
+        print(f"需要搜索的商品条码是{barcode}")
+        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL+'a')
+        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if result_num == '本页共0条数据':
+            print(f"商品条码[{barcode}]没数据不用查看")
+        else:
+            result = base.get_column_text("商家编码")
+            for i in result:
+                assert sku_code == i
+    product_code_list = list(set(base.get_column_text("货号")))
+    for product_code in product_code_list:
+        barcode_list = product_interface.get_sku_bar_code("", product_code)
+        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL + 'a')
+        for barcode in barcode_list:
+            base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
+            base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.ENTER)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if result_num == '本页共0条数据':
+            print(f"没数据不用查看")
+        else:
+            result = base.get_unique_column_text("货号")
+            for i in result:
+                assert i == product_code
+
+
+def test_category_search_condition():
+    category_list = ["裤子", "上衣"]
+    for category in category_list:
+        print(f"本次搜索的分类:{category}")
+        base.wait_element_click(base.find_xpath_by_placeholder("分类"))
+        base.change_frame("库存查询框架", "商品分类")
+        base.wait_element_click(base.find_xpath(category))
+        base.change_frame("库存查询框架")
+        base.wait_element_click(base.find_xpath("商品分类", "确认"))
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
+        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+        if result_num == '本页共0条数据':
+            print(f"没数据不用查看")
+        else:
+            result = base.get_unique_column_text("货号")
+            for product_code in result:
+                category_result = product_interface.get_sku_info(product_code)["data"]["Items"][0]["ProductCategory"]
+                print(f"本次搜索的货号:{product_code}的分类是{category_result}")
+                assert category_result == category
+
+
 if __name__ == '__main__':
     pytest.main()
 
