@@ -200,6 +200,55 @@ def test_category_search_condition():
                 assert category_result == category
 
 
+def test_bin_name_search_condition():
+    bin_name_list = ["A", "A1", "A1-2", "A1-2-", "A1-2-1"]
+    time.sleep(1)
+    for b in bin_name_list:
+        base.wait_element(base.find_xpath_by_placeholder("固定库位")).send_keys(Keys.CONTROL+'a')
+        base.wait_element(base.find_xpath_by_placeholder("固定库位")).send_keys(b)
+        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+        result = base.get_column_text("固定库位")
+        for i in result:
+            assert b in i, f"库存查询页面固定库位搜索条件失效，输入库位{b}之后搜索结果不正确"
+
+
+def test_inventory_search_condition():
+    base.wait_element(base.find_xpath_by_placeholder("库存大于等于")).send_keys(Keys.CONTROL + 'a')
+    base.wait_element(base.find_xpath_by_placeholder("库存大于等于")).send_keys(100)
+    base.wait_element(base.find_xpath_by_placeholder("库存小于")).send_keys(Keys.CONTROL + 'a')
+    base.wait_element(base.find_xpath_by_placeholder("库存小于")).send_keys(1000)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("库存预警值", "库存数")
+    for i in result:
+        assert 100 <= int(i) < 1000
+
+
+def test_marketability_inventory():
+    time.sleep(1)
+    base.wait_element(base.find_xpath_by_placeholder("可销库存数大于等于")).send_keys(Keys.CONTROL + 'a')
+    base.wait_element(base.find_xpath_by_placeholder("可销库存数大于等于")).send_keys(100)
+    base.wait_element(base.find_xpath_by_placeholder("可销库存数小于")).send_keys(Keys.CONTROL + 'a')
+    base.wait_element(base.find_xpath_by_placeholder("可销库存数小于")).send_keys(1000)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("可销库存数")
+    for i in result:
+        assert 100 <= int(i) < 1000
+
+
+def test_show_zero_inventory_search_condition():
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("显示0库存", "是"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("库存预警值", "库存数")
+    for i in result:
+        assert i == "0"
+    base.wait_element_click(base.find_xpath("显示0库存", "否"))
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
+    result = base.get_column_text("库存预警值", "库存数")
+    for i in result:
+        assert i != "0"
+
+
 if __name__ == '__main__':
     pytest.main()
 

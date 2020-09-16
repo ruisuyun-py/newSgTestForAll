@@ -474,3 +474,14 @@ def get_random_substring(source_string):
     result = source_string[0:source_string.index(key_char)+1]
     return result
 
+
+# 选择商品方法
+def chose_product_by_text(sku_name_str):
+    """
+    sku_name_str : "测试商品1-红色 XS,测试商品1-红色 S"
+    """
+    wait_element(find_xpath("加载", "渲染"))
+    time.sleep(1)
+    wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(sku_name_str)
+    wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(Keys.ENTER)
+
