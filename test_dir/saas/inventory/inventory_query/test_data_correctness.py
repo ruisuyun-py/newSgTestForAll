@@ -42,6 +42,7 @@ def test_data_correctness():
     product_interface.new_product(product_code)
     print(f"先新建一个商品:{product_code}")
     base.wait_element_click(base.find_xpath_by_placeholder("货号")).send_keys(product_code)
+    time.sleep(1)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     print(f"校验货号是不是{product_code}")
     result = base.get_column_text("货号")
@@ -368,28 +369,28 @@ def check_data(bin_inventory, marketability_inventory, inventory, balance, tempo
                cost_price, purchase_num, sales_num, occupy_num):
     result = base.get_column_text("库位库存")
     for i in result:
-        assert i == str(int(bin_inventory))
+        assert i == str(int(bin_inventory)), f"库位库存应该是{str(int(bin_inventory))},但实际是{i}"
     result = base.get_column_text("可销库存数")
     for i in result:
-        assert i == str(int(marketability_inventory))
+        assert i == str(int(marketability_inventory)), f"可销售库存数应该是{str(int(marketability_inventory))},但实际是{i}"
     result = base.get_column_text("库存预警值", "库存数")
     for i in result:
-        assert i == str(int(inventory))
+        assert i == str(int(inventory)), f"库存数应该是{str(int(inventory))},但实际是{i}"
     result = base.get_column_text("余额")
     for i in result:
-        assert i == format(balance, '.2f')
+        assert i == format(balance, '.2f'), f"余额应该是{format(balance, '.2f')},但实际是{i}"
     result = base.get_column_text("暂存位库存")
     for i in result:
-        assert i == str(int(temporary_inventory))
+        assert i == str(int(temporary_inventory)), f"暂存位库存应该是{str(int(temporary_inventory))},但实际是{i}"
     result = base.get_column_text("最新进价")
     for i in result:
-        assert i == format(purchase_price, '.2f')
+        assert i == format(purchase_price, '.2f'), f"最新进价应该是{format(purchase_price, '.2f')},但实际是{i}"
     result = base.get_column_text("成本价")
     for i in result:
-        assert i == format(cost_price, '.2f')
+        assert i == format(cost_price, '.2f'), f"成本价应该是{format(cost_price, '.2f')},但实际是{i}"
     result = base.get_column_text("采购在途数")
     for i in result:
-        assert i == str(int(purchase_num))
+        assert i == str(int(purchase_num)), f"采购在途数应该是{str(int(purchase_num))},但实际是{i}"
     base.wait_element_click(base.find_xpath("刷新报表"))
     base.wait_element(base.find_xpath("刷新报表缓存", "确定"))
     time.sleep(1)
@@ -397,17 +398,17 @@ def check_data(bin_inventory, marketability_inventory, inventory, balance, tempo
     base.wait_element(base.find_xpath_by_tag_name("任务托管列表", "a"))
     time.sleep(1)
     base.wait_element_click(base.find_xpath_by_tag_name("任务托管列表", "a"))
-    time.sleep(2)
+    time.sleep(3)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "三十天销量")
     result = base.get_column_text("三十天销量")
     for i in result:
-        assert i == str(int(sales_num))
+        assert i == str(int(sales_num)), f"三十天销量应该是{str(int(sales_num))},但实际是{i}"
     result = base.get_column_text("七天销量")
     for i in result:
-        assert i == str(int(sales_num))
+        assert i == str(int(sales_num)), f"七天销量应该是{str(int(sales_num))},但实际是{i}"
     result = base.get_column_text("占用数")
     for i in result:
-        assert i == str(int(occupy_num))
+        assert i == str(int(occupy_num)), f"占用数应该是{str(int(occupy_num))},但实际是{i}"
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import sys
+import time
 from os.path import dirname, abspath
 import pytest
 from selenium import webdriver
@@ -39,8 +40,9 @@ def teardown_module():
 def test_brand_search_condition():
     brand_name_list = ["阿迪达斯", "安踏", "波司登"]
     for brand_name in brand_name_list:
-        base.wait_element_click(base.find_xpath_by_tag_name("品牌", "select"))
-        base.wait_element_click(base.find_xpath(brand_name))
+        base.wait_element_click(base.find_xpath_by_placeholder("请选择品牌"))
+        base.wait_element_click(base.find_xpath("品牌", brand_name))
+        time.sleep(1)
         base.wait_table_refresh(base.find_xpath('组合查询'), 1, "货号")
         result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
         if result_num == '本页共0条数据':
@@ -56,11 +58,10 @@ def test_supplier_name_search_condition():
     supplier_name_list = ["供应商1", "供应商2", "供应商3", "供应商4", "供应商5"]
     for supplier_name in supplier_name_list:
         base.wait_element_click(base.find_xpath_by_placeholder("供应商"))
-        base.change_frame("选择供应商")
+        base.change_frame("库存查询框架", "选择供应商")
         base.chose_supplier_by_text(supplier_name)
-        base.change_frame()
-        base.wait_element_click(base.find_xpath("选择供应商", "确认"))
         base.change_frame("库存查询框架")
+        base.wait_element_click(base.find_xpath("选择供应商", "确定"))
         base.wait_table_refresh(base.find_xpath('组合查询'), 1, "货号")
         result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
         if result_num == '本页共0条数据':
@@ -182,11 +183,11 @@ def test_category_search_condition():
     category_list = ["裤子", "上衣"]
     for category in category_list:
         print(f"本次搜索的分类:{category}")
-        base.wait_element_click(base.find_xpath_by_placeholder("分类"))
-        base.change_frame("库存查询框架", "商品分类")
+        base.wait_element_click(base.find_xpath_by_placeholder("商品分类"))
+        base.change_frame("库存查询框架", "选择分类")
         base.wait_element_click(base.find_xpath(category))
         base.change_frame("库存查询框架")
-        base.wait_element_click(base.find_xpath("商品分类", "确认"))
+        base.wait_element_click(base.find_xpath("选择分类", "确定"))
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
         result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
         if result_num == '本页共0条数据':

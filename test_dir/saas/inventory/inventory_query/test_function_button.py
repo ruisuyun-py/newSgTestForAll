@@ -43,8 +43,10 @@ def test_export_button():
     """
     base.wait_element_click(base.find_xpath("导出"))
 
+
 # 盘点选中库位
 def test_check_inventory():
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "是"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     sku_code = base.wait_element(base.get_cell_xpath(1, "商家编码")).text
@@ -86,10 +88,12 @@ def test_multi_modify_bin():
     print(result_bin_name)
     assert result_bin_name in result
 
+
 # 修改固定库位
 def test_modify_bin():
     bin_name = setting_interface.get_random_bin("主仓库")["库位"]
     print(bin_name)
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "是"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     sku_code = base.wait_element(base.get_cell_xpath(1, "商家编码")).text
@@ -112,6 +116,7 @@ def test_modify_bin():
 
 # 库存预警值
 def test_warning_inventory():
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "是"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     sku_code = base.wait_element(base.get_cell_xpath(1, "商家编码")).text
@@ -144,6 +149,7 @@ def test_detail_button():
     """
     sku_code = "测试商品1-红色 XS"
     base.scroll_to(4)
+    time.sleep(1)
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(Keys.CONTROL+'a')
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(sku_code)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "余额")
@@ -177,3 +183,7 @@ def test_detail_button():
     base.wait_element_click(base.get_cell_xpath(1, "操作", "销售订单"))
     base.change_frame("库存查询框架", "销售订单")
     base.wait_element(base.find_xpath("平台单号"))
+
+
+if __name__ == '__main__':
+    pytest.main()

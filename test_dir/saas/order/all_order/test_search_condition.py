@@ -13,7 +13,8 @@ import page.order.all_order_page as order
 import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
-
+import interface.order.order_interface as order_interface
+import interface.product.product_interface as product_interface
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
@@ -651,7 +652,7 @@ def test_wait_merger_order_exception():
     else:
         result = base.get_column_text("订单状态")
         for i in result:
-            assert "待审核" == i
+            assert i in ["待审核", "部分审核"]
         print("验证订单数必须大于2且必须至少有一个待合并订单状态异常")
         for i in range(1, len(result)):
             order_sum = base.wait_element(base.get_cell_xpath(i + 1, "订单数")).text
@@ -946,14 +947,14 @@ def test_supplier_search_condition():
             supplier_id = supplier_interface.get_supplier_info(i, ["供应商ID"])["供应商ID"]
             print(f"指定供应商: {i}的供应商id是: {supplier_id}")
             for order_code in order_code_list:
-                order_code = order_code[order_code.index("T"):]
-                # print(f"order_code:{order_code}")
+                print(f"order_code:{order_code}")
                 order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
-                # print(f"order_id:{order_id}")
-                supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
-                for s in supplier_id_result:
-                    print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
-                    assert s["供应商ID"] == supplier_id
+                print(f"order_id:{order_id}")
+                sku_code_result = order_interface.get_order_product_detail(order_id, ["商家编码"])
+                for s in sku_code_result:
+                    expect_supplier_id = product_interface.get_sku_info(s["商家编码"])["data"]["Items"][0]["SupplierId"]
+                    print(f"订单商品的ID是{expect_supplier_id}")
+                    assert expect_supplier_id == supplier_id
     print(f"再试下指定多个供应商：供应商1-5")
     supplier_id_list = []
     for i in supplier_name_list:
@@ -979,14 +980,14 @@ def test_supplier_search_condition():
     else:
         order_code_list = base.get_column_text("订单编码")
         for order_code in order_code_list:
-            order_code = order_code[order_code.index("T"):]
             # print(f"order_code:{order_code}")
             order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
             # print(f"order_id:{order_id}")
-            supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
-            for s in supplier_id_result:
-                print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
-                assert s["供应商ID"] in supplier_id_list
+            sku_code_result = order_interface.get_order_product_detail(order_id, ["商家编码"])
+            for s in sku_code_result:
+                expect_supplier_id = product_interface.get_sku_info(s["商家编码"])["data"]["Items"][0]["SupplierId"]
+                print(f"订单商品的ID是{expect_supplier_id}")
+                assert expect_supplier_id in supplier_id_list
     print(f"测试排除供应商，订单的所有商品必须全部不是指定供应商才符合条件")
     element = base.wait_element(base.find_xpath("本页共", "加载"))
     text = element.text
@@ -1013,14 +1014,14 @@ def test_supplier_search_condition():
             supplier_id = supplier_interface.get_supplier_info(i, ["供应商ID"])["供应商ID"]
             print(f"指定供应商: {i}的供应商id是: {supplier_id}")
             for order_code in order_code_list:
-                order_code = order_code[order_code.index("T"):]
                 # print(f"order_code:{order_code}")
                 order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
                 # print(f"order_id:{order_id}")
-                supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
-                for s in supplier_id_result:
-                    print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
-                    assert s["供应商ID"] != supplier_id
+                sku_code_result = order_interface.get_order_product_detail(order_id, ["商家编码"])
+                for s in sku_code_result:
+                    expect_supplier_id = product_interface.get_sku_info(s["商家编码"])["data"]["Items"][0]["SupplierId"]
+                    print(f"订单商品的ID是{expect_supplier_id}")
+                    assert expect_supplier_id != supplier_id
     print(f"供应商id集合是{supplier_id_list}")
     print("指定排除多个供应商时，订单明细的供应商不能是指定供应商其中之一")
     time.sleep(1)
@@ -1040,40 +1041,40 @@ def test_supplier_search_condition():
     else:
         order_code_list = base.get_column_text("订单编码")
         for order_code in order_code_list:
-            order_code = order_code[order_code.index("T"):]
             # print(f"order_code:{order_code}")
             order_id = interface.get_order_info_by_fuzzy(order_code, ["ID"])[0]["ID"]
             # print(f"order_id:{order_id}")
-            supplier_id_result = interface.get_order_product_detail(order_id, ["供应商ID"])
-            for s in supplier_id_result:
-                print(f"订单：{order_code}的商品明细的供应商id是: {s['供应商ID']}")
-                assert s["供应商ID"] not in supplier_id_list
+            sku_code_result = order_interface.get_order_product_detail(order_id, ["商家编码"])
+            for s in sku_code_result:
+                expect_supplier_id = product_interface.get_sku_info(s["商家编码"])["data"]["Items"][0]["SupplierId"]
+                assert expect_supplier_id not in supplier_id_list
 
 
 # 缺货类型
 def test_shortage_status_search_condition():
+    base.scroll_to(4)
     base.wait_element_click(base.find_xpath("缺货状态"))
     base.wait_element_click(base.find_xpath("缺货状态", "库存充足"))
-    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
-    result = base.get_column_text("订单编码")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "缺货")
+    result = base.get_column_text("缺货")
     for i in result:
-        assert "充足" in i
+        assert "库存充足" in i
     base.wait_element_click(base.find_xpath("缺货状态", "部分缺货"))
-    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
-    result = base.get_column_text("订单编码")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "缺货")
+    result = base.get_column_text("缺货")
     for i in result:
-        assert "部分缺" in i
+        assert "部分缺货" in i
     base.wait_element_click(base.find_xpath("缺货状态", "全部缺货"))
-    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
-    result = base.get_column_text("订单编码")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "缺货")
+    result = base.get_column_text("缺货")
     for i in result:
-        assert "全缺" in i
+        assert "全部缺货" in i
     print(f"有缺货搜索出来的订单可以是全缺或者部分缺")
     base.wait_element_click(base.find_xpath("缺货状态", "有缺货"))
-    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
-    result = base.get_column_text("订单编码")
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "缺货")
+    result = base.get_column_text("缺货")
     for i in result:
-        assert "缺" in i
+        assert "缺货" in i
 
 
 # 店铺搜索条件
