@@ -4,7 +4,6 @@ from os.path import dirname, abspath
 import pytest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
 import page.login_page as login
 import page.base_page as base
 import interface.order.delivery_order_interface as delivery_interface
@@ -64,6 +63,7 @@ def test_check_inventory():
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     inventory = base.wait_element(base.get_cell_xpath(sku_code, ["库存预警值", "库存数"])).text
     assert inventory == '100'
+
 
 # 批量修改固定库位
 def test_multi_modify_bin():

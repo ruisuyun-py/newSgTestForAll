@@ -172,6 +172,24 @@ def wait_table_refresh(button_xpath, keywords, column_name):
             break
 
 
+# 等待文本加载
+def wait_text_locate(xpath, text):
+    """
+    xpath:等待文本加载的元素定位
+    text:需要等待加载的文本
+    """
+    start = datetime.datetime.now()
+    while (datetime.datetime.now() - start).seconds < 30:
+        try:
+            rate_of_progress = wait_element(xpath)
+            rate_of_progress_text = rate_of_progress.text
+            if text in rate_of_progress_text:
+                break
+        except StaleElementReferenceException as stale:
+            print(stale)
+            break
+
+
 # 等待元素刷新
 def wait_element_refresh(element, old_text):
     """
@@ -484,4 +502,5 @@ def chose_product_by_text(sku_name_str):
     time.sleep(1)
     wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(sku_name_str)
     wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(Keys.ENTER)
+    time.sleep(1)
 

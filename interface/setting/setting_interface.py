@@ -166,7 +166,7 @@ def get_express_info(warehouse_name, express_name):
             elif k == "Name":
                 express_info["快递名称"] = v
         express_info_list.append(express_info)
-    print(f"快递信息列表：{express_info_list}")
+    # print(f"快递信息列表：{express_info_list}")
     return express_info_list
 
 
@@ -178,7 +178,7 @@ def get_express_id(warehouse_name, express_name):
         if i["快递名称"] == express_name:
             express_id = i["快递ID"]
             break
-    print(f"快递ID：{express_id}")
+    # print(f"快递ID：{express_id}")
     return express_id
 
 
