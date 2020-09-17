@@ -1232,7 +1232,7 @@ def test_order_status_search_condition():
 def test_freight_search_condition():
     base.wait_element_click(base.find_xpath("其他"))
     base.wait_element_click(base.find_xpath_by_placeholder("运费大于等于")).send_keys(2)
-    base.wait_element_click(base.find_xpath_by_placeholder("运费数小于")).send_keys(10)
+    base.wait_element_click(base.find_xpath_by_placeholder("运费小于")).send_keys(10)
     element = base.wait_element(base.find_xpath("本页共", "加载"))
     text = element.text
     base.wait_element_click(base.find_xpath("组合查询"))

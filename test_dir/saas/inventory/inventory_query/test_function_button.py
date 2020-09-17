@@ -134,6 +134,7 @@ def test_warning_inventory():
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     base.wait_element_click(base.get_cell_xpath(sku_code, "库存预警值")).send_keys(200)
     base.wait_element_click(base.find_xpath("库存告警", "是"))
+    time.sleep(1)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
     assert result_num == "本页共1条数据"
@@ -175,13 +176,13 @@ def test_detail_button():
     time.sleep(1)
     base.wait_element_click(base.find_xpath_by_tag_name("在途采购单明细页面", "a"))
     base.wait_element_click(base.get_cell_xpath(1, "操作", "销售链接"))
-    base.change_frame("库存查询框架", "销售链接")
+    base.change_frame("库存查询框架", "销售链接明细")
     base.wait_element(base.find_xpath("店铺"))
     base.change_frame("库存查询框架")
     time.sleep(1)
-    base.wait_element_click(base.find_xpath_by_tag_name("销售链接", "a"))
+    base.wait_element_click(base.find_xpath_by_tag_name("销售链接明细", "a"))
     base.wait_element_click(base.get_cell_xpath(1, "操作", "销售订单"))
-    base.change_frame("库存查询框架", "销售订单")
+    base.change_frame("库存查询框架", "销售订单明细")
     base.wait_element(base.find_xpath("平台单号"))
 
 

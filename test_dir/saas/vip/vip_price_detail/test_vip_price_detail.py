@@ -697,6 +697,7 @@ def test_function_button():
     base.wait_element_click(base.find_xpath_with_spaces("批量删除预设价格"))
     time.sleep(1)
     base.wait_element_click(base.find_xpath("是否确认删除", "确认"))
+    time.sleep(1)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
     result = base.get_column_text("商家编码")
     assert result == sku_code_list[3:]
@@ -750,21 +751,6 @@ def test_function_button():
     base.wait_element_click(base.find_xpath("是否确认删除", "确认"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     base.wait_element(base.find_xpath("本页共0条数据"))
-
-
-def test_001():
-    modi1 = "111"
-    modi12 = "222"
-    modify_price = modi1
-    a = modify_price
-    b = copy.copy(modify_price)
-    print()
-    print(f"a={a}")
-    print(f"b={b}")
-    modify_price += modi12
-    print("修改值之后：")
-    print(f"a={a}")
-    print(f"b={b}")
 
 
 if __name__ == '__main__':
