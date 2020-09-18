@@ -105,15 +105,26 @@ def test_turn_to_exception():
     order_code = order_interface.new_order(vip_name, sku_info)["Code"]
     base.fuzzy_search("订单编码", order_code)
     base.select_all()
-    base.wait_element_click(base.find_xpath("转异常"))
     order.turn_to_exception("黑名单")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "黑名单")
-    base.wait_element_click(base.find_xpath("转正常单"))
-    base.wait_element(base.find_xpath("选中", "黑名单"))
-    time.sleep(1)
-    base.wait_element_click(base.find_xpath("选中", "黑名单"))
-    base.wait_element_click(base.find_xpath("转正常单", "清除选中异常"))
+    order.turn_to_normal("黑名单")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
+    order.turn_to_exception("终结")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "已终结")
+    order.turn_to_normal("已终结")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
+    order.turn_to_exception("标记异常", "手工标记异常测试")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "手工标记异常测试")
+    order.turn_to_normal("标记异常")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
+    order.turn_to_exception("常用异常", "常用异常2")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "常用异常2")
+    order.turn_to_normal("标记异常")
+    base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
+
+
+def test_manual_split_order():
+    pass
 
 
 if __name__ == '__main__':

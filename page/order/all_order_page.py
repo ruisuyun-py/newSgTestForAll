@@ -1,3 +1,4 @@
+import time
 import page.base_page as base
 from selenium.webdriver.common.keys import Keys
 locations = {
@@ -134,6 +135,7 @@ def turn_to_exception(exception_type, exception_description='', normal_exception
     exception_description：异常描述，当使用常用异常时，用于指定是哪个常用异常
     normal_exceptions：用于直接覆盖常用异常枚举
     """
+    base.wait_element_click(base.find_xpath("转异常"))
     base.change_frame("全部订单框架", "请输入标记异常的类型,输入相关说明")
     if exception_type == '常用异常':
         base.wait_element_click(base.find_xpath("维护常用异常"))
@@ -142,13 +144,29 @@ def turn_to_exception(exception_type, exception_description='', normal_exception
         base.wait_element(base.find_xpath_by_placeholder("请输入常用异常(逗号分隔)")).send_keys(normal_exceptions)
         base.wait_element_click(base.find_xpath("维护常用异常", "确认"))
         base.change_frame("全部订单框架", "请输入标记异常的类型,输入相关说明")
+        time.sleep(1)
         base.wait_element_click(base.find_xpath("常用异常", exception_description))
     elif exception_type in ["黑名单", "终结", "标记异常"]:
         base.wait_element_click(base.find_xpath(exception_type))
         if exception_description != '':
-            base.wait_element(base.find_xpath_by_tag_name("异常描述", "input")).send_keys(Keys.CONTROL+'a')
-            base.wait_element(base.find_xpath_by_tag_name("异常描述", "input")).send_keys(exception_description)
+            base.wait_element(base.find_xpath_by_tag_name("异常描述：", "input")).send_keys(Keys.CONTROL+'a')
+            base.wait_element(base.find_xpath_by_tag_name("异常描述：", "input")).send_keys(exception_description)
     else:
         assert 1 == 2, "请核实异常类型是否正确，目前仅支持常用异常，黑名单，终结，标记异常"
     base.change_frame("全部订单框架")
     base.wait_element_click(base.find_xpath("请输入标记异常的类型,输入相关说明", "确认"))
+    if exception_type == '终结':
+        base.wait_element(base.find_xpath("是否终结", "确定"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath("是否终结", "确定"))
+
+
+def turn_to_normal(exception_type):
+    """
+    exception_type:异常类型 目前包括：全部异常，黑名单等
+    """
+    base.wait_element_click(base.find_xpath("转正常单"))
+    base.wait_element(base.find_xpath("选中", exception_type))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("选中", exception_type))
+    base.wait_element_click(base.find_xpath("转正常单", "清除选中异常"))

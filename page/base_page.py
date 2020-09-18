@@ -2,7 +2,7 @@ import datetime
 import random
 import time
 from contextlib import contextmanager
-from selenium.common.exceptions import StaleElementReferenceException
+import selenium.common.exceptions as exceptions
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
@@ -119,7 +119,7 @@ def wait_element(xpath):
                 return element
             else:
                 continue
-        except Exception:
+        except exceptions.NoSuchElementException:
             continue
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
@@ -135,7 +135,7 @@ def wait_element_click(xpath):
                 return element
             else:
                 continue
-        except Exception:
+        except exceptions.NoSuchElementException:
             continue
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
@@ -149,7 +149,7 @@ def wait_elements(xpath):
                 return elements
             else:
                 continue
-        except Exception:
+        except exceptions.NoSuchElementException:
             continue
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
@@ -168,7 +168,7 @@ def wait_table_refresh(button_xpath, keywords, column_name):
     while (datetime.datetime.now() - start).seconds < 30:
         try:
             element.get_attribute("value")
-        except StaleElementReferenceException:
+        except exceptions.StaleElementReferenceException:
             break
 
 
@@ -185,7 +185,7 @@ def wait_text_locate(xpath, text):
             rate_of_progress_text = rate_of_progress.text
             if text in rate_of_progress_text:
                 break
-        except StaleElementReferenceException as stale:
+        except exceptions.StaleElementReferenceException as stale:
             print(stale)
             break
 
@@ -204,7 +204,7 @@ def wait_element_refresh(element, old_text):
                 print(f"刷新前的文本：{old_text}")
                 print(f"刷新后的文本：{text}")
                 return text
-        except StaleElementReferenceException:
+        except exceptions.StaleElementReferenceException:
             print("元素过期")
             return text
     assert 1 == 0, "元素刷新失败"
@@ -222,7 +222,7 @@ def wait_element_focus(xpath):
             focus_element = driver.switch_to.active_element
             if element == focus_element:
                 return element
-        except Exception:
+        except exceptions.NoSuchElementException:
             continue
     assert 1 == 0, "元素未获取焦点"
 
@@ -232,7 +232,8 @@ def get_column_field(column_name, column_name2=""):
     if column_name2 == "":
         xpath = "//div[contains(@class,'ag-header-cell') and contains(string(),'{}')]".format(column_name)
     else:
-        xpath = f"//div[contains(@class,'ag-header-cell') and contains(string(),'{column_name}')]/following::div[contains(@class,'ag-header-cell') and contains(string(),'{column_name2}')]"
+        xpath = f"//div[contains(@class,'ag-header-cell') and contains(string(),'{column_name}')]/following::div[" \
+                f"contains(@class,'ag-header-cell') and contains(string(),'{column_name2}')] "
     column_field = wait_element(xpath).get_attribute("col-id")
     return column_field
 
@@ -281,9 +282,6 @@ def get_cell_xpath(row_key, column_name, icon_text=''):
                         f"'{get_column_field(column_name[0], column_name[1])}']/span[1]/*[text()='{icon_text}'] "
 
     return xpath
-
-
-
 
 
 def get_old_cell_xpath(row_key, column_name):
@@ -503,4 +501,3 @@ def chose_product_by_text(sku_name_str):
     wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(sku_name_str)
     wait_element(find_xpath_by_placeholder("请输入完整的商家编码，多个商家编码以逗号（，）分隔")).send_keys(Keys.ENTER)
     time.sleep(1)
-
