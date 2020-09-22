@@ -1162,6 +1162,8 @@ def test_order_source_search_condition():
         else:
             order_code_list = base.get_column_text("订单编码")
             for order_code in order_code_list:
+                base.wait_element(base.get_cell_xpath(order_code, "订单编码"))
+                time.sleep(1)
                 base.wait_element_click(base.get_cell_xpath(order_code, "订单编码"))
                 base.wait_element_click(base.get_cell_xpath(order_code, "订单编码", "详"))
                 base.change_frame("全部订单框架", "订单详情")
@@ -1243,6 +1245,8 @@ def test_freight_search_condition():
     else:
         order_code_list = base.get_column_text("订单编码")
         for i in order_code_list:
+            base.wait_element(base.get_cell_xpath(i, "订单编码"))
+            time.sleep(1)
             base.wait_element_click(base.get_cell_xpath(i, "订单编码"))
             base.wait_element_click(base.get_cell_xpath(i, "订单编码", "详"))
             base.change_frame("全部订单框架", "订单详情")
@@ -1336,6 +1340,8 @@ def test_same_phone_number_with_different_address():
         phone_num_list = list(set(base.get_column_text("手机号")))
         for i in phone_num_list:
             print(f"本次搜索的手机号是：{i}")
+            if i == '15221071395':
+                continue
             base.fuzzy_search("收货地址", i)
             address_list = list(set(base.get_column_text("收货地址")))
             print(f"搜索出来的地址是{address_list}")
@@ -1351,10 +1357,12 @@ def test_same_phone_number_with_different_address():
     if order_num_text == "本页共0条数据":
         print("没有数据不用看")
     else:
-        print(f"搜索出来的会员名必然存在只有一个收货地址")
+        print(f"手机号")
         vip_name_list = list(set(base.get_column_text("手机号")))
         for i in vip_name_list:
             print(f"本次搜索的手机号是：{i}")
+            if i == '':
+                continue
             base.fuzzy_search("收货地址", i)
             address_list = list(set(base.get_column_text("收货地址")))
             print(f"搜索出来的地址是{address_list}")

@@ -167,6 +167,7 @@ def test_barcode_search_condition():
         barcode_list = product_interface.get_sku_bar_code("", product_code)
         base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL + 'a')
         for barcode in barcode_list:
+            print(f"需要搜索的商品条码是{barcode}")
             base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
             base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.ENTER)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
@@ -175,6 +176,7 @@ def test_barcode_search_condition():
             print(f"没数据不用查看")
         else:
             result = base.get_unique_column_text("货号")
+            # TODO:(rui)有BUG之前支持批量搜索
             for i in result:
                 assert i == product_code
 
@@ -217,6 +219,8 @@ def test_inventory_search_condition():
     base.wait_element(base.find_xpath_by_placeholder("库存大于等于")).send_keys(100)
     base.wait_element(base.find_xpath_by_placeholder("库存小于")).send_keys(Keys.CONTROL + 'a')
     base.wait_element(base.find_xpath_by_placeholder("库存小于")).send_keys(1000)
+    base.wait_text_locate(base.find_xpath_by_placeholder("库存小于"), "1000")
+    time.sleep(1)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     result = base.get_column_text("库存预警值", "库存数")
     for i in result:

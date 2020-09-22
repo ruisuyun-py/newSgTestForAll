@@ -63,6 +63,8 @@ def test_new_order():
     base.chose_product_by_text("测试商品1-红色 XS,测试商品1-红色 S")
     base.change_frame("全部订单框架")
     base.wait_element_click(base.find_xpath("选择商品", "确定"))
+    base.wait_element(base.get_cell_xpath(1, "订单编码"))
+    time.sleep(1)
     base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
     base.wait_element_click(base.get_cell_xpath(1, "订单编码", "详"))
     base.change_frame("全部订单框架", "订单详情")

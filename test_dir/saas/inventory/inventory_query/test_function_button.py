@@ -45,6 +45,7 @@ def test_export_button():
 
 # 盘点选中库位
 def test_check_inventory():
+    base.wait_element(base.find_xpath("显示0库存", "是"))
     time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "是"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
@@ -57,6 +58,8 @@ def test_check_inventory():
     base.wait_element(base.get_old_cell_input_xpath(1, "实际数量")).send_keys(100)
     base.change_frame("库存查询框架")
     base.wait_element_click(base.find_xpath("新增盘点单", "提交并盘点"))
+    base.wait_element(base.find_xpath("显示0库存", "全部"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "全部"))
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(Keys.CONTROL+'a')
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(sku_code)
@@ -116,6 +119,7 @@ def test_modify_bin():
 
 # 库存预警值
 def test_warning_inventory():
+    base.wait_element(base.find_xpath("显示0库存", "是"))
     time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "是"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
@@ -128,6 +132,8 @@ def test_warning_inventory():
     base.wait_element(base.get_old_cell_input_xpath(1, "实际数量")).send_keys(100)
     base.change_frame("库存查询框架")
     base.wait_element_click(base.find_xpath("新增盘点单", "提交并盘点"))
+    base.wait_element(base.find_xpath("显示0库存", "全部"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("显示0库存", "全部"))
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(Keys.CONTROL + 'a')
     base.wait_element(base.find_xpath_by_placeholder("商家编码")).send_keys(sku_code)

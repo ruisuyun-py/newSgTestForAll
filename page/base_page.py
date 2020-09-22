@@ -181,9 +181,9 @@ def wait_text_locate(xpath, text):
     start = datetime.datetime.now()
     while (datetime.datetime.now() - start).seconds < 30:
         try:
-            rate_of_progress = wait_element(xpath)
-            rate_of_progress_text = rate_of_progress.text
-            if text in rate_of_progress_text:
+            element = wait_element(xpath)
+            element_text = element.text + element.get_attribute("value")
+            if text in element_text:
                 break
         except exceptions.StaleElementReferenceException as stale:
             print(stale)
