@@ -182,12 +182,19 @@ def wait_text_locate(xpath, text):
     while (datetime.datetime.now() - start).seconds < 30:
         try:
             element = wait_element(xpath)
-            element_text = element.text + element.get_attribute("value")
+            element_text = element.text
+            # print(f"{element_text}")
             if text in element_text:
                 break
+            try:
+                value = element.get_attribute("value")
+                if text in value:
+                    break
+            except TypeError as t:
+                continue
         except exceptions.StaleElementReferenceException as stale:
             print(stale)
-            break
+            continue
 
 
 # 等待元素刷新

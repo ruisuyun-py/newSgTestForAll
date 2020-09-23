@@ -7,6 +7,9 @@ import interface.inventory.inventory_interface as inventory_interface
 
 # 保存基础业务
 def save_base_setting(setting_info):
+    """
+    setting_info:{"允许负库存": "false",}
+    """
     setting = {
         "LockToOperate": "false",
         "RecordOrderChangeDetail": "false",
@@ -45,6 +48,8 @@ def save_base_setting(setting_info):
     for k, v in setting_info.items():
         if k == "启用条码唯一码":
             setting["PrintUniqueBarCode"] = v
+        elif k == '允许负库存':
+            setting["EnableLackOfInventery"] = v
     headers = {
         'Cookie': base.cookies
     }
