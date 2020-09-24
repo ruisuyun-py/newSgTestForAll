@@ -5,9 +5,10 @@ import interface.product.product_interface as product_interface
 
 
 # 新增会员
-def new_vip(name):
+def new_vip(name, other_info={}):
     """
     name:会员名称，一般用get_now_string()生成
+    other_info : 收货人，地址，电话，等
     return:
     {'data':
         {
@@ -23,6 +24,7 @@ def new_vip(name):
     'message':
     None}
     """
+    random_string = base.get_now_string()
     headers = {
         'Cookie': base.cookies
     }
@@ -36,16 +38,31 @@ def new_vip(name):
         'VipCode': name,
         'ShipName': '',
         'ShipMobile': '',
-        'ReceiverName': '芮苏云',
-        'ReceiverMobile': '15221071395',
+        'ReceiverName': name,
+        'ReceiverMobile': random_string[0:11],
         'ReceiverPhone': '',
         'ReceiverZip': '',
         'ProvinceName': '上海',
         'CityName': '上海市',
         'DistrictName': '闵行区',
-        'ReceiverAddress': '衡东路189',
+        'ReceiverAddress': '衡东路' + random_string[7:10] + '号',
         'IsIllegal': 'false'
     }
+    if len(other_info) != 0:
+        for k, v in other_info.items():
+            if k == '收货人':
+                vip["ReceiverName"] = v
+            elif k == '手机':
+                vip["ReceiverName"] = v
+            elif k == '省':
+                vip["ProvinceName"] = v
+            elif k == '市':
+                vip["CityName"] = v
+            elif k == '区':
+                vip["DistrictName"] = v
+            elif k == '地址':
+                vip["ReceiverAddress"] = v
+
     url_param = ''
     for k, v in vip.items():
         url_param += f"'{k}':'{v}',"

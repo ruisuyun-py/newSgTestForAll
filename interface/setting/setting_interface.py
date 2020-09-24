@@ -129,6 +129,50 @@ def save_order_setting(setting_info):
     response = requests.get(url, headers=headers)
 
 
+def save_auto_merge_setting(setting_info):
+    """
+    setting_info:{"店铺相同": "false",}
+    """
+    setting = {
+        "Enable": "false",
+        "SameShop": "false",
+        "SameVip": "false",
+        "SameReceiver": "true",
+        "SameExpress": "false",
+        "SameWarehouse": "false",
+        "NotMergeRefundOrder": "false",
+        "NotMergeDispatchedOrder": "false",
+        "MergeMemoWithoutTid": "false",
+    }
+    for k, v in setting_info.items():
+        if k == "开启":
+            setting["Enable"] = v
+        elif k == '店铺相同':
+            setting["SameShop"] = v
+        elif k == '会员相同':
+            setting["SameVip"] = v
+        elif k == '相同收货人、手机、地址':
+            setting["SameReceiver"] = v
+        elif k == '仓库相同':
+            setting["SameWarehouse"] = v
+        elif k == '快递相同':
+            setting["SameExpress"] = v
+        elif k == '不合并有退款订单':
+            setting["NotMergeRefundOrder"] = v
+        elif k == '不合并已配货订单':
+            setting["NotMergeDispatchedOrder"] = v
+        elif k == '合并买家/卖家备注不加平台单号':
+            setting["MergeMemoWithoutTid"] = v
+    headers = {
+        'Cookie': base.cookies
+    }
+    url = "http://gw.erp12345.com/api/Settings/TradeMergeSetting/savesetting?setting={"
+    for k, v in setting.items():
+        url += f"'{k}':'{v}',"
+    url += "}"
+    response = requests.get(url, headers=headers)
+
+
 # 获取快递ID
 def get_express_info(warehouse_name, express_name):
     """
@@ -227,3 +271,38 @@ def get_random_bin(warehouse_name):
     random_bin = result["data"]["Items"][random_num]
     random_bin_info = {"ID": random_bin["Id"], "库位": random_bin["Name"], "绑定商品": random_bin["WarehouseStorageProSku"]}
     return random_bin_info
+
+
+# 获取店铺信息
+def get_shop_info(shop_name):
+    """
+    shop_name:店铺名
+    """
+    """原始数据： {"data":{"Items":[{"Id":"7494677199308457149","IsDisable":false,"Name":"巨淘气","PlatformType":1,
+    "PlatformName":"淘宝集市","ShipName":"芮苏云","ShipPhone":"15221071395","ShipAddress":"恒西路189号","Memo":"",
+    "AuthorizeBeginDate":"2020-07-03 12:38:05","AuthorizeEndDate":"2020-12-27 05:59:59","Nick":"章kun666666",
+    "ShipRegionName":"上海 > 上海市 > 闵行区"}],"TotalCount":1},"code":1,"message":null} """
+    url = "http://gw.erp12345.com/api/Basics/Shop/QueryPage?"
+    params = {
+        "ModelTypeName": "ErpWeb.Domain.ViewModels.ShopVm",
+        "Name": shop_name,
+    }
+    for k, v in params.items():
+        url += f"{k}={v}&"
+    headers = {
+        'Cookie': base.cookies
+    }
+    # print(url)
+    response = requests.get(url, headers=headers)
+    result = dict(response.json())
+    return result
+
+
+# 获取店铺id
+def get_shop_id(shop_name):
+    """
+    shop_name:店铺名
+    """
+    result = get_shop_info(shop_name)
+    shop_id = result["data"]["Items"][0]["Id"]
+    return shop_id

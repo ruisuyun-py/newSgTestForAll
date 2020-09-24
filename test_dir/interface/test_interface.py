@@ -6,6 +6,7 @@ import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.product.product_interface as product_interface
 import interface.supplier.supplier_interface as supplier_interface
+import interface.vip.vip_interface as vip_interface
 import interface.inventory.inventory_interface as inventory_interface
 import interface.purchase.purchase_interface as purchase_interface
 import interface.finance.finance_interface as finance_interface
@@ -93,6 +94,18 @@ def test_new_order():
     delivery_order_id = delivery_interface.get_delivered_order_info({"模糊搜索": name}, ["ID"])
     print(f"发货单ID是{delivery_order_id}")
 
+
+def test_new_order2():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(sku_code, "100")
+    sku_info = [{'商家编码': sku_code, '数量': '2'}, ]
+    order_code = order_interface.new_order(vip_name, sku_info, "测试仓", "买家自提", "巨淘气", {"卖家备注": "111"})["Code"]
+    print(order_code)
 
 def test_get_product_info_by_id():
     result = interface.get_sku_price_by_vip_id("20200803195546", "20200803195549-红色 3XL")
@@ -253,6 +266,18 @@ def test_get_bin_info():
     result = setting_interface.get_bin_info("主仓库")
     result = setting_interface.get_random_bin("主仓库")
     print(f"{result}")
+
+
+def test_save_auto_merge_setting():
+    setting_info = {"开启": "true", "会员相同": "true"}
+    setting_interface.save_auto_merge_setting(setting_info)
+    time.sleep(5)
+    print(f"修改设置之后等待5秒")
+
+
+def test_get_shop_id():
+    shop_id = setting_interface.get_shop_id("巨淘气")
+    print(f"{shop_id}")
 
 
 if __name__ == '__main__':

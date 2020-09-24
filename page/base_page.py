@@ -110,9 +110,9 @@ def open_page(menu_name, page_name, frame_name):
     switch_to_frame(get_location(frame_name))
 
 
-def wait_element(xpath):
+def wait_element(xpath, seconds=30):
     start = datetime.datetime.now()
-    while (datetime.datetime.now() - start).seconds < 30:
+    while (datetime.datetime.now() - start).seconds < seconds:
         try:
             element = driver.find_element_by_xpath(xpath)
             if element:
@@ -125,9 +125,9 @@ def wait_element(xpath):
 
 
 # 等待元素并点击
-def wait_element_click(xpath):
+def wait_element_click(xpath, seconds=30):
     start = datetime.datetime.now()
-    while (datetime.datetime.now() - start).seconds < 30:
+    while (datetime.datetime.now() - start).seconds < seconds:
         try:
             element = driver.find_element_by_xpath(xpath)
             if element:
@@ -140,9 +140,9 @@ def wait_element_click(xpath):
     assert 1 == 2, "元素不存在:{}".format(xpath)
 
 
-def wait_elements(xpath):
+def wait_elements(xpath, seconds=30):
     start = datetime.datetime.now()
-    while (datetime.datetime.now() - start).seconds < 30:
+    while (datetime.datetime.now() - start).seconds < seconds:
         try:
             elements = driver.find_elements_by_xpath(xpath)
             if elements:
@@ -208,8 +208,8 @@ def wait_element_refresh(element, old_text):
         try:
             text = element.text
             if text != old_text:
-                print(f"刷新前的文本：{old_text}")
-                print(f"刷新后的文本：{text}")
+                # print(f"刷新前的文本：{old_text}")
+                # print(f"刷新后的文本：{text}")
                 return text
         except exceptions.StaleElementReferenceException:
             print("元素过期")
@@ -476,6 +476,8 @@ def change_frame(frame_name='', frame_name2=''):
 def operate_page(menu_name, page_name, frame_name):
     try:
         open_page(menu_name, page_name, frame_name)
+        wait_element(find_xpath("组合查询"))
+        time.sleep(1)
         yield 1
     finally:
         close_page(page_name)

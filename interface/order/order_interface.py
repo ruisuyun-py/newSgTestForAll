@@ -8,7 +8,7 @@ import interface.setting.setting_interface as setting_interface
 
 
 # 新建订单
-def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买家自提'):
+def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买家自提', shop_name='阿里测试店铺01', other={}):
     """
     vip_name:会员名
     sku_info:商品信息列表，商品信息字典，如下
@@ -22,7 +22,7 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
         "Tid": "",
         "OrderType": 1,
         "DealDate": time.strftime('%Y-%m-%d %H:%M:%S'),
-        "ShopId": "7494440439622140309",
+        "ShopId": setting_interface.get_shop_id(shop_name),
         "VipId": vip_info["data"]["Items"][0]["VipId"],
         "VipName": vip_info["data"]["Items"][0]["VipName"],
         "ExpressId": setting_interface.get_express_id(warehouse_name, express_name),
@@ -47,6 +47,18 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
         "InvoiceTitle": "",
         "InvoiceNo": ""
     }
+    if len(other) != 0:
+        for k, v in other.items():
+            if k == "卖家备注":
+                order["SellerMemo"] = v
+            elif k == "买家备注":
+                order["BuyerMemo"] = v
+            elif k == "便签":
+                order["Note"] = v
+            elif k == "运费":
+                order["PostFee"] = v
+            elif k == "旗帜":
+                order["SellerFlag"] = v
     headers = {
         'Cookie': base.cookies
     }
@@ -54,6 +66,7 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
     for k, v in order.items():
         url_param += f"'{k}':'{v}',"
     url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrder?order={" + url_param + "}"
+    # print(url)
     response = requests.get(url, headers=headers, )
     result = dict(response.json())
     start = result['data']['OrderCodeTid'].find("T")

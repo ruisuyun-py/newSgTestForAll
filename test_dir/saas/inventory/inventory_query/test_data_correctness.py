@@ -26,6 +26,14 @@ def setup_module():
 
 def setup_function():
     base.open_page("库存", "库存查询", "库存查询框架")
+    element = ''
+    try:
+        element = base.wait_element(base.find_xpath("刷新报表缓存", "天数"), 3)
+    except AssertionError as ae:
+        print(ae)
+    if element != '':
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath("刷新报表缓存", "确定"))
 
 
 def teardown_function():
@@ -41,7 +49,7 @@ def test_data_correctness():
     product_code = base.get_now_string()
     product_interface.new_product(product_code)
     print(f"先新建一个商品:{product_code}")
-    base.wait_element_click(base.find_xpath_by_placeholder("货号")).send_keys(product_code)
+    base.wait_element(base.find_xpath_by_placeholder("货号")).send_keys(product_code)
     time.sleep(1)
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "货号")
     print(f"校验货号是不是{product_code}")
