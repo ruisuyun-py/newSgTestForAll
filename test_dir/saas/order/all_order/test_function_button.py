@@ -125,8 +125,41 @@ def test_turn_to_exception():
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
 
 
-def test_manual_split_order():
-    pass
+def test_manual_split_order():# TODO:(RUI) 有BUG：全部订单页面，手工拆弹功能，拆包配货页面需要切换新表格组件，图片有问题，没做处理，当前重量字段应该是剩余可拆分数*商品重量，但是目前失效
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(sku_code, "100")
+    sku_info = [{'商家编码': sku_code, '数量': '2'}, ]
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", vip_name)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "手工拆单"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "手工拆单"))
+    base.change_frame("全部订单框架", "拆包配货")
+    base.wait_element(base.get_old_cell_input_xpath(1, "拆分数量")).send_keys(Keys.CONTROL+'a')
+    base.wait_element(base.get_old_cell_input_xpath(1, "拆分数量")).send_keys("1")
+    base.wait_element(base.find_xpath("立即拆分"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("立即拆分"))
+    base.wait_element(base.find_xpath("提示", "请确认需要拆分出来1个商品？"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("提示", "确定"))
+    base.change_frame("全部订单框架")
+    base.wait_element_refresh(element, text)
+    result = base.wait_element(base.get_cell_xpath(order_code, "订单状态")).text
+    assert result == "部分审核"
+    base.wait_element_click(base.get_cell_xpath(order_code, "商品信息"))
+    other_info = order.get_float_sku_info_text(sku_code, "其他信息")
+    assert "已审1件" in other_info
 
 
 if __name__ == '__main__':

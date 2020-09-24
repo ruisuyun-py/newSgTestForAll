@@ -208,13 +208,13 @@ def wait_element_refresh(element, old_text):
         try:
             text = element.text
             if text != old_text:
-                # print(f"刷新前的文本：{old_text}")
-                # print(f"刷新后的文本：{text}")
+                print(f"刷新前的文本：{old_text}")
+                print(f"刷新后的文本：{text}")
                 return text
         except exceptions.StaleElementReferenceException:
             print("元素过期")
             return text
-    assert 1 == 0, "元素刷新失败"
+    # assert 1 == 0, "元素刷新失败"
 
 
 # 等待元素获取焦点
