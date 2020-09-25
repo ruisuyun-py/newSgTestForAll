@@ -104,8 +104,8 @@ def switch_to_frame(xpath):
 
 def open_page(menu_name, page_name, frame_name):
     driver.switch_to.default_content()
-    wait_element(find_xpath(menu_name)).click()
-    wait_element(find_xpath(page_name)).click()
+    wait_element_click(find_xpath(menu_name))
+    wait_element_click(find_xpath(page_name))
     driver.switch_to.default_content()
     switch_to_frame(get_location(frame_name))
 
