@@ -11,12 +11,14 @@ import test_dir.test_base as test
 import page.login_page as login
 import page.base_page as base
 import page.order.all_order_page as order
+import page.order.print_and_delivery_page as delivery_order
 import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
 import interface.order.order_interface as order_interface
 import interface.product.product_interface as product_interface
 import interface.vip.vip_interface as vip_interface
+import interface.inventory.inventory_interface as inventory_interface
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 
@@ -160,6 +162,368 @@ def test_manual_split_order():# TODO:(RUI) 有BUG：全部订单页面，手工�
     base.wait_element_click(base.get_cell_xpath(order_code, "商品信息"))
     other_info = order.get_float_sku_info_text(sku_code, "其他信息")
     assert "已审1件" in other_info
+
+
+def test_multi_split_to_one_piece():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(sku_code, "100")
+    sku_info = [{'商家编码': sku_code, '数量': '20'}, ]
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", vip_name)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "批量拆分成单件"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "批量拆分成单件"))
+    base.wait_element(base.find_xpath("提示", "订单会被拆分成商品数量为1的发货单发货，是否继续操作？"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("提示", "确定"))
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            product_num_list = base.get_column_text("商品数")
+            if len(product_num_list) == 20:
+                for i in product_num_list:
+                    assert int(i) == 1
+                break
+
+
+def test_multi_split_with_warehouse():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    main_sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(main_sku_code, "100")
+    sku_id_list = product_interface.get_sku_id("", product_code)
+    modify_info_dict = {"优先出库仓": "主仓库"}
+    product_interface.multi_modify_sku_info(sku_id_list, modify_info_dict)
+    sku_info = [{'商家编码': main_sku_code, '数量': '2'}]
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    test_sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(test_sku_code, "100")
+    sku_id_list = product_interface.get_sku_id("", product_code)
+    modify_info_dict = {"优先出库仓": "测试仓"}
+    product_interface.multi_modify_sku_info(sku_id_list, modify_info_dict)
+    sku_info.append({'商家编码': test_sku_code, '数量': '2'})
+    print(f"商品信息是：{sku_info}")
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "按仓库拆包"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "按仓库拆包"))
+    time.sleep(1)
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            base.scroll_to(2)
+            warehouse_list = base.get_column_text("仓库")
+            if len(warehouse_list) == 2:
+                assert "主仓库" in warehouse_list
+                assert "测试仓" in warehouse_list
+                break
+        base.scroll_to(0)
+        base.wait_element_click(base.get_cell_xpath("主仓库", "商品信息"))
+        sku_code_list = delivery_order.get_all_float_sku_info("商家编码")
+        for i in sku_code_list:
+            assert i == main_sku_code
+        base.wait_element_click(base.get_cell_xpath("测试仓", "商品信息"))
+        sku_code_list = delivery_order.get_all_float_sku_info("商家编码")
+        for i in sku_code_list:
+            assert i == test_sku_code
+
+
+def test_multi_split_with_weight():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    sku_code = product_interface.get_sku_code(product_code)[0]
+    product_interface.modify_sku_price(sku_code, "100")
+    sku_id_list = product_interface.get_sku_id("", product_code)
+    modify_info_dict = {"重量": "1.0"}
+    product_interface.multi_modify_sku_info(sku_id_list, modify_info_dict)
+    sku_info = [{'商家编码': sku_code, '数量': '10'}]
+    print(f"商品信息是：{sku_info}")
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "按重量拆包"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "按重量拆包"))
+    time.sleep(1)
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            product_num_list = base.get_column_text("商品数")
+            if len(product_num_list) == 4:
+                assert ['1', '3', '3', '3'] == product_num_list
+                break
+
+
+def test_multi_split_with_inventory():
+    # TODO:(RUI):全部订单页面 按照库存拆单报错：当前数据可能被其他人操作了，请刷新后重试！，请排查下审核问题，数据：测试专用 测试  8888     订单编码：TD200925016  正常情况下不会报错
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    stock_in_sku_info = []
+    stock_in_num = 0
+    for enough_sku_code in enough_sku_code_list:
+        stock_in_num += 2
+        stock_in_sku_info .append({'商家编码': enough_sku_code, '数量': stock_in_num})
+    stock_in_order_id = inventory_interface.new_stock_in_order("主仓库", "供应商1", stock_in_sku_info)["ID"]
+    inventory_interface.stock_in_stock_in_order(stock_in_order_id)
+    sku_info = []
+    for enough_sku_code in enough_sku_code_list:
+        sku_info .append({'商家编码': enough_sku_code, '数量': '3'})
+    print(f"商品信息是：{sku_info}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    lack_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(lack_sku_code_list[0], "100")
+    for lack_sku_code in lack_sku_code_list:
+        sku_info.append({'商家编码': lack_sku_code, '数量': '5'})
+    print(f"商品信息是：{sku_info}")
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "按库存拆包"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "按库存拆包"))
+    time.sleep(1)
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            product_num_list = base.wait_element(base.get_cell_xpath(vip_name, "商品数")).text
+            if int(product_num_list) == 9:
+                print(f"按库存拆分：库存充足的库存全部拆包配货，库存不足的留下")
+                break
+
+
+def test_multi_split_to_one_sku_one_package():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = []
+    for enough_sku_code in enough_sku_code_list:
+        sku_info.append({'商家编码': enough_sku_code, '数量': '3'})
+    print(f"商品信息是：{sku_info}")
+    sku_info.append({'商家编码': "测试商品1-红色 XS", '数量': '3'})
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "单件成包"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "单件成包"))
+    time.sleep(1)
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            product_num_list = base.get_column_text("商品数")
+            if int(len(product_num_list)) == 4:
+                break
+        assert ["21", "1", "1", "1"].sort() == product_num_list.sort()
+        print(f"{product_num_list.sort()}")
+        for i in range(1, 5):
+            product_num_text = base.wait_element(base.get_cell_xpath(i, "商品数")).text
+            print(product_num_text)
+            if product_num_text == "1":
+                base.wait_element_click(base.get_cell_xpath(i, "商品信息"))
+                result = delivery_order.get_all_float_sku_info("商家编码")
+                print(result)
+                for j in result:
+                    assert j == "测试商品1-红色 XS"
+            elif product_num_text == "21":
+                base.wait_element_click(base.get_cell_xpath(i, "商品信息"))
+                result = delivery_order.get_all_float_sku_info("商家编码")
+                print(result)
+                assert result.sort() == enough_sku_code_list.sort()
+            else:
+                assert 1 == 2, "单件成包拆包结果不符合预期，请核实"
+
+
+def test_multi_split_to_multi_sku_one_package():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = []
+    for enough_sku_code in enough_sku_code_list:
+        sku_info.append({'商家编码': enough_sku_code, '数量': '3'})
+    print(f"商品信息是：{sku_info}")
+    sku_info.append({'商家编码': "测试商品1-红色 XXXXXXL", '数量': '3'})
+    sku_info.append({'商家编码': "测试商品1-红色 6XL", '数量': '3'})
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    element = base.wait_element(base.get_cell_xpath(1, "订单状态"))
+    text = element.text
+    base.wait_element_click(base.find_xpath("拆单"))
+    base.wait_element(base.find_xpath("拆单", "多件成包"))
+    time.sleep(1)
+    base.wait_element_click(base.find_xpath("拆单", "多件成包"))
+    time.sleep(1)
+    with base.operate_page("订单", "打印发货", "打印发货框架"):
+        start = datetime.datetime.now()
+        while (datetime.datetime.now() - start).seconds < 30:
+            base.fuzzy_search("发货单号", order_code)
+            product_num_list = base.get_column_text("商品数")
+            if int(len(product_num_list)) == 2:
+                break
+        assert ["21", "6"].sort() == product_num_list.sort()
+        print(f"{product_num_list.sort()}")
+        for i in range(1, 3):
+            product_num_text = base.wait_element(base.get_cell_xpath(i, "商品数")).text
+            print(product_num_text)
+            if product_num_text == "6":
+                base.wait_element_click(base.get_cell_xpath(i, "商品信息"))
+                result = delivery_order.get_all_float_sku_info("商家编码")
+                print(result)
+                assert ["测试商品1-红色 XXXXXXL", "测试商品1-红色 6XL"].sort() == result.sort()
+            elif product_num_text == "21":
+                base.wait_element_click(base.get_cell_xpath(i, "商品信息"))
+                result = delivery_order.get_all_float_sku_info("商家编码")
+                print(result)
+                assert result.sort() == enough_sku_code_list.sort()
+            else:
+                assert 1 == 2, "单件成包拆包结果不符合预期，请核实"
+
+
+def test_modify_warehouse_and_express():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", order_code)
+    base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
+    base.click_space()
+    modify_info = {"仓库": "测试仓", "快递": "EMS", }
+    order.modify_warehouse_and_express(order_code, modify_info)
+    warehouse_name = base.wait_element(base.get_cell_xpath(order_code, "仓库")).text
+    assert "测试仓" in warehouse_name
+    express_name = base.wait_element(base.get_cell_xpath(order_code, "快递")).text
+    assert "EMS" in express_name
+
+
+def test_modify_seller_memo():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    first_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    second_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", vip_name)
+    base.wait_element_click(base.get_cell_xpath(first_order_code, "订单编码"))
+    base.click_space()
+    modify_info = {"旗帜": "红旗", "备注": "第一次"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
+    assert "第一次" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "旗帜")).text
+    assert "红旗" in result
+    modify_info = {"旗帜": "绿旗", "备注": "第二次", "追加": "true"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
+    assert "第二次" in result
+    assert "第一次" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "旗帜")).text
+    assert "绿旗" in result
+    print(f"再测试常用备注")
+    modify_info = {"旗帜": "黄旗", "常用备注": "常用备注1"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
+    assert "常用备注1" in result
+    assert "第二次" in result
+    assert "第一次" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "旗帜")).text
+    assert "黄旗" in result
+    base.select_all()
+    print(f"----------------------------------试下勾选多个订单修改备注-------------------------------------")
+    modify_info = {"旗帜": "蓝旗", "备注": "第三次"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.get_column_text("卖家备注")
+    for i in result:
+        assert "第三次" in i
+    result = base.get_column_text("旗帜")
+    for i in result:
+        assert "蓝旗" in result
+    modify_info = {"旗帜": "紫旗", "备注": "第四次", "追加": "true"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.get_column_text("卖家备注")
+    for i in result:
+        assert "第四次" in i
+        assert "第三次" in i
+    result = base.get_column_text("旗帜")
+    for i in result:
+        assert "紫旗" in result
+    print(f"再测试常用备注")
+    modify_info = {"旗帜": "黄旗", "常用备注": "常用备注2"}
+    order.modify_seller_memo(first_order_code, modify_info)
+    result = base.get_column_text("卖家备注")
+    for i in result:
+        assert "常用备注2" in i
+    result = base.get_column_text("旗帜")
+    for i in result:
+        assert "黄旗" in result
+
+
+
+
+
 
 
 if __name__ == '__main__':

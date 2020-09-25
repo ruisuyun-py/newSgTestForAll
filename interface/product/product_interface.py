@@ -2,7 +2,7 @@ import time
 import requests
 import page.base_page as base
 import interface.supplier.supplier_interface as supplier_interface
-
+import interface.inventory.inventory_interface as inventory_interface
 
 # 新建商品
 def new_product(product_code):
@@ -309,7 +309,7 @@ def get_sku_unique_bar_code(sku_code, qty):
 # 批量修改
 def multi_modify_sku_info(sku_id_list, modify_info_dict):
     """
-    sku_code_lsit:["测试商品1-红色 XS", "测试商品1-红色 XS", "测试商品1-红色 S", "测试商品1-红色 M", "测试商品1-红色 L", ]
+    sku_code_lsit:[7495079369275081918, 7495079369275081919, 7495079369275081920, 7495079369275081921]
     modify_info_dict:{"商品简称":"奖惩", "商品分类":"上衣", "供应商":"供应商1", "品牌":"阿迪达斯", "标准售价":"1", }
     """
     sku_ids = ""
@@ -352,6 +352,9 @@ def multi_modify_sku_info(sku_id_list, modify_info_dict):
         if k == "供应商ID":
             supplier_id = supplier_interface.get_supplier_info(v, ["供应商ID"])["供应商ID"]
             params[modify_info_mapping[k]] = supplier_id
+        elif k == "优先出库仓":
+            warehouse_id = inventory_interface.get_inventory_id(v)
+            params[modify_info_mapping[k]] = warehouse_id
         elif k in ["商品分类ID", "品牌ID"]:
             assert 1 == 2, "商品分类和品牌获取ID方法需要完善"
         else:

@@ -73,7 +73,7 @@ def find_xpath_by_tag_name(keywords1, keywords2):
 
 
 def find_xpath_by_inner_tag_name(keywords1, keywords2):
-    xpath = "//*[text()='{0}']/descendant::{1}".format(keywords1, keywords2)
+    xpath = "//*[contains(text(),'{0}')]/descendant::{1}".format(keywords1, keywords2)
     return xpath
 
 
@@ -481,7 +481,18 @@ def operate_page(menu_name, page_name, frame_name):
         yield 1
     finally:
         close_page(page_name)
-        
+
+
+@contextmanager
+def wait_refresh(xpath,):
+    try:
+        element = wait_element(xpath)
+        text = element.text
+        yield 1
+    finally:
+        wait_element_refresh(element, text)
+
+
 
 def fuzzy_search(column_name, keywords):
     """

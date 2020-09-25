@@ -170,3 +170,59 @@ def turn_to_normal(exception_type):
     time.sleep(1)
     base.wait_element_click(base.find_xpath("选中", exception_type))
     base.wait_element_click(base.find_xpath("转正常单", "清除选中异常"))
+
+
+def modify_seller_memo(keyword, modify_info):
+    """
+    key_word:关键字，比如order_code
+    modify_info = {"旗帜": "红旗", "备注": "111", "追加": "true", "常用备注": "常用备注1", }
+    """
+    flag_mapping = {
+        "无旗帜": "i[2]",
+        "红旗": "i[3]",
+        "黄旗": "i[4]",
+        "绿旗": "i[5]",
+        "蓝旗": "i[6]",
+        "紫旗": "i[7]",
+    }
+    with base.wait_refresh(base.get_cell_xpath(keyword, "卖家备注")) as e:
+        base.wait_element_click(base.find_xpath("修改&标记"))
+        base.wait_element_click(base.find_xpath("修改&标记", "修改备注"))
+        for k, v in modify_info.items():
+            if k == "旗帜":
+                base.wait_element(base.find_xpath_by_tag_name("修改备注", flag_mapping[v]))
+                time.sleep(1)
+                base.wait_element_click(base.find_xpath_by_tag_name("修改备注", flag_mapping[v]))
+            elif k == "备注":
+                base.wait_element(base.find_xpath_by_tag_name("修改备注", "textarea")).send_keys(Keys.CONTROL+'a')
+                base.wait_element(base.find_xpath_by_tag_name("修改备注", "textarea")).send_keys(v)
+            elif k == "追加":
+                element = base.wait_element(base.find_xpath_by_inner_tag_name("是否追加备注", "input"))
+                is_select = element.is_selected()
+                if is_select != v:
+                    base.wait_element_click(base.find_xpath_by_inner_tag_name("是否追加备注", "input"))
+            elif k == "常用备注":
+                base.wait_element_click(base.find_xpath("维护常用卖家备注"))
+                base.wait_element(base.find_xpath_by_placeholder("请输入常用卖家备注(逗号分隔)")).send_keys(Keys.CONTROL+'a')
+                base.wait_element(base.find_xpath_by_placeholder("请输入常用卖家备注(逗号分隔)")).send_keys("常用备注1,常用备注2,常用备注3")
+                base.wait_element_click(base.find_xpath("维护常用卖家备注", "确认"))
+                base.wait_element(base.find_xpath("常用卖家备注", v))
+                time.sleep(1)
+                base.wait_element_click(base.find_xpath("常用卖家备注", v))
+        base.wait_element_click(base.find_xpath("修改备注", "保存"))
+
+
+def modify_warehouse_and_express(keyword, modify_info):
+    """
+    keyword:关键字，比如 order_code
+    modify_info: {"仓库": "主仓库", "快递": "EMS",}
+    """
+    with base.wait_refresh(base.get_cell_xpath(keyword, "仓库")) as e:
+        base.wait_element_click(base.find_xpath("修改&标记"))
+        base.wait_element_click(base.find_xpath("修改&标记", "修改仓库、快递"))
+        base.change_frame("全部订单框架", "修改仓库和快递")
+        for k, v in modify_info.items():
+            base.wait_element_click(base.find_xpath_by_tag_name(k, "input"))
+            base.wait_element_click(base.find_xpath(v))
+        base.change_frame("全部订单框架")
+        base.wait_element_click(base.find_xpath("修改仓库和快递", "确认"))

@@ -186,7 +186,8 @@ def test_get_delivery_order_info():
 
 def test_multi_modify_sku_info():
     sku_id_list = product_interface.get_sku_id("", "20200831095731")
-    modify_info_dict = {"商品简称": "奖惩", "供应商ID": "供应商1", "标准售价": "1", }
+    print(sku_id_list)
+    modify_info_dict = {"优先出库仓": "主仓库"}
     product_interface.multi_modify_sku_info(sku_id_list, modify_info_dict)
 
 
