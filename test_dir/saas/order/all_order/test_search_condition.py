@@ -238,6 +238,8 @@ def test_fuzzy_search():
 # 待审核（无备注）
 def test_wait_to_approve_with_out_memo():
     print("验证待审核无备注订单的状态均为待审核，且买家备注和卖家备注均为空或者以#结尾")
+    base.wait_element(base.find_xpath_with_spaces("待审核（无备注）"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath_with_spaces("待审核（无备注）"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
     result = base.get_column_text("订单状态")

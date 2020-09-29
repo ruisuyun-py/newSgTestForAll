@@ -107,6 +107,7 @@ def test_new_order2():
     order_code = order_interface.new_order(vip_name, sku_info, "测试仓", "买家自提", "巨淘气", {"卖家备注": "111"})["Code"]
     print(order_code)
 
+
 def test_get_product_info_by_id():
     result = interface.get_sku_price_by_vip_id("20200803195546", "20200803195549-红色 3XL")
     print(result)

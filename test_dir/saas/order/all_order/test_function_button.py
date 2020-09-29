@@ -15,6 +15,7 @@ import page.order.print_and_delivery_page as delivery_order
 import interface.interface as interface
 import interface.order.delivery_order_interface as delivery_interface
 import interface.supplier.supplier_interface as supplier_interface
+import interface.setting.setting_interface as setting_interface
 import interface.order.order_interface as order_interface
 import interface.product.product_interface as product_interface
 import interface.vip.vip_interface as vip_interface
@@ -42,6 +43,8 @@ def teardown_module():
 
 
 def test_new_order():
+    base.wait_element(base.find_xpath("新增订单"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("新增订单"))
     base.wait_element_click(base.find_xpath_with_spaces("手工新增订单"))
     base.change_frame("全部订单框架", "创建新订单")
@@ -66,7 +69,7 @@ def test_new_order():
     base.change_frame("全部订单框架")
     base.wait_element_click(base.find_xpath("选择商品", "确定"))
     base.wait_element(base.get_cell_xpath(1, "订单编码"))
-    time.sleep(1)
+    time.sleep(2)
     base.wait_element_click(base.get_cell_xpath(1, "订单编码"))
     base.wait_element_click(base.get_cell_xpath(1, "订单编码", "详"))
     base.change_frame("全部订单框架", "订单详情")
@@ -83,6 +86,8 @@ def test_new_order():
 
 # 批量审核
 def test_multi_approve_button():
+    base.wait_element(base.find_xpath("订单状态", "待审核（无备注）"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath("订单状态", "待审核（无备注）"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
     order_code = base.wait_element(base.get_cell_xpath(1, "订单编码")).text
@@ -475,7 +480,7 @@ def test_modify_seller_memo():
     assert "第一次" in result
     result = base.wait_element(base.get_cell_xpath(first_order_code, "旗帜")).text
     assert "红旗" in result
-    modify_info = {"旗帜": "绿旗", "备注": "第二次", "追加": "true"}
+    modify_info = {"旗帜": "绿旗", "备注": "第二次", "追加": True}
     order.modify_seller_memo(first_order_code, modify_info)
     result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
     assert "第二次" in result
@@ -501,7 +506,7 @@ def test_modify_seller_memo():
     result = base.get_column_text("旗帜")
     for i in result:
         assert "蓝旗" in result
-    modify_info = {"旗帜": "紫旗", "备注": "第四次", "追加": "true"}
+    modify_info = {"旗帜": "紫旗", "备注": "第四次", "追加": True}
     order.modify_seller_memo(first_order_code, modify_info)
     result = base.get_column_text("卖家备注")
     for i in result:
@@ -521,8 +526,148 @@ def test_modify_seller_memo():
         assert "黄旗" in result
 
 
+def test_modify_note():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    first_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    second_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", vip_name)
+    base.wait_element_click(base.get_cell_xpath(first_order_code, "订单编码"))
+    base.click_space()
+    modify_info = {"便签": "第一次", "追加": False}
+    order.modify_note(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "便签")).text
+    assert "第一次" in result
+    modify_info = {"便签": "第二次", "追加": True}
+    order.modify_note(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "便签")).text
+    assert "第二次" in result
+    assert "第一次" in result
+    print(f"再测试常用便签")
+    modify_info = {"常用便签": "常用便签1", "追加": False}
+    order.modify_note(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "便签")).text
+    assert "常用便签1" in result
+    assert "第二次" not in result
+    assert "第一次" not in result
+    print(f"再测试系统标签")
+    modify_info = {"系统便签": "爆款订单", "追加": True}
+    order.modify_note(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "便签")).text
+    assert "常用便签1" in result
+    assert "爆款订单" in result
+    base.select_all()
+    print(f"----------------------------------试下勾选多个订单修改备注-------------------------------------")
+    modify_info = {"便签": "第三次", "追加": False}
+    order.modify_note(first_order_code, modify_info)
+    result = base.get_column_text("便签")
+    for i in result:
+        assert "第三次" in i
+    modify_info = {"便签": "第四次", "追加": True}
+    order.modify_note(first_order_code, modify_info)
+    result = base.get_column_text("便签")
+    for i in result:
+        assert "第四次" in i
+        assert "第三次" in i
+    print(f"再测试常用便签")
+    modify_info = {"常用便签": "常用便签2", "追加": False}
+    order.modify_note(first_order_code, modify_info)
+    result = base.get_column_text("便签")
+    for i in result:
+        assert "常用便签2" in i
+    print(f"再测试系统便签")
+    modify_info = {"系统便签": "装车拦截", "追加": True}
+    order.modify_note(first_order_code, modify_info)
+    result = base.get_column_text("便签")
+    for i in result:
+        assert "常用便签2" in i
+        assert "装车拦截" in i
 
 
+def test_modify_address():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    first_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    second_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.fuzzy_search("订单编码", vip_name)
+    base.wait_element_click(base.get_cell_xpath(first_order_code, "订单编码"))
+    base.click_space()
+    modify_seller_memo_info = {"备注": "修改地址显示卖家备注"}
+    order.modify_seller_memo(first_order_code, modify_seller_memo_info)
+    modify_info = {"收货地址": "江苏省南京市鼓楼区鼓楼大道1185号", "收货人名": "芮苏云", "联系电话": "02133668823", "联系手机": "13772839830",
+                   "邮政编码": "211458", "核对备注": "修改地址显示卖家备注"}
+    order.modify_address(first_order_code, modify_info)
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "收货地址")).text
+    assert "鼓楼大道1185号" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "省")).text
+    assert "江苏省" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "市")).text
+    assert "南京市" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "区")).text
+    assert "鼓楼区" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "收货人")).text
+    assert "芮苏云" in result
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "手机号")).text
+    assert "13772839830" in result
+    base.select_all()
+    print(f"----------------------------------试下勾选多个订单修改地址-------------------------------------")
+    modify_info = {"选择地址": f"芮苏云,13772839830,江苏省 南京市 鼓楼区 鼓楼大道1185号"}
+    order.modify_address(vip_name, modify_info)
+    result_list = base.get_column_text('收货地址')
+    for i in result_list:
+        assert "江苏省 南京市 鼓楼区 鼓楼大道1185号" in i
+    result_list = base.get_column_text('省')
+    for i in result_list:
+        assert "江苏省" in i
+    result_list = base.get_column_text('市')
+    for i in result_list:
+        assert "南京市" in i
+    result_list = base.get_column_text('区')
+    for i in result_list:
+        assert "鼓楼区" in i
+    result_list = base.get_column_text('收货人')
+    for i in result_list:
+        assert "芮苏云" in i
+    result_list = base.get_column_text('手机号')
+    for i in result_list:
+        assert "13772839830" in i
+
+
+def test_multi_mark_memo_processed():
+    setting_info = {"开启": "true", "会员相同": "true"}
+    setting_interface.save_auto_merge_setting(setting_info)
+    time.sleep(5)
+    print(f"开启合单设置之后等待五秒生效")
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    first_order_code = order_interface.new_order(vip_name, sku_info, "主仓库", "买家自提", "巨淘气", {"卖家备注": "111"})["Code"]
+    second_order_code = order_interface.new_order(vip_name, sku_info, "主仓库", "买家自提", "巨淘气", {"买家备注": "222"})["Code"]
+    third_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
+    base.wait_element_click(base.find_xpath("订单状态", "待审核（有备注）"))
+    base.fuzzy_search("订单编码", vip_name)
+    result = base.get_column_text("会员名")
+    assert len(result) == 3
+    base.wait_element_click(base.get_cell_xpath(first_order_code, "订单编码"))
+    base.click_space()
+    base.wait_element(base.find_xpath())
 
 
 

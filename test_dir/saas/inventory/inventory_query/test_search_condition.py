@@ -23,18 +23,19 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 def setup_module():
     base.driver = webdriver.Chrome()
     base.cookies = login.login()
-
-
-def setup_function():
     base.open_page("库存", "库存查询", "库存查询框架")
     element = ''
     try:
-        element = base.wait_element(base.find_xpath("刷新报表缓存", "天数"), 3)
+        element = base.wait_element(base.find_xpath("刷新报表缓存", "天数"), 5)
     except AssertionError as ae:
         print(ae)
     if element != '':
         time.sleep(1)
         base.wait_element_click(base.find_xpath("刷新报表缓存", "确定"))
+
+
+def setup_function():
+    base.open_page("库存", "库存查询", "库存查询框架")
 
 
 def teardown_function():
@@ -198,6 +199,8 @@ def test_category_search_condition():
         print(f"本次搜索的分类:{category}")
         base.wait_element_click(base.find_xpath_by_placeholder("商品分类"))
         base.change_frame("选择分类")
+        base.wait_element(base.find_xpath(category))
+        time.sleep(1)
         base.wait_element_click(base.find_xpath(category))
         base.change_frame()
         base.wait_element_click(base.find_xpath("选择分类", "确定"))

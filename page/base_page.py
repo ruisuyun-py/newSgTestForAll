@@ -67,8 +67,11 @@ def find_xpath(keywords1, keywords2=''):
     return xpath
 
 
-def find_xpath_by_tag_name(keywords1, keywords2):
-    xpath = "//*[text()='{0}']/following::{1}".format(keywords1, keywords2)
+def find_xpath_by_tag_name(keywords1, keywords2, fuzzy=False):
+    if not fuzzy:
+        xpath = "//*[text()='{0}']/following::{1}".format(keywords1, keywords2)
+    else:
+        xpath = "//*[contains(text(),'{0}')]/following::{1}".format(keywords1, keywords2)
     return xpath
 
 
@@ -104,6 +107,8 @@ def switch_to_frame(xpath):
 
 def open_page(menu_name, page_name, frame_name):
     driver.switch_to.default_content()
+    # wait_element(find_xpath(menu_name))
+    # time.sleep(1)
     wait_element_click(find_xpath(menu_name))
     wait_element_click(find_xpath(page_name))
     driver.switch_to.default_content()

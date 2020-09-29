@@ -88,6 +88,11 @@ def test_approve_button():
             base.wait_element_click(base.find_xpath("信息", "确定"))
             base.wait_element_click(base.find_xpath("未审核有异常", k))
     print(f"新建会员，转异常，验证是否能正常报错")
+    print(f"先修改设置开启自动合单设置")
+    setting_info = {"开启": "true"}
+    setting_interface.save_auto_merge_setting(setting_info)
+    time.sleep(5)
+    print(f"修改设置之后等待5秒")
     base.wait_element_click(base.find_xpath("清空"))
     vip_name = "会员" + base.get_now_string()
     vip_interface.new_vip(vip_name)
@@ -100,9 +105,9 @@ def test_approve_button():
     order_code = order_interface.new_order(vip_name, sku_info)["Code"]
     merge_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
     print(order_code)
-    base.fuzzy_search("订单编码", vip_name)
+    base.fuzzy_search("订单编码", order_code)
     base.wait_element_click(base.get_cell_xpath(order_code, "订单编码"))
-    base.click_space()
+    base.select_all()
     print(f"先测试 黑名单，终结， 标记异常审核时系统能否正常报错")
     order.turn_to_exception("黑名单")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "黑名单")
@@ -125,6 +130,8 @@ def test_approve_button():
         assert 1 == 2, f"全部订单页面审核标记异常订单不能正常弹窗报错"
     time.sleep(1)
     base.wait_element_click(base.find_xpath("信息", "确定"))
+    base.fuzzy_search("订单编码", order_code)
+    base.select_all()
     order.turn_to_normal("黑名单")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
     # TODO:(RUI)全部订单页面审核已终结的订单报错：当前数据可能被其他人操作了，请刷新后重试！，需要优化下报错，比如 订单:/TD200918013有异常：标记异常 常用异常2
@@ -132,6 +139,8 @@ def test_approve_button():
     # base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "已终结")
     # order.turn_to_normal("已终结")
     # base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
+    base.fuzzy_search("订单编码", order_code)
+    base.select_all()
     order.turn_to_exception("标记异常", "异常测试")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "异常测试")
     base.wait_element_click(base.find_xpath("审核"))
@@ -153,6 +162,8 @@ def test_approve_button():
         assert 1 == 2, f"全部订单页面审核标记异常订单不能正常弹窗报错"
     time.sleep(1)
     base.wait_element_click(base.find_xpath("信息", "确定"))
+    base.fuzzy_search("订单编码", order_code)
+    base.select_all()
     order.turn_to_normal("标记异常")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
     order.turn_to_exception("常用异常", "常用异常2")
@@ -176,6 +187,8 @@ def test_approve_button():
         assert 1 == 2, f"全部订单页面审核标记异常订单不能正常弹窗报错"
     time.sleep(1)
     base.wait_element_click(base.find_xpath("信息", "确定"))
+    base.fuzzy_search("订单编码", order_code)
+    base.select_all()
     order.turn_to_normal("标记异常")
     base.wait_text_locate(base.get_cell_xpath(order_code, "订单状态"), "待审核")
     print(f"先设置不允许负库存，然后审核报错，再设置允许负库存，审核订单")
@@ -199,6 +212,10 @@ def test_approve_button():
     base.wait_element_refresh(element, text)
     order_status = base.wait_element(base.get_cell_xpath(order_code, "订单状态")).text
     assert order_status == '发货中'
+    setting_info = {"开启": "false"}
+    setting_interface.save_auto_merge_setting(setting_info)
+    time.sleep(5)
+    print(f"修改设置之后等待5秒")
 
 
 def test_auto_merge_setting():
@@ -722,6 +739,10 @@ def test_not_merge_approved_order():
     assert len(order_status) == 2
     for i in order_status:
         assert "发货中" == i
+    setting_info = {"开启": "true"}
+    setting_interface.save_auto_merge_setting(setting_info)
+    time.sleep(5)
+    print(f"修改设置之后等待5秒")
 
 
 if __name__ == '__main__':
