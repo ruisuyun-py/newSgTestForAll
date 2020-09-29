@@ -662,12 +662,19 @@ def test_multi_mark_memo_processed():
     second_order_code = order_interface.new_order(vip_name, sku_info, "主仓库", "买家自提", "巨淘气", {"买家备注": "222"})["Code"]
     third_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
     base.wait_element_click(base.find_xpath("订单状态", "待审核（有备注）"))
+    time.sleep(1)
     base.fuzzy_search("订单编码", vip_name)
     result = base.get_column_text("会员名")
     assert len(result) == 3
     base.wait_element_click(base.get_cell_xpath(first_order_code, "订单编码"))
     base.click_space()
-    base.wait_element(base.find_xpath())
+    base.wait_element_click(base.find_xpath("修改&标记"))
+    with base.wait_refresh(base.get_cell_xpath(first_order_code, "卖家备注")):
+        base.wait_element_click(base.find_xpath("修改&标记", "标记备注已处理"))
+    result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
+    print(f"{result}")
+    assert result.replace("\n改", "").endswith("#")
+
 
 
 
