@@ -22,9 +22,6 @@ def setup_module():
     base.driver = webdriver.Chrome()
     base.cookies = login.login()
     pda_interface.cookies = pda_interface.login()
-
-
-def setup_function():
     base.open_page("库存", "库存查询", "库存查询框架")
     element = ''
     try:
@@ -34,6 +31,10 @@ def setup_function():
     if element != '':
         time.sleep(1)
         base.wait_element_click(base.find_xpath("刷新报表缓存", "取消"))
+
+
+def setup_function():
+    base.open_page("库存", "库存查询", "库存查询框架")
 
 
 def teardown_function():

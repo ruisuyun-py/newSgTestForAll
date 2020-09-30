@@ -22,9 +22,7 @@ sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 def setup_module():
     base.driver = webdriver.Chrome()
     base.cookies = login.login()
-
-
-def setup_function():
+    pda_interface.cookies = pda_interface.login()
     base.open_page("库存", "库存查询", "库存查询框架")
     element = ''
     try:
@@ -34,6 +32,10 @@ def setup_function():
     if element != '':
         time.sleep(1)
         base.wait_element_click(base.find_xpath("刷新报表缓存", "取消"))
+
+
+def setup_function():
+    base.open_page("库存", "库存查询", "库存查询框架")
 
 
 def teardown_function():
