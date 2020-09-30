@@ -735,17 +735,18 @@ def test_note_search_condition():
         assert i == ""
     base.wait_element_click(base.find_xpath("便签", "有便签"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
-    result = list(set(base.get_column_text("便签")))
+    result = list(set(base.get_column_string("便签")))
     for i in result:
         assert i != ""
-    for i in result:
-        print(f"搜索便签：{i}")
+    note_list = ["常用便签2", "爆款订单", "第一次第二次", "第二次"]
+    for i in note_list:
+        print(f"搜索原文本：{i}")
         base.wait_element(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(Keys.CONTROL + 'a')
         base.wait_element(base.find_xpath_by_placeholder("便签模糊搜索")).send_keys(i)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "便签")
-        buyer_memo_list = list(set(base.get_column_text("便签")))
+        buyer_memo_list = base.get_column_string("便签")
         for j in buyer_memo_list:
-            print(f"搜索结果：{j}")
+            print(f"结果：{j}")
             assert i in j
 
 
@@ -1274,11 +1275,15 @@ def test_pay_time_search_condition():
     else:
         result = base.get_column_text("付款时间")
         for i in result:
-            i = i.replace("\n", " ")
-            pay_time = datetime.strptime(i, "%Y-%m-%d %H:%M:%S")
-            days = (datetime.now()-pay_time).total_seconds()/(60*60)
-            print(f"订单的间隔天数{int(days)}")
-            assert 3*24 <= int(days) < 10*24
+            # i = i.replace("\n", " ")
+            i = i[0:i.index("\n")]
+            # pay_time = datetime.strptime(i, "%Y-%m-%d %H:%M:%S")
+            pay_time = datetime.strptime(i, "%Y-%m-%d")
+            print(f"付款时间是{pay_time}")
+            # days = (datetime.now()-pay_time).total_seconds()/(60*60)
+            days = (datetime.now() - pay_time).days
+            print(f"订单的间隔天数：{int(days)}")
+            assert 3 <= int(days) < 10
 
 
 # 相同会员不同地址

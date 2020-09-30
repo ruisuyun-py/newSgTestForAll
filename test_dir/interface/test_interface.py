@@ -174,7 +174,7 @@ def test_get_order_info_by_fuzzy():
 
 
 def test_get_order_product_detail():
-    result = interface.get_order_product_detail("7495072077142033625", ["供应商ID"])
+    result = interface.get_order_product_detail("7495072077142033625", ["商家编码"])
     print(result)
 
 

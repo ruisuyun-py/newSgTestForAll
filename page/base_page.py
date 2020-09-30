@@ -362,6 +362,20 @@ def get_column_text(column_name, column_name2=''):
     return text_list
 
 
+# 获取所有文本
+def get_column_string(column_name, column_name2=''):
+    """
+        column:列名
+        return：文本列表
+        """
+    xpath = get_column_xpath(column_name, column_name2)
+    elements = wait_elements(xpath)
+    text_list = []
+    for element in elements:
+        text_list.append(element.get_attribute("textContent"))
+    return text_list
+
+
 # 获取主表中一列的文本,并去掉重复值
 def get_unique_column_text(column_name):
     """
@@ -481,7 +495,6 @@ def change_frame(frame_name='', frame_name2=''):
 def operate_page(menu_name, page_name, frame_name):
     try:
         open_page(menu_name, page_name, frame_name)
-        wait_element(find_xpath("组合查询"))
         time.sleep(1)
         yield 1
     finally:
@@ -496,7 +509,6 @@ def wait_refresh(xpath,):
         yield 1
     finally:
         wait_element_refresh(element, text)
-
 
 
 def fuzzy_search(column_name, keywords):
