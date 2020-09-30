@@ -17,6 +17,6 @@ class RunConfig:
     rerun = "1"
 
     # 当达到最大失败数，停止执行
-    max_fail = "5"
+    max_fail = "100"
 
 

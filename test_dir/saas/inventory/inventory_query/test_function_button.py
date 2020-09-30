@@ -33,7 +33,7 @@ def setup_function():
         print(ae)
     if element != '':
         time.sleep(1)
-        base.wait_element_click(base.find_xpath("刷新报表缓存", "确定"))
+        base.wait_element_click(base.find_xpath("刷新报表缓存", "取消"))
 
 
 def teardown_function():
