@@ -160,9 +160,28 @@ def test_sku_name_search_condition():
 
 def test_barcode_search_condition():
     print(f"先用商家编码获取条码单个搜索，再用货号批量搜索")
-    sku_code_list = base.get_column_text("商家编码")
-    for sku_code in sku_code_list:
-        barcode = product_interface.get_sku_bar_code(sku_code)[0]
+    sku_code_list = {
+        "2009290026958",
+        "2009290027054",
+        "2009290026965",
+        "2009290027061",
+        "2009290026972",
+        "2009290027078",
+        "2009290026989",
+        "2009290027085",
+        "2009290027184",
+        "2009290027160",
+        "2009290027153",
+        "2009290027146",
+        "2009290027177",
+        "2009290027092",
+        "2009290027191",
+        "2009290027108",
+        "2009290027207",
+        "2009290027115",
+        "2009290027214",
+    }
+    for barcode in sku_code_list:
         print(f"需要搜索的商品条码是{barcode}")
         base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL+'a')
         base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
@@ -171,26 +190,24 @@ def test_barcode_search_condition():
         if result_num == '本页共0条数据':
             print(f"商品条码[{barcode}]没数据不用查看")
         else:
-            result = base.get_column_text("商家编码")
+            result = base.get_column_text("商品条码")
             for i in result:
-                assert sku_code == i
-    product_code_list = list(set(base.get_column_text("货号")))
-    for product_code in product_code_list:
-        barcode_list = product_interface.get_sku_bar_code("", product_code)
-        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL + 'a')
-        for barcode in barcode_list:
-            print(f"需要搜索的商品条码是{barcode}")
-            base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
-            base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.ENTER)
-        base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
-        result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
-        if result_num == '本页共0条数据':
-            print(f"没数据不用查看")
-        else:
-            result = base.get_unique_column_text("货号")
-            # TODO:(rui)有BUG之前支持批量搜索
-            for i in result:
-                assert i == product_code
+                assert barcode == i
+
+    base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL + 'a')
+    for barcode in sku_code_list:
+        print(f"需要搜索的商品条码是{barcode}")
+        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
+        base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.ENTER)
+    base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商品条码")
+    result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
+    if result_num == '本页共0条数据':
+        print(f"没数据不用查看")
+    else:
+        result = base.get_unique_column_text("商品条码")
+        # TODO:(rui)有BUG之前支持批量搜索
+        for i in result:
+            assert i in sku_code_list
 
 
 def test_category_search_condition():
