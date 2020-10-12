@@ -921,6 +921,7 @@ def test_sku_num_search_condition():
 
 # 供应商/排除供应商搜索条件
 def test_supplier_search_condition():
+    base.wait_element_click(base.find_xpath("订单状态", "待审核（无备注）"))
     base.wait_element_click(base.find_xpath("商品信息"))
     supplier_name_list = [
         "供应商1",
@@ -996,6 +997,7 @@ def test_supplier_search_condition():
     text = element.text
     base.wait_element_click(base.find_xpath("清空"))
     base.wait_element_refresh(element, text)
+    base.wait_element_click(base.find_xpath("订单状态", "待审核（无备注）"))
     for i in supplier_name_list:
         print(f"供应商点快了没有用")
         time.sleep(1)
