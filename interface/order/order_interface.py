@@ -67,10 +67,10 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
     for k, v in order.items():
         url_param += f"'{k}':'{v}',"
     url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrder?order={" + url_param + "}"
-    print(url)
+    # print(url)
     response = requests.get(url, headers=headers, )
     result = dict(response.json())
-    print(f"订单创建结果{result}")
+    # print(f"订单创建结果{result}")
     start = result['data']['OrderCodeTid'].find("T")
     end = len(result['data']['OrderCodeTid'])
     order_info = {"ID": result['data']['Id'], "Code": result['data']['OrderCodeTid'][start: end]}
@@ -87,7 +87,7 @@ def new_order(vip_name, sku_info, warehouse_name='主仓库', express_name='买�
         url_param += '},'
     url = "http://gw.erp12345.com/api/Orders/AllOrder/AddOrderLine?orderId=" + order_info[
         "ID"] + "&skus=[" + url_param + "]"
-    print(url)
+    # print(url)
     requests.get(url, headers=headers, )
     # 添加支付信息
     url = "http://gw.erp12345.com/api/Orders/AllOrder/FastAddOrderPayment?orderId=" + order_info["ID"] + ""

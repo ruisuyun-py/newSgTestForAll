@@ -32,7 +32,7 @@ def time_component_test(key_name):
     """
     key_name:place_holder，column_name,目前没发现不一样的，直接使用一个key_name表示
     """
-    time_options = ["昨天", "30天内", "上月", "今天", "本周", "今年", "3天内", "上周", "去年", "7天内", "本月"]
+    time_options = ["昨天", "30天内", "上月", "本周", "今年", "3天内", "上周", "去年", "7天内", "本月"]
     base.wait_element_click(base.find_xpath("时间"))
     for i in time_options:
         base.wait_element_click(base.find_xpath_by_placeholder(key_name))

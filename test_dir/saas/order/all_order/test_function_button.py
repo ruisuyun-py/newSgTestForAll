@@ -662,7 +662,7 @@ def test_multi_mark_memo_processed():
     second_order_code = order_interface.new_order(vip_name, sku_info, "主仓库", "买家自提", "巨淘气", {"买家备注": "222"})["Code"]
     third_order_code = order_interface.new_order(vip_name, sku_info)["Code"]
     base.wait_element_click(base.find_xpath("订单状态", "待审核（有备注）"))
-    time.sleep(1)
+    time.sleep(5)
     base.fuzzy_search("订单编码", vip_name)
     result = base.get_column_text("会员名")
     assert len(result) == 3
@@ -674,8 +674,94 @@ def test_multi_mark_memo_processed():
     result = base.wait_element(base.get_cell_xpath(first_order_code, "卖家备注")).text
     print(f"{result}")
     assert result.replace("\n改", "").endswith("#")
+    base.fuzzy_search("订单编码", vip_name)
+    result = base.get_column_text("会员名")
+    assert len(result) == 3
+    base.wait_element_click(base.get_cell_xpath(second_order_code, "订单编码"))
+    base.click_space()
+    base.wait_element_click(base.find_xpath("修改&标记"))
+    with base.wait_refresh(base.get_cell_xpath(second_order_code, "买家备注")):
+        base.wait_element_click(base.find_xpath("修改&标记", "标记备注已处理"))
+    result = base.wait_element(base.get_cell_xpath(second_order_code, "买家备注")).text
+    print(f"{result}")
+    assert result.replace("\n改", "").endswith("#")
+    base.wait_element_click(base.find_xpath("订单状态", "待审核（有备注）"))
+    base.wait_element_click(base.find_xpath("订单状态", "待审核（无备注）"))
+    time.sleep(1)
+    base.fuzzy_search("订单编码", vip_name)
+    result = base.get_column_text("会员名")
+    assert len(result) == 3
 
 
+def test_check_out_of_stock():
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    enough_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(enough_sku_code_list[0], "100")
+    stock_in_sku_info = []
+    stock_in_num = 0
+    for enough_sku_code in enough_sku_code_list:
+        stock_in_num += 10
+        stock_in_sku_info .append({'商家编码': enough_sku_code, '数量': stock_in_num})
+    stock_in_order_id = inventory_interface.new_stock_in_order("主仓库", "供应商1", stock_in_sku_info)["ID"]
+    inventory_interface.stock_in_stock_in_order(stock_in_order_id)
+    enough_sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}]
+    print(f"商品信息是：{enough_sku_info}")
+    enough_order_code = order_interface.new_order(vip_name, enough_sku_info)["Code"]
+    product_code = base.get_now_string()
+    product_interface.new_product(product_code)
+    lack_sku_code_list = product_interface.get_sku_code(product_code)
+    product_interface.modify_sku_price(lack_sku_code_list[0], "100")
+    lack_sku_info = [{'商家编码': lack_sku_code_list[0], '数量': '5'}]
+    print(f"商品信息是：{lack_sku_info}")
+    lack_order_code = order_interface.new_order(vip_name, lack_sku_info)["Code"]
+    part_lack_sku_info = [{'商家编码': enough_sku_code_list[0], '数量': '3'}, {'商家编码': lack_sku_code_list[0], '数量': '5'}]
+    part_lack_order_code = order_interface.new_order(vip_name, part_lack_sku_info)["Code"]
+    print(f"检查缺货之后订单需要标记缺货状态")
+    base.scroll_to(5)
+    with base.wait_refresh(base.get_cell_xpath(1, "缺货")):
+        base.wait_element_click(base.find_xpath("修改&标记", "其他"))
+        base.wait_element(base.find_xpath_with_spaces("全部检查缺货"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_with_spaces("全部检查缺货"))
+    result = base.wait_element(base.get_cell_xpath(enough_order_code, "缺货")).text
+    assert result == "部分缺货"
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    enough_order_code = order_interface.new_order(vip_name, enough_sku_info)["Code"]
+    with base.wait_refresh(base.get_cell_xpath(1, "缺货")):
+        base.wait_element_click(base.find_xpath("修改&标记", "其他"))
+        base.wait_element(base.find_xpath_with_spaces("全部检查缺货"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_with_spaces("全部检查缺货"))
+    result = base.wait_element(base.get_cell_xpath(1, "缺货")).text
+    assert result == "库存充足"
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    lack_order_code = order_interface.new_order(vip_name, lack_sku_info)["Code"]
+    with base.wait_refresh(base.get_cell_xpath(1, "缺货")):
+        base.wait_element_click(base.find_xpath("修改&标记", "其他"))
+        base.wait_element(base.find_xpath_with_spaces("全部检查缺货"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_with_spaces("全部检查缺货"))
+    result = base.wait_element(base.get_cell_xpath(1, "缺货")).text
+    assert result == "全部缺货"
+    vip_name = "会员" + base.get_now_string()
+    vip_interface.new_vip(vip_name)
+    print(f"{vip_name}")
+    part_lack_order_code = order_interface.new_order(vip_name, part_lack_sku_info)["Code"]
+    with base.wait_refresh(base.get_cell_xpath(1, "缺货")):
+        base.wait_element_click(base.find_xpath("修改&标记", "其他"))
+        base.wait_element(base.find_xpath_with_spaces("全部检查缺货"))
+        time.sleep(1)
+        base.wait_element_click(base.find_xpath_with_spaces("全部检查缺货"))
+    result = base.wait_element(base.get_cell_xpath(1, "缺货")).text
+    assert result == "部分缺货"
 
 
 if __name__ == '__main__':

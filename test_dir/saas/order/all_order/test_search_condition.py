@@ -269,6 +269,8 @@ def test_wait_to_approve_with_out_memo():
 # 待审核（有备注）
 def test_wait_to_approve_with_memo():
     print("验证待审核有备注的订单状态为待审核，并且买家备注买家备注中必须有一个不为空，且不以# 结尾")
+    base.wait_element(base.find_xpath_with_spaces("待审核（有备注）"))
+    time.sleep(1)
     base.wait_element_click(base.find_xpath_with_spaces("待审核（有备注）"))
     base.wait_table_refresh(base.find_xpath("组合查询"), 1, "订单编码")
     result = base.get_column_text("订单状态")
