@@ -185,6 +185,7 @@ def test_detail_button():
     base.wait_element(base.find_xpath_by_tag_name("占用记录页面", "a"))
     time.sleep(1)
     base.wait_element_click(base.find_xpath_by_tag_name("占用记录页面", "a"))
+    time.sleep(1)
     base.wait_element_click(base.get_cell_xpath(1, "采购在途数"))
     base.wait_element_click(base.get_cell_xpath(1, "采购在途数", "详"))
     base.change_frame("库存查询框架", "在途采购单明细页面")

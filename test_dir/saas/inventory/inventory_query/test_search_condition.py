@@ -185,6 +185,7 @@ def test_barcode_search_condition():
         print(f"需要搜索的商品条码是{barcode}")
         base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(Keys.CONTROL+'a')
         base.wait_element(base.find_xpath_by_placeholder("条码")).send_keys(barcode)
+        time.sleep(1)
         base.wait_table_refresh(base.find_xpath("组合查询"), 1, "商家编码")
         result_num = base.wait_element(base.find_xpath("已选择", "本页共")).text
         if result_num == '本页共0条数据':
