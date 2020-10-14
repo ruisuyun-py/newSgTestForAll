@@ -727,7 +727,7 @@ def test_check_out_of_stock():
         base.wait_element(base.find_xpath_with_spaces("全部检查缺货"))
         time.sleep(1)
         base.wait_element_click(base.find_xpath_with_spaces("全部检查缺货"))
-    result = base.wait_element(base.get_cell_xpath(enough_order_code, "缺货")).text
+    result = base.wait_element(base.get_cell_xpath(1, "缺货")).text
     assert result == "部分缺货"
     vip_name = "会员" + base.get_now_string()
     vip_interface.new_vip(vip_name)

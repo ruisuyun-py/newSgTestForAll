@@ -205,7 +205,6 @@ def test_barcode_search_condition():
         print(f"没数据不用查看")
     else:
         result = base.get_unique_column_text("商品条码")
-        # TODO:(rui)有BUG之前支持批量搜索
         for i in result:
             assert i in sku_code_list
 
